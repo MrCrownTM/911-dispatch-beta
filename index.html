@@ -419,6 +419,14 @@
             border-left-color: #22c55e;
             opacity: 0.6;
         }
+        .call-item.status-backup {
+            border-left-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.06);
+        }
+        .call-item.status-help {
+            border-left-color: #ec4899;
+            background: rgba(236, 72, 153, 0.06);
+        }
         .call-item .call-header {
             display: flex;
             justify-content: space-between;
@@ -469,6 +477,14 @@
         .call-item .call-status.completed {
             color: #4ade80;
             background: rgba(34, 197, 94, 0.15);
+        }
+        .call-item .call-status.backup {
+            color: #a78bfa;
+            background: rgba(139, 92, 246, 0.15);
+        }
+        .call-item .call-status.help {
+            color: #f472b6;
+            background: rgba(236, 72, 153, 0.15);
         }
         .call-item .call-actions {
             display: flex;
@@ -1030,18 +1046,18 @@
                 <span class="shield">🛡️</span>
                 <h1 id="systemTitle">911 Диспетчерский Центр</h1>
                 <span class="badge">ДС</span>
-                <span class="version">v2.1</span>
+                <span class="version">v2.2</span>
             </div>
             <div class="header-controls">
                 <div class="status-badge">
                     <span class="live-dot"></span>
                     <span>Система активна</span>
                 </div>
-                <div class="user-info" id="userInfo" style="display:none;">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <span class="user-name" id="userNameDisplay">Пользователь</span>
+                <div class="user-info" id="userInfo">
+                    <div class="user-avatar" id="userAvatar">Г</div>
+                    <span class="user-name" id="userNameDisplay">Гражданский</span>
                 </div>
-                <div class="role-badge guest" id="roleBadge">👤 Гость</div>
+                <div class="role-badge civilian" id="roleBadge">👤 Гражданский</div>
                 <button class="btn btn-sm btn-outline" id="authToggleBtn">🔑 Войти</button>
             </div>
         </div>
@@ -1287,33 +1303,14 @@
         <select id="statusSelect" style="width:100%;">
             <option value="pending">⏳ Ожидает</option>
             <option value="assigned">🚔 Назначен</option>
+            <option value="backup">🟣 Требуется подмога</option>
+            <option value="help">🩷 Требуется помощь</option>
             <option value="completed">✅ Выполнен</option>
             <option value="cancelled">❌ Отменён</option>
         </select>
         <div class="modal-actions">
             <button class="btn btn-primary" id="statusConfirmBtn">🔄 Применить</button>
             <button class="btn btn-outline" id="statusCancelBtn">Отмена</button>
-        </div>
-    </div>
-</div>
-
-<!-- ===== МОДАЛЬНОЕ ОКНО: ИЗМЕНЕНИЕ СТАТУСА ЮНИТА ===== -->
-<div class="modal-overlay" id="unitStatusModal">
-    <div class="modal">
-        <h2>🔄 Изменить статус юнита</h2>
-        <p id="unitStatusTargetInfo">Юнит: ...</p>
-        <select id="unitStatusSelect" style="width:100%;">
-            <option value="available">🟢 Доступен</option>
-            <option value="busy">🟡 Занят</option>
-            <option value="en-route">🔵 В пути</option>
-            <option value="briefing">🟣 На брифинге</option>
-            <option value="waiting">🩷 Ожидание</option>
-            <option value="helping">💚 Помощь</option>
-            <option value="offline">⚫ Офлайн</option>
-        </select>
-        <div class="modal-actions">
-            <button class="btn btn-primary" id="unitStatusConfirmBtn">🔄 Применить</button>
-            <button class="btn btn-outline" id="unitStatusCancelBtn">Отмена</button>
         </div>
     </div>
 </div>
@@ -1428,7 +1425,9 @@
         }
 
         function logoutUser() {
-            currentUser = null;
+            // При выходе из аккаунта возвращаемся к гражданскому
+            const civilianUser = findUser('civilian') || { login: 'Гражданский', role: 'civilian' };
+            currentUser = civilianUser;
             isAdmin = false;
             isDispatcher = false;
             updateUI();
@@ -1543,16 +1542,22 @@
                     const priorityLabel = call.priority === 'high' ? '🔴 Высокий' : 
                                          call.priority === 'low' ? '🟢 Низкий' : '🟡 Средний';
                     
-                    const statusClass = call.status;
-                    const statusLabel = call.status === 'pending' ? '⏳ Ожидает' :
-                                       call.status === 'assigned' ? '🚔 Назначен' : '✅ Выполнен';
+                    const statusMap = {
+                        'pending': { class: 'pending', label: '⏳ Ожидает' },
+                        'assigned': { class: 'assigned', label: '🚔 Назначен' },
+                        'backup': { class: 'backup', label: '🟣 Требуется подмога' },
+                        'help': { class: 'help', label: '🩷 Требуется помощь' },
+                        'completed': { class: 'completed', label: '✅ Выполнен' },
+                        'cancelled': { class: 'cancelled', label: '❌ Отменён' }
+                    };
+                    const statusInfo = statusMap[call.status] || statusMap.pending;
                     
                     const assignedInfo = call.assignedTo ? `🚔 ${call.assignedTo}` : '';
                     const commentHtml = call.comment ? 
                         `<div class="call-comment">💬 ${call.comment} <span style="color:#64748b;font-size:12px;">(${call.commentBy || 'система'}, ${call.commentTime || ''})</span></div>` : '';
                     
                     html += `
-                        <div class="call-item priority-${priorityClass} status-${statusClass}">
+                        <div class="call-item priority-${priorityClass} status-${statusInfo.class}">
                             <div class="call-header">
                                 <span class="call-street">📍 ${call.street}</span>
                                 <span class="call-priority ${priorityClass}">${priorityLabel}</span>
@@ -1561,13 +1566,13 @@
                             <div class="call-meta">
                                 <span>⏱ ${call.time}</span>
                                 ${assignedInfo ? `<span>${assignedInfo}</span>` : ''}
-                                <span class="call-status ${statusClass}">${statusLabel}</span>
+                                <span class="call-status ${statusInfo.class}">${statusInfo.label}</span>
                             </div>
                             ${commentHtml}
                             <div class="call-actions">
                                 ${isDispatcher ? `
                                     ${call.status === 'pending' ? `<button class="btn btn-primary btn-xs" onclick="window.openAssignModal('${call.id}')">🎯 Назначить</button>` : ''}
-                                    ${call.status === 'assigned' ? `<button class="btn btn-success btn-xs" onclick="window.completeCall('${call.id}')">✅ Завершить</button>` : ''}
+                                    ${call.status === 'assigned' || call.status === 'backup' || call.status === 'help' ? `<button class="btn btn-success btn-xs" onclick="window.completeCall('${call.id}')">✅ Завершить</button>` : ''}
                                     <button class="btn btn-info btn-xs" onclick="window.openCommentModal('${call.id}')">💬 Коммент</button>
                                     <button class="btn btn-warning btn-xs" onclick="window.openCallStatusModal('${call.id}')">🔄 Статус</button>
                                 ` : ''}
@@ -1634,6 +1639,9 @@
                         }
                     }
                     
+                    // Кнопка "Освободить" показывается для всех статусов, кроме available и offline
+                    const showReleaseBtn = unit.status !== 'available' && unit.status !== 'offline';
+                    
                     html += `
                         <div class="unit-item">
                             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -1652,8 +1660,8 @@
                                         <option value="helping" ${unit.status === 'helping' ? 'selected' : ''}>💚 Помощь</option>
                                         <option value="offline" ${unit.status === 'offline' ? 'selected' : ''}>⚫ Офлайн</option>
                                     </select>
+                                    ${showReleaseBtn ? `<button class="btn btn-success btn-xs" onclick="window.releaseUnit('${unit.id}')">🟢 Освободить</button>` : ''}
                                     ${unit.status === 'available' ? `<button class="btn btn-primary btn-xs" onclick="window.setUnitBusy('${unit.id}')">📋 Занять</button>` : ''}
-                                    ${unit.status === 'busy' || unit.status === 'en-route' || unit.status === 'helping' ? `<button class="btn btn-success btn-xs" onclick="window.setUnitAvailable('${unit.id}')">🟢 Освободить</button>` : ''}
                                 ` : ''}
                                 ${isAdmin ? `
                                     <button class="btn btn-danger btn-xs" onclick="window.deleteUnit('${unit.id}')">✖</button>
@@ -1765,6 +1773,43 @@
             saveData();
         };
 
+        window.releaseUnit = function(unitId) {
+            const unit = units.find(u => u.id === unitId);
+            if (!unit) return;
+            if (!isDispatcher && !isAdmin) {
+                alert('⛔ Только диспетчеры могут освобождать юниты');
+                return;
+            }
+            if (unit.status === 'available' || unit.status === 'offline') {
+                alert('Юнит уже доступен или офлайн');
+                return;
+            }
+            
+            // Если юнит был на вызове
+            if (unit.currentCall) {
+                const call = calls.find(c => c.id === unit.currentCall);
+                if (call && (call.status === 'assigned' || call.status === 'backup' || call.status === 'help')) {
+                    if (confirm(`Освободить ${unit.name}? Вызов "${call.street}" будет отменён и отправлен в архив.`)) {
+                        addToArchive(call, 'cancelled');
+                        calls = calls.filter(c => c.id !== call.id);
+                        unit.status = 'available';
+                        unit.currentCall = null;
+                        renderUnits();
+                        renderCalls();
+                        renderArchive();
+                        saveData();
+                        return;
+                    }
+                    return;
+                }
+            }
+            
+            unit.status = 'available';
+            unit.currentCall = null;
+            renderUnits();
+            saveData();
+        };
+
         window.setUnitBusy = function(unitId) {
             const unit = units.find(u => u.id === unitId);
             if (!unit) return;
@@ -1798,37 +1843,6 @@
             
             renderUnits();
             renderCalls();
-            saveData();
-        };
-
-        window.setUnitAvailable = function(unitId) {
-            const unit = units.find(u => u.id === unitId);
-            if (!unit) return;
-            if (unit.status === 'available') {
-                alert('Юнит уже доступен');
-                return;
-            }
-            
-            if (unit.currentCall) {
-                const call = calls.find(c => c.id === unit.currentCall);
-                if (call && (call.status === 'assigned' || call.status === 'pending')) {
-                    if (confirm(`Освободить ${unit.name}? Вызов "${call.street}" будет отменён.`)) {
-                        addToArchive(call, 'cancelled');
-                        calls = calls.filter(c => c.id !== call.id);
-                        unit.status = 'available';
-                        unit.currentCall = null;
-                        renderUnits();
-                        renderCalls();
-                        renderArchive();
-                        saveData();
-                    }
-                    return;
-                }
-            }
-            
-            unit.status = 'available';
-            unit.currentCall = null;
-            renderUnits();
             saveData();
         };
 
@@ -2374,7 +2388,7 @@
                 userInfo.style.display = 'flex';
                 userAvatar.textContent = getAvatar(currentUser.login);
                 userNameDisplay.textContent = currentUser.login;
-                authToggleBtn.textContent = '🚪 Выйти';
+                authToggleBtn.textContent = currentUser.role === 'civilian' ? '👤 Выйти' : '🚪 Выйти';
                 
                 const roleLabels = {
                     'admin': '👑 Администратор',
@@ -2388,10 +2402,17 @@
                 adminTabBtn.style.display = isAdmin ? 'inline-block' : 'none';
                 if (isAdmin) adminRoleBadge.textContent = '🔐 Админ';
             } else {
-                userInfo.style.display = 'none';
-                authToggleBtn.textContent = '🔑 Войти';
-                roleBadge.textContent = '👤 Гость';
-                roleBadge.className = 'role-badge guest';
+                // Если нет пользователя, показываем гражданского по умолчанию
+                const civilianUser = findUser('civilian') || { login: 'Гражданский', role: 'civilian' };
+                currentUser = civilianUser;
+                isAdmin = false;
+                isDispatcher = false;
+                userInfo.style.display = 'flex';
+                userAvatar.textContent = 'Г';
+                userNameDisplay.textContent = 'Гражданский';
+                authToggleBtn.textContent = '👤 Выйти';
+                roleBadge.textContent = '👤 Гражданский';
+                roleBadge.className = 'role-badge civilian';
                 adminTabBtn.style.display = 'none';
             }
             renderUsersList();
@@ -2508,7 +2529,10 @@
 
         // Авторизация
         authToggleBtn.addEventListener('click', function() {
-            if (currentUser) {
+            if (currentUser && currentUser.role === 'civilian') {
+                // Если гражданский, просто выходим
+                logoutUser();
+            } else if (currentUser) {
                 if (confirm('Выйти из системы?')) {
                     logoutUser();
                 }
@@ -2740,6 +2764,14 @@
         loadUsers();
         applySystemSettings();
 
+        // Устанавливаем гражданского по умолчанию
+        const defaultUser = findUser('civilian');
+        if (defaultUser) {
+            currentUser = defaultUser;
+            isAdmin = false;
+            isDispatcher = false;
+        }
+
         if (!loadData()) {
             loadTestData();
         }
@@ -2748,8 +2780,10 @@
         renderUsersList();
 
         console.log('🚀 911 Диспетчерский Центр запущен');
-        console.log('👥 Пользователи: admin / dispatcher / user / civilian');
-        console.log('🔑 Пароль для admin: admin123, для остальных: 123456');
+        console.log('👤 По умолчанию вы вошли как Гражданский');
+        console.log('🔑 Для входа как диспетчер: dispatcher / 123456');
+        console.log('🔑 Для входа как администратор: admin / admin123');
+        console.log('📋 Доступные статусы вызовов: Ожидает, Назначен, Требуется подмога, Требуется помощь, Выполнен, Отменён');
         console.log('📋 Доступные статусы юнитов: Доступен, Занят, В пути, На брифинге, Ожидание, Помощь, Офлайн');
 
     })();
