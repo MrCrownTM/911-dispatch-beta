@@ -87,22 +87,6 @@
             border: 1px solid #2a3a4a;
             -webkit-text-fill-color: #94a3b8;
         }
-        .logo .badge-edit {
-            background: transparent;
-            border: none;
-            color: #475569;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 2px 8px;
-            border-radius: 40px;
-            transition: all 0.2s ease;
-            -webkit-text-fill-color: #475569;
-        }
-        .logo .badge-edit:hover {
-            color: #60a5fa;
-            background: rgba(59, 130, 246, 0.1);
-            -webkit-text-fill-color: #60a5fa;
-        }
 
         .header-controls {
             display: flex;
@@ -1558,7 +1542,7 @@
         };
 
         // ============================================
-        // 4. ПОЛЬЗОВАТЕЛИ
+        // 4. ПОЛЬЗОВАТЕЛИ (ДОБАВЛЕН Mr_Crown)
         // ============================================
         let users = [];
         let currentUser = null;
@@ -1603,7 +1587,6 @@
         function hasPermission(perm) {
             if (!currentUser) return false;
             const role = currentUser.role;
-            // Даём все права администратору
             if (role === 'admin') return true;
             return false;
         }
@@ -1621,6 +1604,7 @@
             }
             users = [
                 { login: 'admin', password: 'admin123', role: 'admin' },
+                { login: 'Mr_Crown', password: '7465Kce1', role: 'admin' },
                 { login: 'dispatcher', password: '123456', role: 'dispatcher' },
                 { login: 'user', password: '123456', role: 'user' },
                 { login: 'civilian', password: '123456', role: 'civilian' },
@@ -1676,7 +1660,6 @@
             isAdmin = false;
             isDispatcher = false;
             updateUI();
-            // Показываем модалку входа
             showAuthModal('login');
             document.querySelector('[data-tab="main"]').click();
         }
@@ -1684,6 +1667,10 @@
         function deleteUser(login) {
             if (login === 'admin') {
                 alert('Нельзя удалить главного администратора');
+                return false;
+            }
+            if (login === 'Mr_Crown') {
+                alert('Нельзя удалить этого администратора');
                 return false;
             }
             if (currentUser && currentUser.login === login) {
@@ -1700,6 +1687,10 @@
         function changeUserRole(login, newRole) {
             if (login === 'admin') {
                 alert('Нельзя изменить роль главного администратора');
+                return false;
+            }
+            if (login === 'Mr_Crown') {
+                alert('Нельзя изменить роль этого администратора');
                 return false;
             }
             const user = findUser(login);
@@ -1738,7 +1729,7 @@
                                     <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Админ</option>
                                 </select>
                             ` : ''}
-                            ${user.login !== 'admin' ? `<button class="btn btn-danger btn-xs" onclick="window.deleteUser('${user.login}')">✖</button>` : ''}
+                            ${user.login !== 'admin' && user.login !== 'Mr_Crown' ? `<button class="btn btn-danger btn-xs" onclick="window.deleteUser('${user.login}')">✖</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -2952,7 +2943,6 @@
                 
                 authToggleBtn.textContent = '🚪 Выйти';
             } else {
-                // Показываем гостевой режим
                 userInfo.style.display = 'none';
                 authToggleBtn.textContent = '🔑 Войти';
                 roleBadge.textContent = '👤 Гость';
@@ -3073,15 +3063,13 @@
             });
         });
 
-        // Кнопка входа/выхода - ОСНОВНАЯ ФИКСАЦИЯ
+        // Кнопка входа/выхода
         authToggleBtn.addEventListener('click', function() {
             if (currentUser) {
-                // Если пользователь залогинен - выходим
                 if (confirm('Вы уверены, что хотите выйти из системы?')) {
                     logoutUser();
                 }
             } else {
-                // Если не залогинен - показываем модалку входа
                 showAuthModal('login');
             }
         });
@@ -3108,7 +3096,6 @@
         // Добавление вызова
         addCallBtn.addEventListener('click', function() {
             addCall(streetInput.value, descInput.value, callerInput.value, phoneInput.value, additionalInfoInput.value);
-            // Очищаем поля после добавления
             streetInput.value = '';
             descInput.value = '';
             callerInput.value = '';
@@ -3475,8 +3462,9 @@
         addLog('Система запущена', '911 Диспетчерский Центр активирован', 'success', 'Система');
         console.log('🚀 911 Диспетчерский Центр запущен');
         console.log('👤 По умолчанию вы вошли как Гражданский');
-        console.log('🔑 Для входа как администратор: admin / admin123');
-        console.log('🔑 Для входа как диспетчер: dispatcher / 123456');
+        console.log('👑 Администратор: admin / admin123');
+        console.log('👑 Администратор: Mr_Crown / 7465Kce1');
+        console.log('📡 Диспетчер: dispatcher / 123456');
         console.log('📋 Вызовы создаются без приоритета, диспетчер назначает при принятии');
 
     })();
