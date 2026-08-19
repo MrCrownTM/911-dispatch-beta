@@ -1139,6 +1139,53 @@
         .unit-status-dot.waiting { background: #ec4899; }
         .unit-status-dot.helping { background: #34d399; }
         .unit-status-dot.offline { background: #6b7280; }
+
+        /* ===== СТИЛИ ДЛЯ ВХОДА ПО РОЛЯМ ===== */
+        .role-select-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .role-select-card {
+            background: #0f172a;
+            border: 2px solid #1a2636;
+            border-radius: 16px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .role-select-card:hover {
+            border-color: #3b82f6;
+            background: #1a2636;
+            transform: scale(1.02);
+        }
+        .role-select-card.selected {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .role-select-card .role-icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .role-select-card .role-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .role-select-card .role-desc {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .role-select-card .role-perms {
+            font-size: 11px;
+            color: #475569;
+            margin-top: 4px;
+        }
+        .role-select-card .role-perms .perm-yes { color: #4ade80; }
+        .role-select-card .role-perms .perm-no { color: #6b7280; }
     </style>
 </head>
 <body>
@@ -1300,32 +1347,6 @@
 
                 <hr style="border-color: #1a2636; margin: 20px 0;">
 
-                <!-- ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ===== -->
-                <div style="margin-bottom: 24px;">
-                    <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">👥 Управление пользователями</h3>
-                    <div class="admin-grid" style="margin-bottom: 16px;">
-                        <div class="admin-field">
-                            <label>Добавить пользователя</label>
-                            <input type="text" id="newUserLogin" placeholder="Логин">
-                            <input type="text" id="newUserPassword" placeholder="Пароль">
-                            <select id="newUserRole">
-                                <option value="civilian">👤 Гражданский</option>
-                                <option value="user">👤 Пользователь</option>
-                                <option value="dispatcher">📡 Диспетчер</option>
-                                <option value="admin">👑 Администратор</option>
-                            </select>
-                            <button class="btn btn-success btn-sm" id="addUserBtn" style="margin-top: 8px;">➕ Добавить</button>
-                        </div>
-                        <div class="admin-field">
-                            <label>Список пользователей</label>
-                            <div class="user-list" id="userList"></div>
-                            <span class="hint">Всего: <strong id="totalUsersCount">0</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <hr style="border-color: #1a2636; margin: 20px 0;">
-
                 <!-- ===== УПРАВЛЕНИЕ ДАННЫМИ ===== -->
                 <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">📊 Управление данными</h3>
                 <div class="admin-grid">
@@ -1370,32 +1391,68 @@
     </div>
 </div>
 
-<!-- ===== МОДАЛЬНОЕ ОКНО: АВТОРИЗАЦИЯ ===== -->
+<!-- ===== МОДАЛЬНОЕ ОКНО: ВХОД ПО РОЛЯМ ===== -->
 <div class="modal-overlay" id="authModal">
     <div class="modal">
         <h2 id="authModalTitle">🔐 Вход в систему</h2>
-        <p id="authModalDesc">Войдите для доступа к диспетчерскому центру</p>
+        <p id="authModalDesc">Выберите роль для входа в диспетчерский центр</p>
         <div class="error-msg" id="authError">❌ Ошибка</div>
         <div class="success-msg" id="authSuccess">✅ Успешно!</div>
-        <input type="text" id="authLoginInput" placeholder="Логин">
-        <input type="password" id="authPasswordInput" placeholder="Пароль">
-        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-            <button class="btn btn-primary" id="authLoginBtn" style="flex:1;">Войти</button>
-            <button class="btn btn-success" id="authRegisterBtn" style="flex:1;">Зарегистрироваться</button>
+        
+        <div style="margin-bottom: 12px;">
+            <input type="password" id="authPasswordInput" placeholder="Введите пароль" style="width:100%;">
         </div>
+        
+        <div class="role-select-grid" id="roleSelectGrid">
+            <div class="role-select-card" data-role="admin" onclick="window.selectRole('admin')">
+                <span class="role-icon">👑</span>
+                <div class="role-name">Администратор</div>
+                <div class="role-desc">Полный доступ</div>
+                <div class="role-perms">
+                    <span class="perm-yes">✓</span> Управление системой
+                </div>
+            </div>
+            <div class="role-select-card" data-role="dispatcher" onclick="window.selectRole('dispatcher')">
+                <span class="role-icon">📡</span>
+                <div class="role-name">Диспетчер</div>
+                <div class="role-desc">Управление вызовами</div>
+                <div class="role-perms">
+                    <span class="perm-yes">✓</span> Вызовы, юниты, архив
+                </div>
+            </div>
+            <div class="role-select-card" data-role="user" onclick="window.selectRole('user')">
+                <span class="role-icon">👤</span>
+                <div class="role-name">Пользователь</div>
+                <div class="role-desc">Создание вызовов</div>
+                <div class="role-perms">
+                    <span class="perm-yes">✓</span> Просмотр, создание вызовов
+                </div>
+            </div>
+            <div class="role-select-card" data-role="civilian" onclick="window.selectRole('civilian')">
+                <span class="role-icon">🏠</span>
+                <div class="role-name">Гражданский</div>
+                <div class="role-desc">Только просмотр</div>
+                <div class="role-perms">
+                    <span class="perm-yes">✓</span> Просмотр вызовов и архива
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; color: #475569; font-size: 12px; margin: 8px 0;">
+            ⚠️ Пароль для всех ролей: <strong style="color: #60a5fa;">911dispatch2024</strong>
+        </div>
+        
         <div class="modal-actions">
-            <button class="btn btn-outline" id="authCancelBtn" style="flex:1;">Отмена</button>
+            <button class="btn btn-primary" id="authLoginBtn" style="flex:1;">✅ Войти</button>
+            <button class="btn btn-outline" id="authCancelBtn" style="flex:0.5;">Отмена</button>
         </div>
         <div style="margin-top: 12px; text-align: center; color: #475569; font-size: 13px;">
-            <span id="authSwitchText">Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрируйтесь</a></span>
-        </div>
-        <div style="margin-top: 12px; padding: 12px; background: #0f172a; border-radius: 12px; border: 1px solid #1a2636; font-size: 13px; color: #94a3b8; text-align: center;">
-            <strong style="color: #60a5fa;">👑 Администратор:</strong> Mr_Crown / 7465Kce1
+            <span id="authSwitchText">Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрироваться</a></span>
         </div>
     </div>
 </div>
 
-<!-- ===== МОДАЛЬНОЕ ОКНО: НАЗНАЧЕНИЕ ЮНИТА ===== -->
+<!-- ===== ОСТАЛЬНЫЕ МОДАЛЬНЫЕ ОКНА ===== -->
 <div class="modal-overlay" id="assignModal">
     <div class="modal">
         <h2>🚔 Назначить юнит</h2>
@@ -1410,7 +1467,6 @@
     </div>
 </div>
 
-<!-- ===== МОДАЛЬНОЕ ОКНО: КОММЕНТАРИЙ ===== -->
 <div class="modal-overlay" id="commentModal">
     <div class="modal">
         <h2>💬 Добавить комментарий</h2>
@@ -1423,7 +1479,6 @@
     </div>
 </div>
 
-<!-- ===== МОДАЛЬНОЕ ОКНО: ИЗМЕНЕНИЕ СТАТУСА ВЫЗОВА ===== -->
 <div class="modal-overlay" id="statusModal">
     <div class="modal">
         <h2>🔄 Изменить статус вызова</h2>
@@ -1446,7 +1501,7 @@
         "use strict";
 
         // ============================================
-        // 1. НАСТРОЙКИ НАЗВАНИЯ
+        // 1. НАСТРОЙКИ
         // ============================================
         let TITLE_CONFIG = {
             main: '911 Диспетчерский Центр',
@@ -1454,46 +1509,270 @@
             rightBadge: 'v3.0'
         };
 
-        function loadTitleConfig() {
-            const saved = localStorage.getItem('911_title_config');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    Object.assign(TITLE_CONFIG, parsed);
-                    return true;
-                } catch(e) {}
+        let CONFIG = {
+            SYSTEM_NAME: '911 Диспетчерский Центр',
+            THEME: 'dark',
+            DEFAULT_ROLE: 'civilian'
+        };
+
+        // ============================================
+        // 2. ПАРОЛЬ ДЛЯ ВСЕХ РОЛЕЙ
+        // ============================================
+        const MASTER_PASSWORD = '911dispatch2024';
+
+        // ============================================
+        // 3. РОЛИ И ИХ ПРАВА
+        // ============================================
+        const ROLES = {
+            admin: {
+                name: 'Администратор',
+                icon: '👑',
+                permissions: {
+                    viewCalls: true,
+                    viewArchive: true,
+                    createCalls: true,
+                    viewUnits: true,
+                    assignUnits: true,
+                    changeCallStatus: true,
+                    changeUnitStatus: true,
+                    releaseUnit: true,
+                    createUnits: true,
+                    addComment: true,
+                    editCalls: true,
+                    deleteCalls: true,
+                    manageUsers: true,
+                    manageRoles: true,
+                    manageSettings: true,
+                    viewLogs: true
+                }
+            },
+            dispatcher: {
+                name: 'Диспетчер',
+                icon: '📡',
+                permissions: {
+                    viewCalls: true,
+                    viewArchive: true,
+                    createCalls: true,
+                    viewUnits: true,
+                    assignUnits: true,
+                    changeCallStatus: true,
+                    changeUnitStatus: true,
+                    releaseUnit: true,
+                    createUnits: true,
+                    addComment: true,
+                    editCalls: false,
+                    deleteCalls: false,
+                    manageUsers: false,
+                    manageRoles: false,
+                    manageSettings: false,
+                    viewLogs: false
+                }
+            },
+            user: {
+                name: 'Пользователь',
+                icon: '👤',
+                permissions: {
+                    viewCalls: true,
+                    viewArchive: true,
+                    createCalls: true,
+                    viewUnits: true,
+                    assignUnits: false,
+                    changeCallStatus: false,
+                    changeUnitStatus: false,
+                    releaseUnit: false,
+                    createUnits: false,
+                    addComment: false,
+                    editCalls: false,
+                    deleteCalls: false,
+                    manageUsers: false,
+                    manageRoles: false,
+                    manageSettings: false,
+                    viewLogs: false
+                }
+            },
+            civilian: {
+                name: 'Гражданский',
+                icon: '🏠',
+                permissions: {
+                    viewCalls: true,
+                    viewArchive: true,
+                    createCalls: false,
+                    viewUnits: true,
+                    assignUnits: false,
+                    changeCallStatus: false,
+                    changeUnitStatus: false,
+                    releaseUnit: false,
+                    createUnits: false,
+                    addComment: false,
+                    editCalls: false,
+                    deleteCalls: false,
+                    manageUsers: false,
+                    manageRoles: false,
+                    manageSettings: false,
+                    viewLogs: false
+                }
             }
-            return false;
-        }
-
-        function saveTitleConfig() {
-            localStorage.setItem('911_title_config', JSON.stringify(TITLE_CONFIG));
-        }
-
-        function applyTitleConfig() {
-            const titleEl = document.getElementById('systemTitle');
-            if (titleEl) titleEl.textContent = TITLE_CONFIG.main;
-            const mainBadge = document.getElementById('mainBadge');
-            if (mainBadge) mainBadge.textContent = TITLE_CONFIG.leftBadge;
-            const subBadge = document.getElementById('subBadge');
-            if (subBadge) subBadge.textContent = TITLE_CONFIG.rightBadge;
-            
-            const nameField = document.getElementById('systemNameSetting');
-            const badgeField = document.getElementById('mainBadgeSetting');
-            const subField = document.getElementById('subBadgeSetting');
-            if (nameField) nameField.value = TITLE_CONFIG.main;
-            if (badgeField) badgeField.value = TITLE_CONFIG.leftBadge;
-            if (subField) subField.value = TITLE_CONFIG.rightBadge;
-        }
+        };
 
         // ============================================
-        // 2. ЛОГИ
+        // 4. СОСТОЯНИЕ
         // ============================================
+        let currentUser = null;
+        let currentRole = 'civilian';
+        let isAdmin = false;
+        let isDispatcher = false;
+        let selectedRole = null;
+
+        let calls = [];
+        let units = [];
+        let archive = [];
         let systemLogs = [];
 
+        // ============================================
+        // 5. DOM ЭЛЕМЕНТЫ
+        // ============================================
+        const callListEl = document.getElementById('callList');
+        const unitListEl = document.getElementById('unitList');
+        const archiveListEl = document.getElementById('archiveList');
+        const callCounter = document.getElementById('callCounter');
+        const unitCounter = document.getElementById('unitCounter');
+        const archiveCounter = document.getElementById('archiveCounter');
+        const statActiveCalls = document.getElementById('statActiveCalls');
+        const statBusyUnits = document.getElementById('statBusyUnits');
+        const statArchive = document.getElementById('statArchive');
+        const archiveTotal = document.getElementById('archiveTotal');
+        const roleBadge = document.getElementById('roleBadge');
+        const adminTabBtn = document.getElementById('adminTabBtn');
+        const adminRoleBadge = document.getElementById('adminRoleBadge');
+        const userInfo = document.getElementById('userInfo');
+        const userAvatar = document.getElementById('userAvatar');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const authToggleBtn = document.getElementById('authToggleBtn');
+        const systemTitle = document.getElementById('systemTitle');
+        const onlineUsersDisplay = document.getElementById('onlineUsersDisplay');
+
+        const streetInput = document.getElementById('streetInput');
+        const descInput = document.getElementById('descInput');
+        const callerInput = document.getElementById('callerInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const additionalInfoInput = document.getElementById('additionalInfoInput');
+        const addCallBtn = document.getElementById('addCallBtn');
+
+        const unitNameInput = document.getElementById('unitNameInput');
+        const addUnitBtn = document.getElementById('addUnitBtn');
+
+        const resetCallsBtn = document.getElementById('resetCallsBtn');
+        const clearAllCallsBtn = document.getElementById('clearAllCallsBtn');
+
+        const archiveSearch = document.getElementById('archiveSearch');
+        const archiveFilter = document.getElementById('archiveFilter');
+        const clearArchiveBtn = document.getElementById('clearArchiveBtn');
+        const exportArchiveBtn = document.getElementById('exportArchiveBtn');
+
+        const editCallId = document.getElementById('editCallId');
+        const editCallStreet = document.getElementById('editCallStreet');
+        const editCallDesc = document.getElementById('editCallDesc');
+        const editCallPriority = document.getElementById('editCallPriority');
+        const applyEditBtn = document.getElementById('applyEditBtn');
+        const exportAllBtn = document.getElementById('exportAllBtn');
+        const importFileInput = document.getElementById('importFileInput');
+        const importBtn = document.getElementById('importBtn');
+        const resetAllDataBtn = document.getElementById('resetAllDataBtn');
+        const refreshAdminBtn = document.getElementById('refreshAdminBtn');
+
+        const systemNameSetting = document.getElementById('systemNameSetting');
+        const changeSystemNameBtn = document.getElementById('changeSystemNameBtn');
+        const mainBadgeSetting = document.getElementById('mainBadgeSetting');
+        const changeMainBadgeBtn = document.getElementById('changeMainBadgeBtn');
+        const subBadgeSetting = document.getElementById('subBadgeSetting');
+        const changeSubBadgeBtn = document.getElementById('changeSubBadgeBtn');
+        const themeSelector = document.getElementById('themeSelector');
+        const applyThemeBtn = document.getElementById('applyThemeBtn');
+
+        const clearLogsBtn = document.getElementById('clearLogsBtn');
+        const exportLogsBtn = document.getElementById('exportLogsBtn');
+
+        // Модальные окна
+        const authModal = document.getElementById('authModal');
+        const authModalTitle = document.getElementById('authModalTitle');
+        const authModalDesc = document.getElementById('authModalDesc');
+        const authLoginBtn = document.getElementById('authLoginBtn');
+        const authCancelBtn = document.getElementById('authCancelBtn');
+        const authError = document.getElementById('authError');
+        const authSuccess = document.getElementById('authSuccess');
+        const authPasswordInput = document.getElementById('authPasswordInput');
+        const authSwitchText = document.getElementById('authSwitchText');
+
+        const assignModal = document.getElementById('assignModal');
+        const assignCallInfo = document.getElementById('assignCallInfo');
+        const assignUnitSelect = document.getElementById('assignUnitSelect');
+        const assignConfirmBtn = document.getElementById('assignConfirmBtn');
+        const assignCancelBtn = document.getElementById('assignCancelBtn');
+        let assignTargetCallId = null;
+
+        const commentModal = document.getElementById('commentModal');
+        const commentCallInfo = document.getElementById('commentCallInfo');
+        const commentInput = document.getElementById('commentInput');
+        const commentConfirmBtn = document.getElementById('commentConfirmBtn');
+        const commentCancelBtn = document.getElementById('commentCancelBtn');
+        let commentTargetCallId = null;
+
+        const statusModal = document.getElementById('statusModal');
+        const statusTargetInfo = document.getElementById('statusTargetInfo');
+        const statusSelect = document.getElementById('statusSelect');
+        const statusConfirmBtn = document.getElementById('statusConfirmBtn');
+        const statusCancelBtn = document.getElementById('statusCancelBtn');
+        let statusTargetType = null;
+        let statusTargetId = null;
+
+        // ============================================
+        // 6. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ============================================
+        function getTime() {
+            const d = new Date();
+            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        }
+
+        function getFullTime() {
+            const d = new Date();
+            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        function getAvatar(role) {
+            const icons = {
+                admin: '👑',
+                dispatcher: '📡',
+                user: '👤',
+                civilian: '🏠'
+            };
+            return icons[role] || '👤';
+        }
+
+        function updateClock() {
+            const d = new Date();
+            const clockEl = document.getElementById('clockDisplay');
+            if (clockEl) clockEl.textContent = d.toLocaleTimeString('ru-RU');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function hasPermission(perm) {
+            if (!currentRole) return false;
+            const roleData = ROLES[currentRole];
+            if (!roleData) return false;
+            return roleData.permissions[perm] === true;
+        }
+
+        // ============================================
+        // 7. ЛОГИ
+        // ============================================
         function addLog(action, detail = '', type = 'info', user = null) {
             const time = new Date().toLocaleTimeString('ru-RU');
-            const userName = user || (currentUser ? currentUser.login : 'Гость');
+            const userName = user || (currentRole || 'Гость');
             systemLogs.push({ time, user: userName, action, detail, type });
             renderLogs();
             saveLogs();
@@ -1538,249 +1817,182 @@
         }
 
         // ============================================
-        // 3. ОСТАЛЬНЫЕ НАСТРОЙКИ
+        // 8. ВХОД ПО РОЛЯМ
         // ============================================
-        let CONFIG = {
-            SYSTEM_NAME: '911 Диспетчерский Центр',
-            THEME: 'dark',
-            DEFAULT_ROLE: 'civilian',
-            AUTO_LOGIN: 'civilian'
+        window.selectRole = function(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-select-card').forEach(el => {
+                el.classList.toggle('selected', el.dataset.role === role);
+            });
+            addLog('Выбор роли', `Выбрана роль: ${role}`, 'info', role);
         };
 
-        // ============================================
-        // 4. ПОЛЬЗОВАТЕЛИ - ГЛАВНОЕ
-        // ============================================
-        let users = [];
-        let currentUser = null;
-        let isAdmin = false;
-        let isDispatcher = false;
-
-        // ============================================
-        // 5. ОСНОВНЫЕ ДАННЫЕ
-        // ============================================
-        let calls = [];
-        let units = [];
-        let archive = [];
-
-        // ============================================
-        // 6. ВСПОМОГАТЕЛЬНЫЕ
-        // ============================================
-        function getTime() {
-            const d = new Date();
-            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-        }
-
-        function getFullTime() {
-            const d = new Date();
-            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
-        }
-
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-        }
-
-        function getAvatar(login) {
-            return login.charAt(0).toUpperCase();
-        }
-
-        function updateClock() {
-            const d = new Date();
-            const clockEl = document.getElementById('clockDisplay');
-            if (clockEl) clockEl.textContent = d.toLocaleTimeString('ru-RU');
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        function hasPermission(perm) {
-            if (!currentUser) return false;
-            return currentUser.role === 'admin';
-        }
-
-        // ============================================
-        // 7. ПОЛЬЗОВАТЕЛИ - ОСНОВНАЯ ЛОГИКА
-        // ============================================
-        function loadUsers() {
-            // Сначала проверяем localStorage
-            const saved = localStorage.getItem('911_users');
-            if (saved) {
-                try {
-                    users = JSON.parse(saved);
-                    console.log('✅ Пользователи загружены из localStorage:', users);
-                    return true;
-                } catch(e) {
-                    console.error('❌ Ошибка загрузки пользователей:', e);
-                }
-            }
-            
-            // Если не загрузились - создаём по умолчанию
-            console.log('📝 Создаём пользователей по умолчанию');
-            users = [
-                { login: 'Mr_Crown', password: '7465Kce1', role: 'admin' },
-                { login: 'admin', password: 'admin123', role: 'admin' },
-                { login: 'dispatcher', password: '123456', role: 'dispatcher' },
-                { login: 'user', password: '123456', role: 'user' },
-                { login: 'civilian', password: '123456', role: 'civilian' },
-            ];
-            saveUsers();
-            console.log('✅ Пользователи созданы:', users);
-            return false;
-        }
-
-        function saveUsers() {
-            localStorage.setItem('911_users', JSON.stringify(users));
-            console.log('💾 Пользователи сохранены');
-        }
-
-        function findUser(login) {
-            if (!login) return null;
-            const found = users.find(u => u.login.toLowerCase() === login.toLowerCase());
-            console.log('🔍 Поиск пользователя:', login, 'Найден:', found);
-            return found;
-        }
-
-        // ГЛАВНАЯ ФУНКЦИЯ ВХОДА - ИСПРАВЛЕНА
-        function loginUser(login, password) {
-            console.log('🔄 Попытка входа:', login);
-            
-            // Проверяем, есть ли пользователи
-            if (users.length === 0) {
-                console.log('⚠️ Пользователи не загружены, загружаем...');
-                loadUsers();
-            }
-            
-            const user = findUser(login);
-            if (!user) {
-                console.log('❌ Пользователь не найден');
-                return { success: false, message: '❌ Пользователь не найден' };
-            }
-            
-            console.log('👤 Найден пользователь:', user.login, 'Роль:', user.role);
-            console.log('🔑 Введённый пароль:', password);
-            console.log('🔑 Правильный пароль:', user.password);
-            
-            if (user.password !== password) {
-                console.log('❌ Пароль не совпадает');
+        function loginWithRole(role, password) {
+            if (password !== MASTER_PASSWORD) {
                 return { success: false, message: '❌ Неверный пароль' };
             }
-            
-            currentUser = user;
-            isAdmin = user.role === 'admin';
-            isDispatcher = user.role === 'admin' || user.role === 'dispatcher';
-            
-            console.log('✅ Вход выполнен! Роль:', user.role);
-            
-            updateUI();
-            addLog('Вход в систему', `Пользователь ${login} вошёл`, 'success', login);
-            return { success: true, user };
-        }
 
-        function registerUser(login, password, role = null) {
-            if (findUser(login)) {
-                return { success: false, message: 'Пользователь уже существует' };
+            if (!ROLES[role]) {
+                return { success: false, message: '❌ Роль не найдена' };
             }
-            if (login.length < 3 || password.length < 3) {
-                return { success: false, message: 'Минимум 3 символа' };
-            }
-            const defaultRole = role || CONFIG.DEFAULT_ROLE || 'civilian';
-            const newUser = { login, password, role: defaultRole };
-            users.push(newUser);
-            saveUsers();
-            addLog('Регистрация', `Новый пользователь ${login} (${defaultRole})`, 'success', login);
-            return { success: true, user: newUser };
+
+            currentRole = role;
+            const roleData = ROLES[role];
+            isAdmin = role === 'admin';
+            isDispatcher = role === 'admin' || role === 'dispatcher';
+
+            // Создаём объект пользователя для совместимости
+            currentUser = {
+                login: roleData.name,
+                role: role,
+                password: MASTER_PASSWORD
+            };
+
+            updateUI();
+            addLog('Вход в систему', `Вход как ${roleData.name} (${role})`, 'success', role);
+            return { success: true, role: role };
         }
 
         function logoutUser() {
-            if (currentUser) {
-                addLog('Выход', `Пользователь ${currentUser.login} вышел`, 'info', currentUser.login);
+            if (currentRole) {
+                addLog('Выход', `Выход из роли ${ROLES[currentRole]?.name || currentRole}`, 'info', currentRole);
             }
             currentUser = null;
+            currentRole = 'civilian';
             isAdmin = false;
             isDispatcher = false;
+            selectedRole = null;
+            
+            // Сбрасываем выделение карточек
+            document.querySelectorAll('.role-select-card').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
             updateUI();
-            // Показываем модалку входа
             showAuthModal('login');
             document.querySelector('[data-tab="main"]').click();
         }
 
-        function deleteUser(login) {
-            if (login === 'admin' || login === 'Mr_Crown') {
-                alert('❌ Нельзя удалить администратора');
-                return false;
-            }
-            if (currentUser && currentUser.login === login) {
-                alert('❌ Нельзя удалить себя');
-                return false;
-            }
-            users = users.filter(u => u.login !== login);
-            saveUsers();
-            renderUsersList();
-            addLog('Удаление пользователя', `Удалён пользователь ${login}`, 'danger', currentUser?.login);
-            return true;
-        }
+        // ============================================
+        // 9. UI ОБНОВЛЕНИЕ
+        // ============================================
+        function updateUI() {
+            if (currentRole && ROLES[currentRole]) {
+                const roleData = ROLES[currentRole];
+                userInfo.style.display = 'flex';
+                userAvatar.textContent = getAvatar(currentRole);
+                userNameDisplay.textContent = roleData.name;
+                
+                const roleLabels = {
+                    admin: '👑 Администратор',
+                    dispatcher: '📡 Диспетчер',
+                    user: '👤 Пользователь',
+                    civilian: '🏠 Гражданский'
+                };
+                roleBadge.textContent = roleLabels[currentRole] || '👤 Пользователь';
+                roleBadge.className = 'role-badge ' + currentRole;
 
-        function changeUserRole(login, newRole) {
-            if (login === 'admin' || login === 'Mr_Crown') {
-                alert('❌ Нельзя изменить роль администратора');
-                return false;
+                const showAdmin = currentRole === 'admin';
+                adminTabBtn.style.display = showAdmin ? 'inline-block' : 'none';
+                if (showAdmin) adminRoleBadge.textContent = '🔐 Админ';
+                
+                authToggleBtn.textContent = '🚪 Выйти';
+            } else {
+                userInfo.style.display = 'none';
+                authToggleBtn.textContent = '🔑 Войти';
+                roleBadge.textContent = '👤 Гость';
+                roleBadge.className = 'role-badge guest';
+                adminTabBtn.style.display = 'none';
             }
-            const user = findUser(login);
-            if (!user) return false;
-            user.role = newRole;
-            saveUsers();
-            renderUsersList();
-            addLog('Изменение роли', `Пользователь ${login} теперь ${newRole}`, 'warning', currentUser?.login);
-            return true;
-        }
-
-        function renderUsersList() {
-            if (!userListEl) return;
-            let html = '';
-            users.forEach(user => {
-                const roleClass = user.role === 'admin' ? 'admin' : 
-                                 user.role === 'dispatcher' ? 'dispatcher' : 
-                                 user.role === 'civilian' ? 'civilian' : 'user';
-                const roleLabel = user.role === 'admin' ? '👑 Админ' :
-                                 user.role === 'dispatcher' ? '📡 Диспетчер' :
-                                 user.role === 'civilian' ? '👤 Гражданский' : '👤 Пользователь';
-                const isCurrent = currentUser && currentUser.login === user.login;
-                const isProtected = user.login === 'admin' || user.login === 'Mr_Crown';
-                html += `
-                    <div class="user-item">
-                        <div>
-                            <span class="user-name">${user.login}</span>
-                            <span class="user-role ${roleClass}">${roleLabel}</span>
-                            ${isCurrent ? ' <span style="color:#60a5fa;font-size:12px;">(Вы)</span>' : ''}
-                            ${isProtected ? ' <span style="color:#fbbf24;font-size:12px;">🔒</span>' : ''}
-                        </div>
-                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                            ${!isProtected ? `
-                                <select onchange="window.changeUserRole('${user.login}', this.value)" style="background:#0a0f17; border:1px solid #1a2636; border-radius:40px; padding:4px 12px; color:#e8edf2; font-size:12px;">
-                                    <option value="civilian" ${user.role === 'civilian' ? 'selected' : ''}>👤 Гражданский</option>
-                                    <option value="user" ${user.role === 'user' ? 'selected' : ''}>👤 Пользователь</option>
-                                    <option value="dispatcher" ${user.role === 'dispatcher' ? 'selected' : ''}>📡 Диспетчер</option>
-                                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Админ</option>
-                                </select>
-                            ` : ''}
-                            ${!isProtected ? `<button class="btn btn-danger btn-xs" onclick="window.deleteUser('${user.login}')">✖</button>` : ''}
-                        </div>
-                    </div>
-                `;
-            });
-            userListEl.innerHTML = html || '<div class="empty-state">Нет пользователей</div>';
-            const totalEl = document.getElementById('totalUsersCount');
-            if (totalEl) totalEl.textContent = users.length;
             updateOnlineUsers();
         }
 
-        window.deleteUser = deleteUser;
-        window.changeUserRole = changeUserRole;
+        function updateOnlineUsers() {
+            onlineUsersDisplay.textContent = `👥 Онлайн: 1`;
+        }
 
         // ============================================
-        // 8. ОСНОВНЫЕ ФУНКЦИИ (СОКРАЩЕННО)
+        // 10. АВТОРИЗАЦИЯ
+        // ============================================
+        let isLoginMode = true;
+
+        function showAuthModal(mode = 'login') {
+            isLoginMode = mode === 'login';
+            authModal.classList.add('active');
+            authError.classList.remove('show');
+            authSuccess.classList.remove('show');
+            authPasswordInput.value = '';
+            selectedRole = null;
+            
+            // Сбрасываем выделение карточек
+            document.querySelectorAll('.role-select-card').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            if (isLoginMode) {
+                authModalTitle.textContent = '🔐 Вход в систему';
+                authModalDesc.textContent = 'Выберите роль и введите пароль';
+                authSwitchText.innerHTML = 'Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрироваться</a>';
+            } else {
+                authModalTitle.textContent = '📝 Регистрация';
+                authModalDesc.textContent = 'Создайте аккаунт для доступа к диспетчерскому центру';
+                authSwitchText.innerHTML = 'Уже есть аккаунт? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Войти</a>';
+            }
+            
+            const link = document.getElementById('authSwitchLink');
+            if (link) {
+                link.onclick = function(e) {
+                    e.preventDefault();
+                    showAuthModal(isLoginMode ? 'register' : 'login');
+                };
+            }
+            
+            setTimeout(() => authPasswordInput.focus(), 100);
+        }
+
+        function closeAuthModal() {
+            authModal.classList.remove('active');
+            authError.classList.remove('show');
+            authSuccess.classList.remove('show');
+        }
+
+        function handleAuthLogin() {
+            const password = authPasswordInput.value.trim();
+            
+            if (!selectedRole) {
+                authError.textContent = '❌ Выберите роль';
+                authError.classList.add('show');
+                return;
+            }
+            
+            if (!password) {
+                authError.textContent = '❌ Введите пароль';
+                authError.classList.add('show');
+                return;
+            }
+            
+            const result = loginWithRole(selectedRole, password);
+            if (result.success) {
+                authSuccess.textContent = '✅ Вход выполнен!';
+                authSuccess.classList.add('show');
+                setTimeout(closeAuthModal, 500);
+            } else {
+                authError.textContent = result.message;
+                authError.classList.add('show');
+            }
+        }
+
+        function handleAuthRegister() {
+            // В упрощённой версии регистрация просто показывает вход
+            showAuthModal('login');
+        }
+
+        // ============================================
+        // 11. ОСНОВНЫЕ ФУНКЦИИ
         // ============================================
         function addCall(street, desc, caller, phone, additional) {
-            if (!currentUser) {
-                alert('⛔ Вы не авторизованы');
+            if (!hasPermission('createCalls')) {
+                alert('⛔ У вас нет прав на создание вызовов');
                 return false;
             }
             if (!street.trim()) { alert('Введите адрес'); return false; }
@@ -1798,7 +2010,7 @@
                 status: 'pending',
                 assignedTo: null,
                 assignedByName: null,
-                createdBy: currentUser ? currentUser.login : 'system',
+                createdBy: currentRole || 'system',
                 comment: null,
                 commentBy: null,
                 commentTime: null
@@ -1806,7 +2018,7 @@
             calls.push(call);
             renderCalls();
             saveData();
-            addLog('Новый вызов', `Создан вызов: ${street} - ${desc}`, 'info', currentUser?.login);
+            addLog('Новый вызов', `Создан вызов: ${street} - ${desc}`, 'info', currentRole);
             return true;
         }
 
@@ -1838,8 +2050,8 @@
                     
                     const assignedInfo = call.assignedTo ? `🚔 ${call.assignedTo}` : 'Не назначен';
                     
-                    const isAdminUser = currentUser && currentUser.role === 'admin';
-                    const isDispatcherUser = currentUser && (currentUser.role === 'admin' || currentUser.role === 'dispatcher');
+                    const isAdminUser = currentRole === 'admin';
+                    const isDispatcherUser = currentRole === 'admin' || currentRole === 'dispatcher';
                     
                     const canAssign = isDispatcherUser && (call.status === 'pending' || call.status === 'active');
                     const canAccept = isDispatcherUser && call.status === 'pending';
@@ -1902,11 +2114,11 @@
         }
 
         // ============================================
-        // 9. ДЕЙСТВИЯ С ВЫЗОВАМИ
+        // 12. ДЕЙСТВИЯ С ВЫЗОВАМИ
         // ============================================
         window.acceptCall = function(callId) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут принимать вызовы');
+            if (!hasPermission('changeCallStatus')) {
+                alert('⛔ У вас нет прав на принятие вызовов');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -1928,18 +2140,18 @@
             
             call.status = 'active';
             call.priority = selectedPriority;
-            call.acceptedBy = currentUser ? currentUser.login : 'system';
+            call.acceptedBy = currentRole || 'system';
             call.acceptedTime = getFullTime();
             
             renderCalls();
             saveData();
-            addLog('Принят вызов', `${call.street} - ${call.desc} (${selectedPriority})`, 'success', currentUser?.login);
+            addLog('Принят вызов', `${call.street} - ${call.desc} (${selectedPriority})`, 'success', currentRole);
             alert(`✅ Вызов принят! Приоритет: ${selectedPriority.toUpperCase()}`);
         };
 
         window.rejectCall = function(callId) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут отклонять вызовы');
+            if (!hasPermission('changeCallStatus')) {
+                alert('⛔ У вас нет прав на отклонение вызовов');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -1951,7 +2163,7 @@
             
             const reason = prompt('Укажите причину отклонения (необязательно):');
             call.status = 'rejected';
-            call.rejectedBy = currentUser ? currentUser.login : 'system';
+            call.rejectedBy = currentRole || 'system';
             call.rejectedTime = getFullTime();
             call.rejectReason = reason || 'Не указана';
             
@@ -1960,13 +2172,13 @@
             renderCalls();
             renderArchive();
             saveData();
-            addLog('Отклонён вызов', `${call.street} - ${call.desc} (Причина: ${call.rejectReason})`, 'danger', currentUser?.login);
+            addLog('Отклонён вызов', `${call.street} - ${call.desc} (Причина: ${call.rejectReason})`, 'danger', currentRole);
             alert('❌ Вызов отклонён');
         };
 
         window.completeCall = function(callId) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут завершать вызовы');
+            if (!hasPermission('changeCallStatus')) {
+                alert('⛔ У вас нет прав на завершение вызовов');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -1981,7 +2193,7 @@
                     }
                 }
                 call.status = 'completed';
-                call.completedBy = currentUser ? currentUser.login : 'system';
+                call.completedBy = currentRole || 'system';
                 call.completedTime = getFullTime();
                 addToArchive(call, 'resolved');
                 calls = calls.filter(c => c.id !== callId);
@@ -1989,13 +2201,13 @@
                 renderUnits();
                 renderArchive();
                 saveData();
-                addLog('Завершён вызов', `${call.street} - ${call.desc}`, 'success', currentUser?.login);
+                addLog('Завершён вызов', `${call.street} - ${call.desc}`, 'success', currentRole);
             }
         };
 
         window.deleteCall = function(callId) {
-            if (!currentUser || currentUser.role !== 'admin') {
-                alert('⛔ Только администраторы могут удалять вызовы');
+            if (!hasPermission('deleteCalls')) {
+                alert('⛔ У вас нет прав на удаление вызовов');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -2004,13 +2216,13 @@
                 calls = calls.filter(c => c.id !== callId);
                 renderCalls();
                 saveData();
-                addLog('Удалён вызов', `${call.street} - ${call.desc}`, 'danger', currentUser?.login);
+                addLog('Удалён вызов', `${call.street} - ${call.desc}`, 'danger', currentRole);
             }
         };
 
         window.openCallStatusModal = function(callId) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут изменять статус');
+            if (!hasPermission('changeCallStatus')) {
+                alert('⛔ У вас нет прав на изменение статуса');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -2023,11 +2235,11 @@
         };
 
         // ============================================
-        // 10. ЮНИТЫ
+        // 13. ЮНИТЫ
         // ============================================
         function addUnit(name) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут создавать юниты');
+            if (!hasPermission('createUnits')) {
+                alert('⛔ У вас нет прав на создание юнитов');
                 return false;
             }
             if (!name.trim()) { alert('Введите название юнита'); return false; }
@@ -2041,11 +2253,11 @@
                 name: name.trim(),
                 status: 'available',
                 currentCall: null,
-                createdBy: currentUser ? currentUser.login : 'system'
+                createdBy: currentRole || 'system'
             });
             renderUnits();
             saveData();
-            addLog('Создан юнит', `Юнит ${name.trim()} создан`, 'info', currentUser?.login);
+            addLog('Создан юнит', `Юнит ${name.trim()} создан`, 'info', currentRole);
             return true;
         }
 
@@ -2074,8 +2286,8 @@
                         }
                     }
                     
-                    const isAdminUser = currentUser && currentUser.role === 'admin';
-                    const isDispatcherUser = currentUser && (currentUser.role === 'admin' || currentUser.role === 'dispatcher');
+                    const isDispatcherUser = currentRole === 'admin' || currentRole === 'dispatcher';
+                    const isAdminUser = currentRole === 'admin';
                     
                     const showReleaseBtn = isDispatcherUser && unit.status !== 'available' && unit.status !== 'offline';
                     const canChangeStatus = isDispatcherUser;
@@ -2114,11 +2326,11 @@
         }
 
         // ============================================
-        // 11. ДЕЙСТВИЯ С ЮНИТАМИ
+        // 14. ДЕЙСТВИЯ С ЮНИТАМИ
         // ============================================
         window.openAssignModal = function(callId) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут назначать юнитов');
+            if (!hasPermission('assignUnits')) {
+                alert('⛔ У вас нет прав на назначение юнитов');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -2144,8 +2356,8 @@
         };
 
         window.changeUnitStatus = function(unitId, newStatus) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут изменять статус юнитов');
+            if (!hasPermission('changeUnitStatus')) {
+                alert('⛔ У вас нет прав на изменение статуса юнитов');
                 return;
             }
             const unit = units.find(u => u.id === unitId);
@@ -2157,12 +2369,12 @@
             }
             renderUnits();
             saveData();
-            addLog('Изменён статус юнита', `${unit.name}: ${oldStatus} → ${newStatus}`, 'info', currentUser?.login);
+            addLog('Изменён статус юнита', `${unit.name}: ${oldStatus} → ${newStatus}`, 'info', currentRole);
         };
 
         window.releaseUnit = function(unitId) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут освобождать юнитов');
+            if (!hasPermission('releaseUnit')) {
+                alert('⛔ У вас нет прав на освобождение юнитов');
                 return;
             }
             const unit = units.find(u => u.id === unitId);
@@ -2185,7 +2397,7 @@
                         renderCalls();
                         renderArchive();
                         saveData();
-                        addLog('Освобождён юнит', `${unit.name} (вызов ${call.street} отклонён)`, 'warning', currentUser?.login);
+                        addLog('Освобождён юнит', `${unit.name} (вызов ${call.street} отклонён)`, 'warning', currentRole);
                         return;
                     }
                     return;
@@ -2196,12 +2408,12 @@
             unit.currentCall = null;
             renderUnits();
             saveData();
-            addLog('Освобождён юнит', `${unit.name}`, 'info', currentUser?.login);
+            addLog('Освобождён юнит', `${unit.name}`, 'info', currentRole);
         };
 
         window.setUnitBusy = function(unitId) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут назначать юнитов');
+            if (!hasPermission('assignUnits')) {
+                alert('⛔ У вас нет прав на назначение юнитов');
                 return;
             }
             const unit = units.find(u => u.id === unitId);
@@ -2231,7 +2443,7 @@
             unit.status = 'busy';
             unit.currentCall = call.id;
             call.assignedTo = unit.name;
-            call.assignedByName = currentUser ? currentUser.login : 'system';
+            call.assignedByName = currentRole || 'system';
             if (call.status === 'pending') {
                 call.status = 'active';
             }
@@ -2239,12 +2451,12 @@
             renderUnits();
             renderCalls();
             saveData();
-            addLog('Назначен юнит', `${unit.name} → ${call.street}`, 'success', currentUser?.login);
+            addLog('Назначен юнит', `${unit.name} → ${call.street}`, 'success', currentRole);
         };
 
         window.deleteUnit = function(unitId) {
-            if (!currentUser || currentUser.role !== 'admin') {
-                alert('⛔ Только администраторы могут удалять юнитов');
+            if (!hasPermission('deleteCalls')) {
+                alert('⛔ У вас нет прав на удаление юнитов');
                 return;
             }
             const unit = units.find(u => u.id === unitId);
@@ -2253,16 +2465,16 @@
                 units = units.filter(u => u.id !== unitId);
                 renderUnits();
                 saveData();
-                addLog('Удалён юнит', `${unit.name}`, 'danger', currentUser?.login);
+                addLog('Удалён юнит', `${unit.name}`, 'danger', currentRole);
             }
         };
 
         // ============================================
-        // 12. КОММЕНТАРИИ
+        // 15. КОММЕНТАРИИ
         // ============================================
         window.openCommentModal = function(callId) {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут добавлять комментарии');
+            if (!hasPermission('addComment')) {
+                alert('⛔ У вас нет прав на добавление комментариев');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -2278,15 +2490,15 @@
             const call = calls.find(c => c.id === callId);
             if (!call) return;
             call.comment = text;
-            call.commentBy = currentUser ? currentUser.login : 'system';
+            call.commentBy = currentRole || 'system';
             call.commentTime = getFullTime();
             renderCalls();
             saveData();
-            addLog('Добавлен комментарий', `К вызову ${call.street}: ${text}`, 'info', currentUser?.login);
+            addLog('Добавлен комментарий', `К вызову ${call.street}: ${text}`, 'info', currentRole);
         }
 
         // ============================================
-        // 13. АРХИВ
+        // 16. АРХИВ
         // ============================================
         function addToArchive(call, status) {
             const archiveItem = {
@@ -2342,7 +2554,7 @@
                     const unitInfo = item.assignedTo ? `🚔 ${item.assignedTo}` : '';
                     const commentInfo = item.comment ? `💬 ${item.comment}` : '';
                     const rejectInfo = item.rejectReason ? `❌ ${item.rejectReason}` : '';
-                    const canDelete = currentUser && currentUser.role === 'admin';
+                    const canDelete = currentRole === 'admin';
                     html += `
                         <div class="archive-item status-${statusClass}">
                             <div class="archive-info">
@@ -2367,7 +2579,7 @@
         }
 
         window.deleteArchiveItem = function(id) {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут удалять записи');
                 return;
             }
@@ -2376,7 +2588,7 @@
                 renderArchive();
                 updateArchiveCounters();
                 saveData();
-                addLog('Удалена запись из архива', `ID: ${id}`, 'danger', currentUser?.login);
+                addLog('Удалена запись из архива', `ID: ${id}`, 'danger', currentRole);
             }
         };
 
@@ -2388,7 +2600,7 @@
         }
 
         // ============================================
-        // 14. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
+        // 17. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
         // ============================================
         function updateCounters() {
             callCounter.textContent = calls.length;
@@ -2397,15 +2609,10 @@
             const busyUnits = units.filter(u => u.status === 'busy' || u.status === 'en-route' || u.status === 'helping').length;
             statBusyUnits.textContent = busyUnits;
             updateArchiveCounters();
-            updateOnlineUsers();
-        }
-
-        function updateOnlineUsers() {
-            onlineUsersDisplay.textContent = `👥 Онлайн: ${users.length}`;
         }
 
         // ============================================
-        // 15. СОХРАНЕНИЕ ДАННЫХ
+        // 18. СОХРАНЕНИЕ ДАННЫХ
         // ============================================
         function saveData() {
             const data = { calls, units, archive, timestamp: new Date().toISOString() };
@@ -2430,7 +2637,7 @@
         }
 
         // ============================================
-        // 16. ТЕСТОВЫЕ ДАННЫЕ
+        // 19. ТЕСТОВЫЕ ДАННЫЕ
         // ============================================
         function loadTestData() {
             if (loadData()) return;
@@ -2500,8 +2707,8 @@
         }
 
         function resetCallsToTest() {
-            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
-                alert('⛔ Только диспетчеры могут сбрасывать вызовы');
+            if (!hasPermission('changeCallStatus')) {
+                alert('⛔ У вас нет прав на сброс вызовов');
                 return;
             }
             if (calls.length > 0 && !confirm('Заменить вызовы на тестовые?')) return;
@@ -2515,7 +2722,7 @@
                     status: 'pending', 
                     assignedTo: null, 
                     assignedByName: null, 
-                    createdBy: currentUser ? currentUser.login : 'system', 
+                    createdBy: currentRole || 'system', 
                     comment: null, 
                     commentBy: null, 
                     commentTime: null,
@@ -2532,7 +2739,7 @@
                     status: 'pending', 
                     assignedTo: null, 
                     assignedByName: null, 
-                    createdBy: currentUser ? currentUser.login : 'system', 
+                    createdBy: currentRole || 'system', 
                     comment: null, 
                     commentBy: null, 
                     commentTime: null,
@@ -2543,11 +2750,11 @@
             ];
             renderCalls();
             saveData();
-            addLog('Сброс вызовов', 'Загружены тестовые вызовы', 'info', currentUser?.login);
+            addLog('Сброс вызовов', 'Загружены тестовые вызовы', 'info', currentRole);
         }
 
         function clearAllCalls() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут очищать все вызовы');
                 return;
             }
@@ -2556,12 +2763,12 @@
                 calls = [];
                 renderCalls();
                 saveData();
-                addLog('Очистка вызовов', 'Все активные вызовы удалены', 'danger', currentUser?.login);
+                addLog('Очистка вызовов', 'Все активные вызовы удалены', 'danger', currentRole);
             }
         }
 
         function clearArchive() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут очищать архив');
                 return;
             }
@@ -2571,7 +2778,7 @@
                 renderArchive();
                 updateArchiveCounters();
                 saveData();
-                addLog('Очистка архива', 'Все записи архива удалены', 'danger', currentUser?.login);
+                addLog('Очистка архива', 'Все записи архива удалены', 'danger', currentRole);
             }
         }
 
@@ -2612,14 +2819,14 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            addLog('Экспорт архива', `Экспортировано ${archive.length} записей`, 'info', currentUser?.login);
+            addLog('Экспорт архива', `Экспортировано ${archive.length} записей`, 'info', currentRole);
         }
 
         // ============================================
-        // 17. АДМИН ФУНКЦИИ
+        // 20. АДМИН ФУНКЦИИ
         // ============================================
         function applyEditCall() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут редактировать вызовы');
                 return;
             }
@@ -2640,7 +2847,7 @@
             calls[id].priority = priority;
             renderCalls();
             saveData();
-            addLog('Редактирование вызова', `Вызов #${id} изменён`, 'warning', currentUser?.login);
+            addLog('Редактирование вызова', `Вызов #${id} изменён`, 'warning', currentRole);
             alert('✅ Вызов обновлён');
         }
 
@@ -2648,7 +2855,6 @@
             const data = { 
                 calls, units, archive,
                 config: CONFIG,
-                users: users,
                 title: TITLE_CONFIG,
                 logs: systemLogs,
                 timestamp: new Date().toISOString() 
@@ -2663,11 +2869,11 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            addLog('Экспорт данных', 'Все данные экспортированы', 'info', currentUser?.login);
+            addLog('Экспорт данных', 'Все данные экспортированы', 'info', currentRole);
         }
 
         function importData(file) {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут импортировать данные');
                 return;
             }
@@ -2681,10 +2887,6 @@
                             calls = data.calls;
                             units = data.units;
                             archive = data.archive;
-                            if (data.users) {
-                                users = data.users;
-                                saveUsers();
-                            }
                             if (data.config) {
                                 Object.assign(CONFIG, data.config);
                             }
@@ -2701,10 +2903,8 @@
                             renderCalls();
                             renderUnits();
                             renderArchive();
-                            renderUsersList();
                             saveData();
-                            saveUsers();
-                            addLog('Импорт данных', 'Данные импортированы', 'success', currentUser?.login);
+                            addLog('Импорт данных', 'Данные импортированы', 'success', currentRole);
                             alert('✅ Импорт успешен!');
                         }
                     } else {
@@ -2718,7 +2918,7 @@
         }
 
         function resetAllData() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут сбрасывать данные');
                 return;
             }
@@ -2733,14 +2933,46 @@
                 renderLogs();
                 saveData();
                 saveLogs();
-                addLog('Сброс данных', 'Все данные сброшены', 'danger', currentUser?.login);
+                addLog('Сброс данных', 'Все данные сброшены', 'danger', currentRole);
                 alert('✅ Данные сброшены');
             }
         }
 
         // ============================================
-        // 18. НАСТРОЙКИ СИСТЕМЫ
+        // 21. НАСТРОЙКИ СИСТЕМЫ
         // ============================================
+        function loadTitleConfig() {
+            const saved = localStorage.getItem('911_title_config');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(TITLE_CONFIG, parsed);
+                    return true;
+                } catch(e) {}
+            }
+            return false;
+        }
+
+        function saveTitleConfig() {
+            localStorage.setItem('911_title_config', JSON.stringify(TITLE_CONFIG));
+        }
+
+        function applyTitleConfig() {
+            const titleEl = document.getElementById('systemTitle');
+            if (titleEl) titleEl.textContent = TITLE_CONFIG.main;
+            const mainBadge = document.getElementById('mainBadge');
+            if (mainBadge) mainBadge.textContent = TITLE_CONFIG.leftBadge;
+            const subBadge = document.getElementById('subBadge');
+            if (subBadge) subBadge.textContent = TITLE_CONFIG.rightBadge;
+            
+            const nameField = document.getElementById('systemNameSetting');
+            const badgeField = document.getElementById('mainBadgeSetting');
+            const subField = document.getElementById('subBadgeSetting');
+            if (nameField) nameField.value = TITLE_CONFIG.main;
+            if (badgeField) badgeField.value = TITLE_CONFIG.leftBadge;
+            if (subField) subField.value = TITLE_CONFIG.rightBadge;
+        }
+
         function applySystemSettings() {
             if (CONFIG.THEME === 'light') {
                 document.body.style.background = '#f0f2f5';
@@ -2794,236 +3026,6 @@
         }
 
         // ============================================
-        // 19. DOM ЭЛЕМЕНТЫ
-        // ============================================
-        const callListEl = document.getElementById('callList');
-        const unitListEl = document.getElementById('unitList');
-        const archiveListEl = document.getElementById('archiveList');
-        const userListEl = document.getElementById('userList');
-        const callCounter = document.getElementById('callCounter');
-        const unitCounter = document.getElementById('unitCounter');
-        const archiveCounter = document.getElementById('archiveCounter');
-        const statActiveCalls = document.getElementById('statActiveCalls');
-        const statBusyUnits = document.getElementById('statBusyUnits');
-        const statArchive = document.getElementById('statArchive');
-        const archiveTotal = document.getElementById('archiveTotal');
-        const totalUsersCount = document.getElementById('totalUsersCount');
-        const roleBadge = document.getElementById('roleBadge');
-        const adminTabBtn = document.getElementById('adminTabBtn');
-        const adminRoleBadge = document.getElementById('adminRoleBadge');
-        const userInfo = document.getElementById('userInfo');
-        const userAvatar = document.getElementById('userAvatar');
-        const userNameDisplay = document.getElementById('userNameDisplay');
-        const authToggleBtn = document.getElementById('authToggleBtn');
-        const systemTitle = document.getElementById('systemTitle');
-        const onlineUsersDisplay = document.getElementById('onlineUsersDisplay');
-
-        const streetInput = document.getElementById('streetInput');
-        const descInput = document.getElementById('descInput');
-        const callerInput = document.getElementById('callerInput');
-        const phoneInput = document.getElementById('phoneInput');
-        const additionalInfoInput = document.getElementById('additionalInfoInput');
-        const addCallBtn = document.getElementById('addCallBtn');
-
-        const unitNameInput = document.getElementById('unitNameInput');
-        const addUnitBtn = document.getElementById('addUnitBtn');
-
-        const resetCallsBtn = document.getElementById('resetCallsBtn');
-        const clearAllCallsBtn = document.getElementById('clearAllCallsBtn');
-
-        const archiveSearch = document.getElementById('archiveSearch');
-        const archiveFilter = document.getElementById('archiveFilter');
-        const clearArchiveBtn = document.getElementById('clearArchiveBtn');
-        const exportArchiveBtn = document.getElementById('exportArchiveBtn');
-
-        const editCallId = document.getElementById('editCallId');
-        const editCallStreet = document.getElementById('editCallStreet');
-        const editCallDesc = document.getElementById('editCallDesc');
-        const editCallPriority = document.getElementById('editCallPriority');
-        const applyEditBtn = document.getElementById('applyEditBtn');
-        const exportAllBtn = document.getElementById('exportAllBtn');
-        const importFileInput = document.getElementById('importFileInput');
-        const importBtn = document.getElementById('importBtn');
-        const resetAllDataBtn = document.getElementById('resetAllDataBtn');
-        const refreshAdminBtn = document.getElementById('refreshAdminBtn');
-
-        const systemNameSetting = document.getElementById('systemNameSetting');
-        const changeSystemNameBtn = document.getElementById('changeSystemNameBtn');
-        const mainBadgeSetting = document.getElementById('mainBadgeSetting');
-        const changeMainBadgeBtn = document.getElementById('changeMainBadgeBtn');
-        const subBadgeSetting = document.getElementById('subBadgeSetting');
-        const changeSubBadgeBtn = document.getElementById('changeSubBadgeBtn');
-        const themeSelector = document.getElementById('themeSelector');
-        const applyThemeBtn = document.getElementById('applyThemeBtn');
-        const defaultRoleSelect = document.getElementById('defaultRoleSelect');
-        const autoLoginSelect = document.getElementById('autoLoginSelect');
-
-        const newUserLogin = document.getElementById('newUserLogin');
-        const newUserPassword = document.getElementById('newUserPassword');
-        const newUserRole = document.getElementById('newUserRole');
-        const addUserBtn = document.getElementById('addUserBtn');
-
-        const clearLogsBtn = document.getElementById('clearLogsBtn');
-        const exportLogsBtn = document.getElementById('exportLogsBtn');
-
-        // Модальные окна
-        const authModal = document.getElementById('authModal');
-        const authModalTitle = document.getElementById('authModalTitle');
-        const authModalDesc = document.getElementById('authModalDesc');
-        const authLoginInput = document.getElementById('authLoginInput');
-        const authPasswordInput = document.getElementById('authPasswordInput');
-        const authLoginBtn = document.getElementById('authLoginBtn');
-        const authRegisterBtn = document.getElementById('authRegisterBtn');
-        const authCancelBtn = document.getElementById('authCancelBtn');
-        const authError = document.getElementById('authError');
-        const authSuccess = document.getElementById('authSuccess');
-        const authSwitchText = document.getElementById('authSwitchText');
-
-        const assignModal = document.getElementById('assignModal');
-        const assignCallInfo = document.getElementById('assignCallInfo');
-        const assignUnitSelect = document.getElementById('assignUnitSelect');
-        const assignConfirmBtn = document.getElementById('assignConfirmBtn');
-        const assignCancelBtn = document.getElementById('assignCancelBtn');
-        let assignTargetCallId = null;
-
-        const commentModal = document.getElementById('commentModal');
-        const commentCallInfo = document.getElementById('commentCallInfo');
-        const commentInput = document.getElementById('commentInput');
-        const commentConfirmBtn = document.getElementById('commentConfirmBtn');
-        const commentCancelBtn = document.getElementById('commentCancelBtn');
-        let commentTargetCallId = null;
-
-        const statusModal = document.getElementById('statusModal');
-        const statusTargetInfo = document.getElementById('statusTargetInfo');
-        const statusSelect = document.getElementById('statusSelect');
-        const statusConfirmBtn = document.getElementById('statusConfirmBtn');
-        const statusCancelBtn = document.getElementById('statusCancelBtn');
-        let statusTargetType = null;
-        let statusTargetId = null;
-
-        // ============================================
-        // 20. UI ОБНОВЛЕНИЕ
-        // ============================================
-        function updateUI() {
-            if (currentUser) {
-                userInfo.style.display = 'flex';
-                userAvatar.textContent = getAvatar(currentUser.login);
-                userNameDisplay.textContent = currentUser.login;
-                
-                const roleLabels = {
-                    'admin': '👑 Администратор',
-                    'dispatcher': '📡 Диспетчер',
-                    'civilian': '👤 Гражданский',
-                    'user': '👤 Пользователь'
-                };
-                roleBadge.textContent = roleLabels[currentUser.role] || '👤 Пользователь';
-                roleBadge.className = 'role-badge ' + currentUser.role;
-
-                const showAdmin = currentUser.role === 'admin';
-                adminTabBtn.style.display = showAdmin ? 'inline-block' : 'none';
-                if (showAdmin) adminRoleBadge.textContent = '🔐 Админ';
-                
-                authToggleBtn.textContent = '🚪 Выйти';
-            } else {
-                userInfo.style.display = 'none';
-                authToggleBtn.textContent = '🔑 Войти';
-                roleBadge.textContent = '👤 Гость';
-                roleBadge.className = 'role-badge guest';
-                adminTabBtn.style.display = 'none';
-            }
-            renderUsersList();
-            updateOnlineUsers();
-        }
-
-        // ============================================
-        // 21. АВТОРИЗАЦИЯ
-        // ============================================
-        let isLoginMode = true;
-
-        function showAuthModal(mode = 'login') {
-            isLoginMode = mode === 'login';
-            authModal.classList.add('active');
-            authError.classList.remove('show');
-            authSuccess.classList.remove('show');
-            authLoginInput.value = '';
-            authPasswordInput.value = '';
-            
-            if (isLoginMode) {
-                authModalTitle.textContent = '🔐 Вход в систему';
-                authModalDesc.textContent = 'Войдите для доступа к диспетчерскому центру';
-                authLoginBtn.style.display = 'block';
-                authRegisterBtn.style.display = 'none';
-                authSwitchText.innerHTML = 'Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрируйтесь</a>';
-            } else {
-                authModalTitle.textContent = '📝 Регистрация';
-                authModalDesc.textContent = 'Создайте аккаунт для доступа к диспетчерскому центру';
-                authLoginBtn.style.display = 'none';
-                authRegisterBtn.style.display = 'block';
-                authSwitchText.innerHTML = 'Уже есть аккаунт? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Войдите</a>';
-            }
-            
-            const link = document.getElementById('authSwitchLink');
-            if (link) {
-                link.onclick = function(e) {
-                    e.preventDefault();
-                    showAuthModal(isLoginMode ? 'register' : 'login');
-                };
-            }
-            
-            setTimeout(() => authLoginInput.focus(), 100);
-        }
-
-        function closeAuthModal() {
-            authModal.classList.remove('active');
-            authError.classList.remove('show');
-            authSuccess.classList.remove('show');
-        }
-
-        function handleAuthLogin() {
-            const login = authLoginInput.value.trim();
-            const password = authPasswordInput.value.trim();
-            
-            console.log('🔐 Обработка входа:', login);
-            
-            if (!login || !password) {
-                authError.textContent = '❌ Заполните все поля';
-                authError.classList.add('show');
-                return;
-            }
-            
-            const result = loginUser(login, password);
-            if (result.success) {
-                authSuccess.textContent = '✅ Вход выполнен!';
-                authSuccess.classList.add('show');
-                setTimeout(closeAuthModal, 500);
-            } else {
-                authError.textContent = '❌ ' + result.message;
-                authError.classList.add('show');
-            }
-        }
-
-        function handleAuthRegister() {
-            const login = authLoginInput.value.trim();
-            const password = authPasswordInput.value.trim();
-            
-            if (!login || !password) {
-                authError.textContent = '❌ Заполните все поля';
-                authError.classList.add('show');
-                return;
-            }
-            
-            const result = registerUser(login, password, CONFIG.DEFAULT_ROLE);
-            if (result.success) {
-                authSuccess.textContent = '✅ Регистрация выполнена! Теперь войдите.';
-                authSuccess.classList.add('show');
-                setTimeout(() => showAuthModal('login'), 800);
-            } else {
-                authError.textContent = '❌ ' + result.message;
-                authError.classList.add('show');
-            }
-        }
-
-        // ============================================
         // 22. ОБРАБОТЧИКИ СОБЫТИЙ
         // ============================================
 
@@ -3037,19 +3039,17 @@
                 if (this.dataset.tab === 'archive') {
                     renderArchive();
                 }
-                if (this.dataset.tab === 'admin') {
-                    if (!currentUser || currentUser.role !== 'admin') {
-                        alert('⚠️ Требуются права администратора!');
-                        document.querySelector('[data-tab="main"]').click();
-                        return;
-                    }
+                if (this.dataset.tab === 'admin' && currentRole !== 'admin') {
+                    alert('⚠️ Требуются права администратора!');
+                    document.querySelector('[data-tab="main"]').click();
+                    return;
                 }
             });
         });
 
         // Кнопка входа/выхода
         authToggleBtn.addEventListener('click', function() {
-            if (currentUser) {
+            if (currentRole && ROLES[currentRole]) {
                 if (confirm('Вы уверены, что хотите выйти из системы?')) {
                     logoutUser();
                 }
@@ -3059,18 +3059,19 @@
         });
 
         authLoginBtn.addEventListener('click', handleAuthLogin);
-        authRegisterBtn.addEventListener('click', handleAuthRegister);
         authCancelBtn.addEventListener('click', closeAuthModal);
 
-        authLoginInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                isLoginMode ? handleAuthLogin() : handleAuthRegister();
-            }
-        });
+        // Вход по Enter
         authPasswordInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                isLoginMode ? handleAuthLogin() : handleAuthRegister();
+                handleAuthLogin();
             }
+        });
+
+        // Регистрация (переключает на вход)
+        document.querySelector('#authSwitchLink')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            showAuthModal(isLoginMode ? 'register' : 'login');
         });
 
         authModal.addEventListener('click', function(e) {
@@ -3122,14 +3123,13 @@
             renderCalls();
             renderUnits();
             renderArchive();
-            renderUsersList();
             renderLogs();
-            addLog('Обновление данных', 'Администратор обновил данные', 'info', currentUser?.login);
+            addLog('Обновление данных', 'Администратор обновил данные', 'info', currentRole);
         });
 
         // Настройка названия
         changeSystemNameBtn.addEventListener('click', function() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Требуются права администратора');
                 return;
             }
@@ -3141,12 +3141,12 @@
             TITLE_CONFIG.main = name;
             saveTitleConfig();
             applyTitleConfig();
-            addLog('Изменение названия', `Новое название: ${name}`, 'warning', currentUser?.login);
+            addLog('Изменение названия', `Новое название: ${name}`, 'warning', currentRole);
             alert('✅ Название изменено!');
         });
 
         changeMainBadgeBtn.addEventListener('click', function() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Требуются права администратора');
                 return;
             }
@@ -3158,12 +3158,12 @@
             TITLE_CONFIG.leftBadge = badge;
             saveTitleConfig();
             applyTitleConfig();
-            addLog('Изменение приписки', `Левая приписка: ${badge}`, 'warning', currentUser?.login);
+            addLog('Изменение приписки', `Левая приписка: ${badge}`, 'warning', currentRole);
             alert('✅ Приписка изменена!');
         });
 
         changeSubBadgeBtn.addEventListener('click', function() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Требуются права администратора');
                 return;
             }
@@ -3175,76 +3175,26 @@
             TITLE_CONFIG.rightBadge = badge;
             saveTitleConfig();
             applyTitleConfig();
-            addLog('Изменение приписки', `Правая приписка: ${badge}`, 'warning', currentUser?.login);
+            addLog('Изменение приписки', `Правая приписка: ${badge}`, 'warning', currentRole);
             alert('✅ Приписка изменена!');
         });
 
         // Настройки темы
         applyThemeBtn.addEventListener('click', function() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Требуются права администратора');
                 return;
             }
             CONFIG.THEME = themeSelector.value;
             applySystemSettings();
             saveConfig();
-            addLog('Изменение темы', `Новая тема: ${themeSelector.value}`, 'info', currentUser?.login);
+            addLog('Изменение темы', `Новая тема: ${themeSelector.value}`, 'info', currentRole);
             alert('✅ Тема применена!');
-        });
-
-        // Общие настройки
-        defaultRoleSelect.addEventListener('change', function() {
-            if (!currentUser || currentUser.role !== 'admin') {
-                alert('⛔ Требуются права администратора');
-                this.value = CONFIG.DEFAULT_ROLE;
-                return;
-            }
-            CONFIG.DEFAULT_ROLE = this.value;
-            saveConfig();
-            addLog('Изменение настроек', `Роль по умолчанию: ${this.value}`, 'info', currentUser?.login);
-        });
-
-        autoLoginSelect.addEventListener('change', function() {
-            if (!currentUser || currentUser.role !== 'admin') {
-                alert('⛔ Требуются права администратора');
-                this.value = CONFIG.AUTO_LOGIN;
-                return;
-            }
-            CONFIG.AUTO_LOGIN = this.value;
-            saveConfig();
-            addLog('Изменение настроек', `Автовход: ${this.value}`, 'info', currentUser?.login);
-        });
-
-        // Управление пользователями
-        addUserBtn.addEventListener('click', function() {
-            if (!currentUser || currentUser.role !== 'admin') {
-                alert('⛔ Требуются права администратора');
-                return;
-            }
-            const login = newUserLogin.value.trim();
-            const password = newUserPassword.value.trim();
-            const role = newUserRole.value;
-            
-            if (!login || !password) {
-                alert('Заполните логин и пароль');
-                return;
-            }
-            
-            const result = registerUser(login, password, role);
-            if (result.success) {
-                alert('✅ Пользователь добавлен!');
-                newUserLogin.value = '';
-                newUserPassword.value = '';
-                renderUsersList();
-                updateOnlineUsers();
-            } else {
-                alert('❌ ' + result.message);
-            }
         });
 
         // Логи
         clearLogsBtn.addEventListener('click', function() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Требуются права администратора');
                 return;
             }
@@ -3252,12 +3202,12 @@
                 systemLogs = [];
                 renderLogs();
                 saveLogs();
-                addLog('Очистка логов', 'Все логи очищены', 'danger', currentUser?.login);
+                addLog('Очистка логов', 'Все логи очищены', 'danger', currentRole);
             }
         });
 
         exportLogsBtn.addEventListener('click', function() {
-            if (!currentUser || currentUser.role !== 'admin') {
+            if (currentRole !== 'admin') {
                 alert('⛔ Требуются права администратора');
                 return;
             }
@@ -3284,7 +3234,7 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            addLog('Экспорт логов', `Экспортировано ${systemLogs.length} записей`, 'info', currentUser?.login);
+            addLog('Экспорт логов', `Экспортировано ${systemLogs.length} записей`, 'info', currentRole);
         });
 
         // Модальные окна: Назначение
@@ -3316,7 +3266,7 @@
             unit.status = 'busy';
             unit.currentCall = call.id;
             call.assignedTo = unit.name;
-            call.assignedByName = currentUser ? currentUser.login : 'system';
+            call.assignedByName = currentRole || 'system';
             if (call.status === 'pending') {
                 call.status = 'active';
             }
@@ -3325,7 +3275,7 @@
             renderCalls();
             renderUnits();
             saveData();
-            addLog('Назначение юнита', `${unit.name} → ${call.street}`, 'success', currentUser?.login);
+            addLog('Назначение юнита', `${unit.name} → ${call.street}`, 'success', currentRole);
         });
 
         assignCancelBtn.addEventListener('click', function() {
@@ -3374,13 +3324,13 @@
                     }
                     addToArchive(call, 'resolved');
                     calls = calls.filter(c => c.id !== statusTargetId);
-                    addLog('Завершение вызова', `${call.street} (статус: ${oldStatus} → ${newStatus})`, 'success', currentUser?.login);
+                    addLog('Завершение вызова', `${call.street} (статус: ${oldStatus} → ${newStatus})`, 'success', currentRole);
                 } else if (newStatus === 'rejected') {
                     addToArchive(call, 'rejected');
                     calls = calls.filter(c => c.id !== statusTargetId);
-                    addLog('Отклонение вызова', `${call.street} (статус: ${oldStatus} → ${newStatus})`, 'danger', currentUser?.login);
+                    addLog('Отклонение вызова', `${call.street} (статус: ${oldStatus} → ${newStatus})`, 'danger', currentRole);
                 } else {
-                    addLog('Изменение статуса вызова', `${call.street} (${oldStatus} → ${newStatus})`, 'info', currentUser?.login);
+                    addLog('Изменение статуса вызова', `${call.street} (${oldStatus} → ${newStatus})`, 'info', currentRole);
                 }
                 
                 renderCalls();
@@ -3411,27 +3361,17 @@
         // 23. ЗАПУСК
         // ============================================
         
-        // Загружаем все настройки
         loadConfig();
         loadTitleConfig();
         loadLogs();
         applySystemSettings();
         applyTitleConfig();
 
-        // ЗАГРУЖАЕМ ПОЛЬЗОВАТЕЛЕЙ (ОБЯЗАТЕЛЬНО)
-        loadUsers();
-        console.log('📋 Пользователи загружены:', users);
-
         // Устанавливаем гражданского по умолчанию
-        const defaultUser = findUser('civilian');
-        if (defaultUser) {
-            currentUser = defaultUser;
-            isAdmin = false;
-            isDispatcher = false;
-            console.log('👤 Установлен пользователь по умолчанию:', currentUser.login);
-        } else {
-            console.warn('⚠️ Пользователь "civilian" не найден!');
-        }
+        currentRole = 'civilian';
+        currentUser = { login: 'Гражданский', role: 'civilian' };
+        isAdmin = false;
+        isDispatcher = false;
 
         // Загружаем данные
         if (!loadData()) {
@@ -3439,22 +3379,18 @@
         }
 
         // Загружаем настройки в интерфейс
-        if (defaultRoleSelect) defaultRoleSelect.value = CONFIG.DEFAULT_ROLE || 'civilian';
-        if (autoLoginSelect) autoLoginSelect.value = CONFIG.AUTO_LOGIN || 'civilian';
         if (themeSelector) themeSelector.value = CONFIG.THEME || 'dark';
         if (systemNameSetting) systemNameSetting.value = TITLE_CONFIG.main;
         if (mainBadgeSetting) mainBadgeSetting.value = TITLE_CONFIG.leftBadge;
         if (subBadgeSetting) subBadgeSetting.value = TITLE_CONFIG.rightBadge;
 
         updateUI();
-        renderUsersList();
 
         addLog('Система запущена', '911 Диспетчерский Центр активирован', 'success', 'Система');
         console.log('🚀 911 Диспетчерский Центр запущен');
         console.log('👤 По умолчанию вы вошли как Гражданский');
-        console.log('👑 Администратор: Mr_Crown / 7465Kce1');
-        console.log('👑 Администратор: admin / admin123');
-        console.log('📡 Диспетчер: dispatcher / 123456');
+        console.log('🔑 Пароль для всех ролей: 911dispatch2024');
+        console.log('👑 Роли: Администратор, Диспетчер, Пользователь, Гражданский');
         console.log('📋 Для входа нажмите кнопку "🔑 Войти" в правом верхнем углу');
 
     })();
