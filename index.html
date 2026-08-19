@@ -48,10 +48,17 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         .logo .shield {
             font-size: 32px;
+        }
+        .logo .title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         .logo h1 {
             font-size: 26px;
@@ -61,7 +68,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .logo .badge {
+        .logo .badge-main {
             background: #dc2626;
             padding: 2px 14px;
             border-radius: 40px;
@@ -71,14 +78,30 @@
             letter-spacing: 1px;
             -webkit-text-fill-color: #fff;
         }
-        .logo .version {
-            font-size: 12px;
-            color: #64748b;
+        .logo .badge-sub {
             background: #1a2330;
             padding: 2px 12px;
             border-radius: 40px;
+            font-size: 12px;
+            color: #94a3b8;
             border: 1px solid #2a3a4a;
-            -webkit-text-fill-color: #64748b;
+            -webkit-text-fill-color: #94a3b8;
+        }
+        .logo .badge-edit {
+            background: transparent;
+            border: none;
+            color: #475569;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            -webkit-text-fill-color: #475569;
+        }
+        .logo .badge-edit:hover {
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+            -webkit-text-fill-color: #60a5fa;
         }
 
         .header-controls {
@@ -134,6 +157,7 @@
             font-weight: 700;
             font-size: 14px;
             color: white;
+            flex-shrink: 0;
         }
         .user-name {
             font-weight: 500;
@@ -858,7 +882,7 @@
             color: #94a3b8;
         }
 
-        /* ===== АДМИН ПАНЕЛЬ - НАСТРОЙКА РОЛЕЙ ===== */
+        /* ===== АДМИН ПАНЕЛЬ ===== */
         .admin-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -953,51 +977,6 @@
             background: rgba(71, 85, 105, 0.15);
         }
 
-        /* Настройки ролей */
-        .role-settings {
-            background: #0a0f17;
-            border-radius: 14px;
-            padding: 16px 20px;
-            border: 1px solid #1a2636;
-            margin-bottom: 16px;
-        }
-        .role-settings .role-setting-row {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            padding: 8px 0;
-            border-bottom: 1px solid #1a2636;
-        }
-        .role-settings .role-setting-row:last-child {
-            border-bottom: none;
-        }
-        .role-settings .role-setting-row .role-name {
-            min-width: 120px;
-            font-weight: 600;
-            color: #e2e8f0;
-            font-size: 14px;
-        }
-        .role-settings .role-setting-row .role-perms {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .role-settings .role-setting-row .role-perms label {
-            font-size: 13px;
-            color: #94a3b8;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-        }
-        .role-settings .role-setting-row .role-perms input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: #3b82f6;
-            cursor: pointer;
-        }
-
         .settings-group {
             background: #0a0f17;
             border-radius: 14px;
@@ -1078,6 +1057,43 @@
         .unit-status-dot.waiting { background: #ec4899; }
         .unit-status-dot.helping { background: #34d399; }
         .unit-status-dot.offline { background: #6b7280; }
+
+        /* Модалка для редактирования названия */
+        .badge-edit-modal .modal {
+            max-width: 450px;
+        }
+        .badge-edit-modal .modal .badge-preview {
+            background: #0f172a;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #1a2636;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .badge-edit-modal .modal .badge-preview .preview-main {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .badge-edit-modal .modal .badge-preview .preview-badge {
+            background: #dc2626;
+            padding: 2px 14px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .badge-edit-modal .modal .badge-preview .preview-sub {
+            background: #1a2330;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            color: #94a3b8;
+            border: 1px solid #2a3a4a;
+        }
     </style>
 </head>
 <body>
@@ -1088,9 +1104,12 @@
         <div class="header">
             <div class="logo">
                 <span class="shield">🛡️</span>
-                <h1 id="systemTitle">911 Диспетчерский Центр</h1>
-                <span class="badge">ДС</span>
-                <span class="version">v3.0</span>
+                <div class="title-group">
+                    <h1 id="systemTitle">911 Диспетчерский Центр</h1>
+                    <span class="badge-main" id="mainBadge">ДС</span>
+                    <span class="badge-sub" id="subBadge">v3.0</span>
+                    <button class="badge-edit" id="editBadgeBtn" title="Редактировать приписки">✏️</button>
+                </div>
             </div>
             <div class="header-controls">
                 <div class="status-badge">
@@ -1102,7 +1121,7 @@
                     <span class="user-name" id="userNameDisplay">Гражданский</span>
                 </div>
                 <div class="role-badge civilian" id="roleBadge">👤 Гражданский</div>
-                <button class="btn btn-sm btn-outline" id="authToggleBtn">🔑 Войти</button>
+                <button class="btn btn-sm btn-outline" id="authToggleBtn">🚪 Выйти</button>
             </div>
         </div>
 
@@ -1195,55 +1214,32 @@
                     <span class="count-badge" id="adminRoleBadge">🔐 Админ</span>
                 </div>
 
-                <!-- ===== НАСТРОЙКА РОЛЕЙ ===== -->
+                <!-- ===== НАСТРОЙКА НАЗВАНИЯ ===== -->
                 <div style="margin-bottom: 24px;">
-                    <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">👑 Настройка ролей и прав</h3>
-                    <div class="role-settings" id="roleSettings">
-                        <!-- JS заполнит -->
-                    </div>
-                    <div class="admin-actions">
-                        <button class="btn btn-success btn-sm" id="saveRoleSettingsBtn">💾 Сохранить настройки</button>
-                        <button class="btn btn-warning btn-sm" id="resetRoleSettingsBtn">↩️ Сбросить к стандартным</button>
-                    </div>
-                </div>
-
-                <hr style="border-color: #1a2636; margin: 20px 0;">
-
-                <!-- ===== ОБЩИЕ НАСТРОЙКИ ===== -->
-                <div style="margin-bottom: 24px;">
-                    <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">⚙️ Общие настройки</h3>
+                    <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">🏷️ Настройка названия и приписок</h3>
                     <div class="settings-group">
                         <div class="setting-row">
-                            <label>Роль по умолчанию</label>
-                            <select id="defaultRoleSelect">
-                                <option value="civilian">👤 Гражданский</option>
-                                <option value="user">👤 Пользователь</option>
-                                <option value="dispatcher">📡 Диспетчер</option>
-                            </select>
-                            <span class="hint">Роль для новых пользователей</span>
-                        </div>
-                        <div class="setting-row">
-                            <label>Автовход</label>
-                            <select id="autoLoginSelect">
-                                <option value="civilian">👤 Как Гражданский</option>
-                                <option value="none">🚪 Без автовхода</option>
-                            </select>
-                            <span class="hint">Роль при заходе на сайт</span>
-                        </div>
-                        <div class="setting-row">
-                            <label>Название системы</label>
-                            <input type="text" id="systemNameSetting" placeholder="Название">
+                            <label>Основное название</label>
+                            <input type="text" id="systemNameSetting" placeholder="Основное название">
                             <button class="btn btn-sm btn-primary" id="changeSystemNameBtn">Изменить</button>
                         </div>
                         <div class="setting-row">
-                            <label>Цветовая схема</label>
-                            <select id="themeSelector">
-                                <option value="dark">Тёмная (официальная)</option>
-                                <option value="light">Светлая</option>
-                                <option value="blue">Синяя</option>
-                                <option value="red">Красная</option>
-                            </select>
-                            <button class="btn btn-sm btn-primary" id="applyThemeBtn">Применить</button>
+                            <label>Приписка слева</label>
+                            <input type="text" id="mainBadgeSetting" placeholder="Например: ДС, RP, 911" maxlength="10">
+                            <button class="btn btn-sm btn-primary" id="changeMainBadgeBtn">Изменить</button>
+                        </div>
+                        <div class="setting-row">
+                            <label>Приписка справа</label>
+                            <input type="text" id="subBadgeSetting" placeholder="Например: v3.0, Beta, Проект" maxlength="15">
+                            <button class="btn btn-sm btn-primary" id="changeSubBadgeBtn">Изменить</button>
+                        </div>
+                        <div class="setting-row" style="border-top: 1px solid #1a2636; padding-top: 12px; margin-top: 6px;">
+                            <label>Предпросмотр</label>
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:#0f172a; padding:8px 16px; border-radius:12px; border:1px solid #1a2636;">
+                                <span style="font-weight:700; color:#f1f5f9;" id="previewMain">911 Диспетчерский Центр</span>
+                                <span style="background:#dc2626; padding:2px 14px; border-radius:40px; font-size:13px; font-weight:700; color:#fff;" id="previewBadge">ДС</span>
+                                <span style="background:#1a2330; padding:2px 12px; border-radius:40px; font-size:12px; color:#94a3b8; border:1px solid #2a3a4a;" id="previewSub">v3.0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1390,12 +1386,94 @@
     </div>
 </div>
 
+<!-- ===== МОДАЛЬНОЕ ОКНО: РЕДАКТИРОВАНИЕ ПРИПИСОК ===== -->
+<div class="modal-overlay badge-edit-modal" id="badgeEditModal">
+    <div class="modal">
+        <h2>✏️ Редактирование приписок</h2>
+        <p>Измените основное название и приписки к нему</p>
+        
+        <div style="margin-bottom: 16px;">
+            <label style="color:#94a3b8; font-size:14px; display:block; margin-bottom:4px;">Основное название</label>
+            <input type="text" id="badgeEditMain" placeholder="Основное название" style="width:100%;">
+        </div>
+        <div style="margin-bottom: 16px;">
+            <label style="color:#94a3b8; font-size:14px; display:block; margin-bottom:4px;">Приписка слева (красный бейдж)</label>
+            <input type="text" id="badgeEditLeft" placeholder="Например: ДС, RP, 911" maxlength="10" style="width:100%;">
+        </div>
+        <div style="margin-bottom: 16px;">
+            <label style="color:#94a3b8; font-size:14px; display:block; margin-bottom:4px;">Приписка справа (серый бейдж)</label>
+            <input type="text" id="badgeEditRight" placeholder="Например: v3.0, Beta, Проект" maxlength="15" style="width:100%;">
+        </div>
+        
+        <div style="background:#0f172a; padding:12px 16px; border-radius:12px; border:1px solid #1a2636; margin-bottom:16px;">
+            <label style="color:#94a3b8; font-size:13px; display:block; margin-bottom:6px;">Предпросмотр:</label>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span style="font-weight:700; color:#f1f5f9; font-size:18px;" id="badgePreviewMain">911 Диспетчерский Центр</span>
+                <span style="background:#dc2626; padding:2px 14px; border-radius:40px; font-size:13px; font-weight:700; color:#fff;" id="badgePreviewLeft">ДС</span>
+                <span style="background:#1a2330; padding:2px 12px; border-radius:40px; font-size:12px; color:#94a3b8; border:1px solid #2a3a4a;" id="badgePreviewRight">v3.0</span>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn btn-primary" id="badgeEditSaveBtn">💾 Сохранить</button>
+            <button class="btn btn-outline" id="badgeEditCancelBtn">Отмена</button>
+        </div>
+    </div>
+</div>
+
 <script>
     (function() {
         "use strict";
 
         // ============================================
-        // 1. НАСТРОЙКИ
+        // 1. НАСТРОЙКИ НАЗВАНИЯ
+        // ============================================
+        let TITLE_CONFIG = {
+            main: '911 Диспетчерский Центр',
+            leftBadge: 'ДС',
+            rightBadge: 'v3.0'
+        };
+
+        function loadTitleConfig() {
+            const saved = localStorage.getItem('911_title_config');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(TITLE_CONFIG, parsed);
+                    return true;
+                } catch(e) {}
+            }
+            return false;
+        }
+
+        function saveTitleConfig() {
+            localStorage.setItem('911_title_config', JSON.stringify(TITLE_CONFIG));
+        }
+
+        function applyTitleConfig() {
+            document.getElementById('systemTitle').textContent = TITLE_CONFIG.main;
+            document.getElementById('mainBadge').textContent = TITLE_CONFIG.leftBadge;
+            document.getElementById('subBadge').textContent = TITLE_CONFIG.rightBadge;
+            
+            // Обновляем превью в админке
+            const previewMain = document.getElementById('previewMain');
+            const previewBadge = document.getElementById('previewBadge');
+            const previewSub = document.getElementById('previewSub');
+            if (previewMain) previewMain.textContent = TITLE_CONFIG.main;
+            if (previewBadge) previewBadge.textContent = TITLE_CONFIG.leftBadge;
+            if (previewSub) previewSub.textContent = TITLE_CONFIG.rightBadge;
+            
+            // Обновляем поля в админке
+            const nameField = document.getElementById('systemNameSetting');
+            const badgeField = document.getElementById('mainBadgeSetting');
+            const subField = document.getElementById('subBadgeSetting');
+            if (nameField) nameField.value = TITLE_CONFIG.main;
+            if (badgeField) badgeField.value = TITLE_CONFIG.leftBadge;
+            if (subField) subField.value = TITLE_CONFIG.rightBadge;
+        }
+
+        // ============================================
+        // 2. ОСТАЛЬНЫЕ НАСТРОЙКИ
         // ============================================
         let CONFIG = {
             SYSTEM_NAME: '911 Диспетчерский Центр',
@@ -1405,7 +1483,7 @@
         };
 
         // ============================================
-        // 2. ПРАВА ДОСТУПА (настройка ролей)
+        // 3. ПРАВА ДОСТУПА
         // ============================================
         let ROLES_CONFIG = {
             civilian: {
@@ -1494,7 +1572,6 @@
             }
         };
 
-        // Загрузка настроек ролей
         function loadRoleSettings() {
             const saved = localStorage.getItem('911_role_settings');
             if (saved) {
@@ -1512,7 +1589,7 @@
         }
 
         // ============================================
-        // 3. ПОЛЬЗОВАТЕЛИ
+        // 4. ПОЛЬЗОВАТЕЛИ
         // ============================================
         let users = [];
         let currentUser = null;
@@ -1520,14 +1597,14 @@
         let isDispatcher = false;
 
         // ============================================
-        // 4. ОСНОВНЫЕ ДАННЫЕ
+        // 5. ОСНОВНЫЕ ДАННЫЕ
         // ============================================
         let calls = [];
         let units = [];
         let archive = [];
 
         // ============================================
-        // 5. ВСПОМОГАТЕЛЬНЫЕ
+        // 6. ВСПОМОГАТЕЛЬНЫЕ
         // ============================================
         function getTime() {
             const d = new Date();
@@ -1563,7 +1640,7 @@
         }
 
         // ============================================
-        // 6. ПОЛЬЗОВАТЕЛИ
+        // 7. ПОЛЬЗОВАТЕЛИ
         // ============================================
         function loadUsers() {
             const saved = localStorage.getItem('911_users');
@@ -1597,7 +1674,8 @@
                 return { success: false, message: 'Неверный логин или пароль' };
             }
             currentUser = user;
-            updatePermissions();
+            isAdmin = user.role === 'admin';
+            isDispatcher = user.role === 'admin' || user.role === 'dispatcher';
             updateUI();
             return { success: true, user };
         }
@@ -1617,31 +1695,19 @@
         }
 
         function logoutUser() {
-            // При выходе используем настройку автовхода
-            const autoLogin = CONFIG.AUTO_LOGIN || 'civilian';
-            if (autoLogin !== 'none') {
-                const defaultUser = findUser(autoLogin);
-                if (defaultUser) {
-                    currentUser = defaultUser;
-                    updatePermissions();
-                    updateUI();
-                    return;
-                }
-            }
+            // Выход из системы - сбрасываем пользователя
             currentUser = null;
             isAdmin = false;
             isDispatcher = false;
+            
+            // Показываем модалку входа
+            showAuthModal('login');
+            
+            // Обновляем UI
             updateUI();
-        }
-
-        function updatePermissions() {
-            if (!currentUser) {
-                isAdmin = false;
-                isDispatcher = false;
-                return;
-            }
-            isAdmin = currentUser.role === 'admin';
-            isDispatcher = currentUser.role === 'admin' || currentUser.role === 'dispatcher';
+            
+            // Переключаем на главную вкладку
+            document.querySelector('[data-tab="main"]').click();
         }
 
         function deleteUser(login) {
@@ -1713,7 +1779,7 @@
         window.changeUserRole = changeUserRole;
 
         // ============================================
-        // 7. ОСНОВНЫЕ ФУНКЦИИ
+        // 8. ОСНОВНЫЕ ФУНКЦИИ (сокращённо)
         // ============================================
         function addCall(street, desc, priority) {
             if (!hasPermission('createCalls')) {
@@ -1747,7 +1813,6 @@
             if (calls.length === 0) {
                 callListEl.innerHTML = `<div class="empty-state">📭 Нет активных вызовов</div>`;
             } else {
-                // Сортировка: Высокий -> Средний -> Низкий
                 const priorityOrder = { high: 0, medium: 1, low: 2 };
                 const sortedCalls = [...calls].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
                 
@@ -1806,7 +1871,7 @@
         }
 
         // ============================================
-        // 8. ЮНИТЫ
+        // 9. ЮНИТЫ (сокращённо)
         // ============================================
         function addUnit(name) {
             if (!hasPermission('createUnits')) {
@@ -1893,7 +1958,7 @@
         }
 
         // ============================================
-        // 9. ДЕЙСТВИЯ С ВЫЗОВАМИ
+        // 10. ОСТАЛЬНЫЕ ФУНКЦИИ (быстрые действия)
         // ============================================
         window.openAssignModal = function(callId) {
             if (!hasPermission('assignUnits')) {
@@ -1976,9 +2041,6 @@
             statusModal.classList.add('active');
         };
 
-        // ============================================
-        // 10. ДЕЙСТВИЯ С ЮНИТАМИ
-        // ============================================
         window.changeUnitStatus = function(unitId, newStatus) {
             if (!hasPermission('changeUnitStatus')) {
                 alert('⛔ У вас нет прав на изменение статуса юнитов');
@@ -2084,9 +2146,6 @@
             }
         };
 
-        // ============================================
-        // 11. КОММЕНТАРИИ
-        // ============================================
         window.openCommentModal = function(callId) {
             if (!hasPermission('addComment')) {
                 alert('⛔ У вас нет прав на добавление комментариев');
@@ -2112,7 +2171,7 @@
         }
 
         // ============================================
-        // 12. АРХИВ
+        // 11. АРХИВ
         // ============================================
         function addToArchive(call, status) {
             archive.push({
@@ -2202,7 +2261,7 @@
         }
 
         // ============================================
-        // 13. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
+        // 12. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
         // ============================================
         function updateCounters() {
             callCounter.textContent = calls.length;
@@ -2219,7 +2278,7 @@
         }
 
         // ============================================
-        // 14. СОХРАНЕНИЕ
+        // 13. СОХРАНЕНИЕ ДАННЫХ
         // ============================================
         function saveData() {
             const data = { calls, units, archive, timestamp: new Date().toISOString() };
@@ -2244,7 +2303,7 @@
         }
 
         // ============================================
-        // 15. ТЕСТОВЫЕ ДАННЫЕ
+        // 14. ТЕСТОВЫЕ ДАННЫЕ
         // ============================================
         function loadTestData() {
             if (loadData()) return;
@@ -2346,7 +2405,7 @@
         }
 
         // ============================================
-        // 16. АДМИН
+        // 15. АДМИН ФУНКЦИИ
         // ============================================
         function applyEditCall() {
             if (!hasPermission('editCalls')) {
@@ -2379,6 +2438,7 @@
                 config: CONFIG,
                 users: users,
                 roles: ROLES_CONFIG,
+                title: TITLE_CONFIG,
                 timestamp: new Date().toISOString() 
             };
             const json = JSON.stringify(data, null, 2);
@@ -2419,7 +2479,11 @@
                             if (data.roles) {
                                 Object.assign(ROLES_CONFIG, data.roles);
                                 saveRoleSettings();
-                                renderRoleSettings();
+                            }
+                            if (data.title) {
+                                Object.assign(TITLE_CONFIG, data.title);
+                                saveTitleConfig();
+                                applyTitleConfig();
                             }
                             renderCalls();
                             renderUnits();
@@ -2458,167 +2522,10 @@
         }
 
         // ============================================
-        // 17. НАСТРОЙКИ РОЛЕЙ (UI)
-        // ============================================
-        function renderRoleSettings() {
-            const container = document.getElementById('roleSettings');
-            if (!container) return;
-            
-            const permissionLabels = {
-                viewCalls: 'Просмотр вызовов',
-                viewArchive: 'Просмотр архива',
-                createCalls: 'Создание вызовов',
-                viewUnits: 'Просмотр юнитов',
-                assignUnits: 'Назначение юнитов',
-                changeCallStatus: 'Изменение статуса вызовов',
-                changeUnitStatus: 'Изменение статуса юнитов',
-                releaseUnit: 'Освобождение юнитов',
-                createUnits: 'Создание юнитов',
-                addComment: 'Добавление комментариев',
-                editCalls: 'Редактирование вызовов',
-                deleteCalls: 'Удаление вызовов',
-                manageUsers: 'Управление пользователями',
-                manageRoles: 'Управление ролями',
-                manageSettings: 'Управление настройками'
-            };
-            
-            let html = '';
-            for (const [roleKey, roleData] of Object.entries(ROLES_CONFIG)) {
-                const roleIcon = roleData.icon || '👤';
-                const roleName = roleData.name || roleKey;
-                html += `
-                    <div class="role-setting-row">
-                        <div class="role-name">${roleIcon} ${roleName}</div>
-                        <div class="role-perms">
-                `;
-                for (const [permKey, permValue] of Object.entries(roleData.permissions)) {
-                    const label = permissionLabels[permKey] || permKey;
-                    html += `
-                        <label>
-                            <input type="checkbox" class="role-perm-checkbox" 
-                                   data-role="${roleKey}" data-perm="${permKey}"
-                                   ${permValue ? 'checked' : ''}>
-                            ${label}
-                        </label>
-                    `;
-                }
-                html += `
-                        </div>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-            
-            // Обработчики для чекбоксов
-            container.querySelectorAll('.role-perm-checkbox').forEach(cb => {
-                cb.addEventListener('change', function() {
-                    const role = this.dataset.role;
-                    const perm = this.dataset.perm;
-                    if (ROLES_CONFIG[role]) {
-                        ROLES_CONFIG[role].permissions[perm] = this.checked;
-                    }
-                });
-            });
-        }
-
-        function resetRoleSettingsToDefault() {
-            const defaultRoles = {
-                civilian: {
-                    name: 'Гражданский',
-                    icon: '👤',
-                    permissions: {
-                        viewCalls: true,
-                        viewArchive: true,
-                        createCalls: true,
-                        viewUnits: true,
-                        assignUnits: false,
-                        changeCallStatus: false,
-                        changeUnitStatus: false,
-                        releaseUnit: false,
-                        createUnits: false,
-                        addComment: false,
-                        editCalls: false,
-                        deleteCalls: false,
-                        manageUsers: false,
-                        manageRoles: false,
-                        manageSettings: false
-                    }
-                },
-                user: {
-                    name: 'Пользователь',
-                    icon: '👤',
-                    permissions: {
-                        viewCalls: true,
-                        viewArchive: true,
-                        createCalls: true,
-                        viewUnits: true,
-                        assignUnits: false,
-                        changeCallStatus: false,
-                        changeUnitStatus: false,
-                        releaseUnit: false,
-                        createUnits: false,
-                        addComment: false,
-                        editCalls: false,
-                        deleteCalls: false,
-                        manageUsers: false,
-                        manageRoles: false,
-                        manageSettings: false
-                    }
-                },
-                dispatcher: {
-                    name: 'Диспетчер',
-                    icon: '📡',
-                    permissions: {
-                        viewCalls: true,
-                        viewArchive: true,
-                        createCalls: true,
-                        viewUnits: true,
-                        assignUnits: true,
-                        changeCallStatus: true,
-                        changeUnitStatus: true,
-                        releaseUnit: true,
-                        createUnits: true,
-                        addComment: true,
-                        editCalls: false,
-                        deleteCalls: false,
-                        manageUsers: false,
-                        manageRoles: false,
-                        manageSettings: false
-                    }
-                },
-                admin: {
-                    name: 'Администратор',
-                    icon: '👑',
-                    permissions: {
-                        viewCalls: true,
-                        viewArchive: true,
-                        createCalls: true,
-                        viewUnits: true,
-                        assignUnits: true,
-                        changeCallStatus: true,
-                        changeUnitStatus: true,
-                        releaseUnit: true,
-                        createUnits: true,
-                        addComment: true,
-                        editCalls: true,
-                        deleteCalls: true,
-                        manageUsers: true,
-                        manageRoles: true,
-                        manageSettings: true
-                    }
-                }
-            };
-            Object.assign(ROLES_CONFIG, defaultRoles);
-            saveRoleSettings();
-            renderRoleSettings();
-        }
-
-        // ============================================
-        // 18. НАСТРОЙКИ СИСТЕМЫ
+        // 16. НАСТРОЙКИ СИСТЕМЫ
         // ============================================
         function applySystemSettings() {
-            systemTitle.innerHTML = CONFIG.SYSTEM_NAME;
-            
+            // Применяем настройки темы
             if (CONFIG.THEME === 'light') {
                 document.body.style.background = '#f0f2f5';
                 document.body.style.color = '#1a1a2e';
@@ -2671,7 +2578,7 @@
         }
 
         // ============================================
-        // 19. DOM ЭЛЕМЕНТЫ
+        // 17. DOM ЭЛЕМЕНТЫ
         // ============================================
         const callListEl = document.getElementById('callList');
         const unitListEl = document.getElementById('unitList');
@@ -2724,6 +2631,10 @@
 
         const systemNameSetting = document.getElementById('systemNameSetting');
         const changeSystemNameBtn = document.getElementById('changeSystemNameBtn');
+        const mainBadgeSetting = document.getElementById('mainBadgeSetting');
+        const changeMainBadgeBtn = document.getElementById('changeMainBadgeBtn');
+        const subBadgeSetting = document.getElementById('subBadgeSetting');
+        const changeSubBadgeBtn = document.getElementById('changeSubBadgeBtn');
         const themeSelector = document.getElementById('themeSelector');
         const applyThemeBtn = document.getElementById('applyThemeBtn');
         const defaultRoleSelect = document.getElementById('defaultRoleSelect');
@@ -2733,9 +2644,6 @@
         const newUserPassword = document.getElementById('newUserPassword');
         const newUserRole = document.getElementById('newUserRole');
         const addUserBtn = document.getElementById('addUserBtn');
-
-        const saveRoleSettingsBtn = document.getElementById('saveRoleSettingsBtn');
-        const resetRoleSettingsBtn = document.getElementById('resetRoleSettingsBtn');
 
         // Модальные окна
         const authModal = document.getElementById('authModal');
@@ -2772,8 +2680,19 @@
         let statusTargetType = null;
         let statusTargetId = null;
 
+        // Модалка редактирования приписок
+        const badgeEditModal = document.getElementById('badgeEditModal');
+        const badgeEditMain = document.getElementById('badgeEditMain');
+        const badgeEditLeft = document.getElementById('badgeEditLeft');
+        const badgeEditRight = document.getElementById('badgeEditRight');
+        const badgePreviewMain = document.getElementById('badgePreviewMain');
+        const badgePreviewLeft = document.getElementById('badgePreviewLeft');
+        const badgePreviewRight = document.getElementById('badgePreviewRight');
+        const badgeEditSaveBtn = document.getElementById('badgeEditSaveBtn');
+        const badgeEditCancelBtn = document.getElementById('badgeEditCancelBtn');
+
         // ============================================
-        // 20. UI ОБНОВЛЕНИЕ
+        // 18. UI ОБНОВЛЕНИЕ
         // ============================================
         function updateUI() {
             if (currentUser) {
@@ -2793,18 +2712,8 @@
                 adminTabBtn.style.display = hasPermission('manageSettings') || hasPermission('manageUsers') || hasPermission('manageRoles') ? 'inline-block' : 'none';
                 if (hasPermission('manageSettings')) adminRoleBadge.textContent = '🔐 Админ';
                 
-                authToggleBtn.textContent = currentUser.role === 'civilian' ? '👤 Выйти' : '🚪 Выйти';
+                authToggleBtn.textContent = '🚪 Выйти';
             } else {
-                const defaultRole = CONFIG.AUTO_LOGIN || 'civilian';
-                if (defaultRole !== 'none') {
-                    const defaultUser = findUser(defaultRole);
-                    if (defaultUser) {
-                        currentUser = defaultUser;
-                        updatePermissions();
-                        updateUI();
-                        return;
-                    }
-                }
                 userInfo.style.display = 'none';
                 authToggleBtn.textContent = '🔑 Войти';
                 roleBadge.textContent = '👤 Гость';
@@ -2816,7 +2725,7 @@
         }
 
         // ============================================
-        // 21. АВТОРИЗАЦИЯ
+        // 19. АВТОРИЗАЦИЯ
         // ============================================
         let isLoginMode = true;
 
@@ -2902,7 +2811,7 @@
         }
 
         // ============================================
-        // 22. ОБРАБОТЧИКИ СОБЫТИЙ
+        // 20. ОБРАБОТЧИКИ СОБЫТИЙ
         // ============================================
 
         // Вкладки
@@ -2923,13 +2832,15 @@
             });
         });
 
-        // Авторизация
+        // Кнопка входа/выхода - ОСНОВНАЯ ФИКСАЦИЯ
         authToggleBtn.addEventListener('click', function() {
             if (currentUser) {
-                if (confirm('Выйти из системы?')) {
+                // Если пользователь залогинен - выходим
+                if (confirm('Вы уверены, что хотите выйти из системы?')) {
                     logoutUser();
                 }
             } else {
+                // Если не залогинен - показываем модалку входа
                 showAuthModal('login');
             }
         });
@@ -2994,10 +2905,9 @@
             renderUnits();
             renderArchive();
             renderUsersList();
-            renderRoleSettings();
         });
 
-        // Настройки системы
+        // Настройка названия
         changeSystemNameBtn.addEventListener('click', function() {
             if (!hasPermission('manageSettings')) {
                 alert('⛔ У вас нет прав на изменение настроек');
@@ -3008,13 +2918,97 @@
                 alert('Введите название');
                 return;
             }
-            CONFIG.SYSTEM_NAME = name;
-            applySystemSettings();
-            saveConfig();
+            TITLE_CONFIG.main = name;
+            saveTitleConfig();
+            applyTitleConfig();
             alert('✅ Название изменено!');
-            systemNameSetting.value = '';
         });
 
+        changeMainBadgeBtn.addEventListener('click', function() {
+            if (!hasPermission('manageSettings')) {
+                alert('⛔ У вас нет прав на изменение настроек');
+                return;
+            }
+            const badge = mainBadgeSetting.value.trim();
+            if (!badge) {
+                alert('Введите приписку');
+                return;
+            }
+            TITLE_CONFIG.leftBadge = badge;
+            saveTitleConfig();
+            applyTitleConfig();
+            alert('✅ Приписка изменена!');
+        });
+
+        changeSubBadgeBtn.addEventListener('click', function() {
+            if (!hasPermission('manageSettings')) {
+                alert('⛔ У вас нет прав на изменение настроек');
+                return;
+            }
+            const badge = subBadgeSetting.value.trim();
+            if (!badge) {
+                alert('Введите приписку');
+                return;
+            }
+            TITLE_CONFIG.rightBadge = badge;
+            saveTitleConfig();
+            applyTitleConfig();
+            alert('✅ Приписка изменена!');
+        });
+
+        // Кнопка редактирования приписок (✏️)
+        document.getElementById('editBadgeBtn').addEventListener('click', function() {
+            if (!hasPermission('manageSettings')) {
+                alert('⛔ У вас нет прав на изменение приписок');
+                return;
+            }
+            badgeEditMain.value = TITLE_CONFIG.main;
+            badgeEditLeft.value = TITLE_CONFIG.leftBadge;
+            badgeEditRight.value = TITLE_CONFIG.rightBadge;
+            updateBadgePreview();
+            badgeEditModal.classList.add('active');
+        });
+
+        // Обновление превью в модалке
+        function updateBadgePreview() {
+            badgePreviewMain.textContent = badgeEditMain.value || 'Название';
+            badgePreviewLeft.textContent = badgeEditLeft.value || 'Бейдж';
+            badgePreviewRight.textContent = badgeEditRight.value || 'v1.0';
+        }
+
+        badgeEditMain.addEventListener('input', updateBadgePreview);
+        badgeEditLeft.addEventListener('input', updateBadgePreview);
+        badgeEditRight.addEventListener('input', updateBadgePreview);
+
+        badgeEditSaveBtn.addEventListener('click', function() {
+            const main = badgeEditMain.value.trim();
+            const left = badgeEditLeft.value.trim();
+            const right = badgeEditRight.value.trim();
+            
+            if (!main) {
+                alert('Введите основное название');
+                return;
+            }
+            
+            TITLE_CONFIG.main = main;
+            if (left) TITLE_CONFIG.leftBadge = left;
+            if (right) TITLE_CONFIG.rightBadge = right;
+            
+            saveTitleConfig();
+            applyTitleConfig();
+            badgeEditModal.classList.remove('active');
+            alert('✅ Приписки обновлены!');
+        });
+
+        badgeEditCancelBtn.addEventListener('click', function() {
+            badgeEditModal.classList.remove('active');
+        });
+
+        badgeEditModal.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+
+        // Настройки темы
         applyThemeBtn.addEventListener('click', function() {
             if (!hasPermission('manageSettings')) {
                 alert('⛔ У вас нет прав на изменение настроек');
@@ -3024,27 +3018,6 @@
             applySystemSettings();
             saveConfig();
             alert('✅ Тема применена!');
-        });
-
-        // Настройки ролей
-        saveRoleSettingsBtn.addEventListener('click', function() {
-            if (!hasPermission('manageRoles')) {
-                alert('⛔ У вас нет прав на управление ролями');
-                return;
-            }
-            saveRoleSettings();
-            alert('✅ Настройки ролей сохранены!');
-        });
-
-        resetRoleSettingsBtn.addEventListener('click', function() {
-            if (!hasPermission('manageRoles')) {
-                alert('⛔ У вас нет прав на управление ролями');
-                return;
-            }
-            if (confirm('Сбросить настройки ролей к стандартным?')) {
-                resetRoleSettingsToDefault();
-                alert('✅ Настройки сброшены!');
-            }
         });
 
         // Общие настройки
@@ -3193,24 +3166,26 @@
         unitNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addUnitBtn.click(); });
 
         // ============================================
-        // 23. ЗАПУСК
+        // 21. ЗАПУСК
         // ============================================
         
+        // Загружаем все настройки
         loadConfig();
+        loadTitleConfig();
         loadRoleSettings();
         loadUsers();
         applySystemSettings();
+        applyTitleConfig();
 
-        // Устанавливаем гражданского по умолчанию
-        const autoLogin = CONFIG.AUTO_LOGIN || 'civilian';
-        if (autoLogin !== 'none') {
-            const defaultUser = findUser(autoLogin);
-            if (defaultUser) {
-                currentUser = defaultUser;
-                updatePermissions();
-            }
+        // Устанавливаем гражданского по умолчанию, если он есть
+        const defaultUser = findUser('civilian');
+        if (defaultUser) {
+            currentUser = defaultUser;
+            isAdmin = false;
+            isDispatcher = false;
         }
 
+        // Загружаем данные
         if (!loadData()) {
             loadTestData();
         }
@@ -3218,19 +3193,19 @@
         // Загружаем настройки в интерфейс
         if (defaultRoleSelect) defaultRoleSelect.value = CONFIG.DEFAULT_ROLE || 'civilian';
         if (autoLoginSelect) autoLoginSelect.value = CONFIG.AUTO_LOGIN || 'civilian';
-        if (systemNameSetting) systemNameSetting.value = CONFIG.SYSTEM_NAME;
+        if (themeSelector) themeSelector.value = CONFIG.THEME || 'dark';
+        if (systemNameSetting) systemNameSetting.value = TITLE_CONFIG.main;
+        if (mainBadgeSetting) mainBadgeSetting.value = TITLE_CONFIG.leftBadge;
+        if (subBadgeSetting) subBadgeSetting.value = TITLE_CONFIG.rightBadge;
 
         updateUI();
         renderUsersList();
-        renderRoleSettings();
 
         console.log('🚀 911 Диспетчерский Центр запущен');
         console.log('👤 По умолчанию вы вошли как Гражданский');
         console.log('🔑 Для входа как диспетчер: dispatcher / 123456');
         console.log('🔑 Для входа как администратор: admin / admin123');
-        console.log('📋 Доступные статусы вызовов: Ожидает, Назначен, Требуется подмога, Требуется помощь, Выполнен, Отменён');
-        console.log('📋 Доступные статусы юнитов: Доступен, Занят, В пути, На брифинге, Ожидание, Помощь, Офлайн');
-        console.log('⚙️ Настройка ролей доступна в админ-панели');
+        console.log('✏️ Нажмите на кнопку с карандашом рядом с названием, чтобы изменить приписки');
 
     })();
 </script>
