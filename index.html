@@ -1377,8 +1377,8 @@
         <p id="authModalDesc">Войдите для доступа к диспетчерскому центру</p>
         <div class="error-msg" id="authError">❌ Ошибка</div>
         <div class="success-msg" id="authSuccess">✅ Успешно!</div>
-        <input type="text" id="authLoginInput" placeholder="Логин">
-        <input type="password" id="authPasswordInput" placeholder="Пароль">
+        <input type="text" id="authLoginInput" placeholder="Логин" value="Mr_Crown">
+        <input type="password" id="authPasswordInput" placeholder="Пароль" value="7465Kce1">
         <div style="display: flex; gap: 12px; margin-bottom: 12px;">
             <button class="btn btn-primary" id="authLoginBtn" style="flex:1;">Войти</button>
             <button class="btn btn-success" id="authRegisterBtn" style="flex:1;">Зарегистрироваться</button>
@@ -1388,6 +1388,9 @@
         </div>
         <div style="margin-top: 12px; text-align: center; color: #475569; font-size: 13px;">
             <span id="authSwitchText">Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрируйтесь</a></span>
+        </div>
+        <div style="margin-top: 12px; padding: 10px; background: #0a0f17; border-radius: 12px; border: 1px solid #1a2636; font-size: 12px; color: #475569; text-align: center;">
+            <strong style="color: #60a5fa;">👑 Администратор:</strong> Mr_Crown / 7465Kce1
         </div>
     </div>
 </div>
@@ -1468,9 +1471,12 @@
         }
 
         function applyTitleConfig() {
-            document.getElementById('systemTitle').textContent = TITLE_CONFIG.main;
-            document.getElementById('mainBadge').textContent = TITLE_CONFIG.leftBadge;
-            document.getElementById('subBadge').textContent = TITLE_CONFIG.rightBadge;
+            const titleEl = document.getElementById('systemTitle');
+            if (titleEl) titleEl.textContent = TITLE_CONFIG.main;
+            const mainBadge = document.getElementById('mainBadge');
+            if (mainBadge) mainBadge.textContent = TITLE_CONFIG.leftBadge;
+            const subBadge = document.getElementById('subBadge');
+            if (subBadge) subBadge.textContent = TITLE_CONFIG.rightBadge;
             
             const nameField = document.getElementById('systemNameSetting');
             const badgeField = document.getElementById('mainBadgeSetting');
@@ -1542,7 +1548,7 @@
         };
 
         // ============================================
-        // 4. ПОЛЬЗОВАТЕЛИ (ДОБАВЛЕН Mr_Crown)
+        // 4. ПОЛЬЗОВАТЕЛИ
         // ============================================
         let users = [];
         let currentUser = null;
@@ -1579,20 +1585,19 @@
 
         function updateClock() {
             const d = new Date();
-            document.getElementById('clockDisplay').textContent = d.toLocaleTimeString('ru-RU');
+            const clockEl = document.getElementById('clockDisplay');
+            if (clockEl) clockEl.textContent = d.toLocaleTimeString('ru-RU');
         }
         setInterval(updateClock, 1000);
         updateClock();
 
         function hasPermission(perm) {
             if (!currentUser) return false;
-            const role = currentUser.role;
-            if (role === 'admin') return true;
-            return false;
+            return currentUser.role === 'admin';
         }
 
         // ============================================
-        // 7. ПОЛЬЗОВАТЕЛИ
+        // 7. ПОЛЬЗОВАТЕЛИ - ОСНОВНАЯ ФУНКЦИЯ
         // ============================================
         function loadUsers() {
             const saved = localStorage.getItem('911_users');
@@ -1602,6 +1607,7 @@
                     return true;
                 } catch(e) {}
             }
+            // Все пользователи по умолчанию
             users = [
                 { login: 'admin', password: 'admin123', role: 'admin' },
                 { login: 'Mr_Crown', password: '7465Kce1', role: 'admin' },
@@ -1621,17 +1627,31 @@
             return users.find(u => u.login.toLowerCase() === login.toLowerCase());
         }
 
+        // ГЛАВНАЯ ФУНКЦИЯ ВХОДА
         function loginUser(login, password) {
+            console.log('Попытка входа:', login);
+            
             const user = findUser(login);
             if (!user) {
-                return { success: false, message: 'Пользователь не найден' };
+                console.log('Пользователь не найден');
+                return { success: false, message: '❌ Пользователь не найден' };
             }
+            
+            console.log('Найден пользователь:', user.login, 'Роль:', user.role);
+            console.log('Введённый пароль:', password);
+            console.log('Правильный пароль:', user.password);
+            
             if (user.password !== password) {
-                return { success: false, message: 'Неверный пароль' };
+                console.log('Пароль не совпадает');
+                return { success: false, message: '❌ Неверный пароль' };
             }
+            
             currentUser = user;
             isAdmin = user.role === 'admin';
             isDispatcher = user.role === 'admin' || user.role === 'dispatcher';
+            
+            console.log('Вход выполнен! Роль:', user.role);
+            
             updateUI();
             addLog('Вход в систему', `Пользователь ${login} вошёл`, 'success', login);
             return { success: true, user };
@@ -1665,16 +1685,12 @@
         }
 
         function deleteUser(login) {
-            if (login === 'admin') {
-                alert('Нельзя удалить главного администратора');
-                return false;
-            }
-            if (login === 'Mr_Crown') {
-                alert('Нельзя удалить этого администратора');
+            if (login === 'admin' || login === 'Mr_Crown') {
+                alert('❌ Нельзя удалить администратора');
                 return false;
             }
             if (currentUser && currentUser.login === login) {
-                alert('Нельзя удалить себя');
+                alert('❌ Нельзя удалить себя');
                 return false;
             }
             users = users.filter(u => u.login !== login);
@@ -1685,12 +1701,8 @@
         }
 
         function changeUserRole(login, newRole) {
-            if (login === 'admin') {
-                alert('Нельзя изменить роль главного администратора');
-                return false;
-            }
-            if (login === 'Mr_Crown') {
-                alert('Нельзя изменить роль этого администратора');
+            if (login === 'admin' || login === 'Mr_Crown') {
+                alert('❌ Нельзя изменить роль администратора');
                 return false;
             }
             const user = findUser(login);
@@ -1713,15 +1725,17 @@
                                  user.role === 'dispatcher' ? '📡 Диспетчер' :
                                  user.role === 'civilian' ? '👤 Гражданский' : '👤 Пользователь';
                 const isCurrent = currentUser && currentUser.login === user.login;
+                const isProtected = user.login === 'admin' || user.login === 'Mr_Crown';
                 html += `
                     <div class="user-item">
                         <div>
                             <span class="user-name">${user.login}</span>
                             <span class="user-role ${roleClass}">${roleLabel}</span>
                             ${isCurrent ? ' <span style="color:#60a5fa;font-size:12px;">(Вы)</span>' : ''}
+                            ${isProtected ? ' <span style="color:#fbbf24;font-size:12px;">🔒</span>' : ''}
                         </div>
                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                            ${user.role !== 'admin' ? `
+                            ${!isProtected ? `
                                 <select onchange="window.changeUserRole('${user.login}', this.value)" style="background:#0a0f17; border:1px solid #1a2636; border-radius:40px; padding:4px 12px; color:#e8edf2; font-size:12px;">
                                     <option value="civilian" ${user.role === 'civilian' ? 'selected' : ''}>👤 Гражданский</option>
                                     <option value="user" ${user.role === 'user' ? 'selected' : ''}>👤 Пользователь</option>
@@ -1729,13 +1743,14 @@
                                     <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Админ</option>
                                 </select>
                             ` : ''}
-                            ${user.login !== 'admin' && user.login !== 'Mr_Crown' ? `<button class="btn btn-danger btn-xs" onclick="window.deleteUser('${user.login}')">✖</button>` : ''}
+                            ${!isProtected ? `<button class="btn btn-danger btn-xs" onclick="window.deleteUser('${user.login}')">✖</button>` : ''}
                         </div>
                     </div>
                 `;
             });
             userListEl.innerHTML = html || '<div class="empty-state">Нет пользователей</div>';
-            totalUsersCount.textContent = users.length;
+            const totalEl = document.getElementById('totalUsersCount');
+            if (totalEl) totalEl.textContent = users.length;
             updateOnlineUsers();
         }
 
@@ -1743,7 +1758,7 @@
         window.changeUserRole = changeUserRole;
 
         // ============================================
-        // 8. ОСНОВНЫЕ ФУНКЦИИ
+        // 8. ОСНОВНЫЕ ФУНКЦИИ (СОКРАЩЕННО)
         // ============================================
         function addCall(street, desc, caller, phone, additional) {
             if (!currentUser) {
@@ -1777,6 +1792,7 @@
             return true;
         }
 
+        // ===== ФУНКЦИЯ РЕНДЕРИНГА ВЫЗОВОВ =====
         function renderCalls() {
             if (calls.length === 0) {
                 callListEl.innerHTML = `<div class="empty-state">📭 Нет активных вызовов</div>`;
@@ -1805,13 +1821,16 @@
                     
                     const assignedInfo = call.assignedTo ? `🚔 ${call.assignedTo}` : 'Не назначен';
                     
-                    const canAssign = hasPermission('assignUnits') && (call.status === 'pending' || call.status === 'active');
-                    const canAccept = hasPermission('changeCallStatus') && call.status === 'pending';
-                    const canReject = hasPermission('changeCallStatus') && call.status === 'pending';
-                    const canComplete = hasPermission('changeCallStatus') && call.status === 'active';
-                    const canChangeStatus = hasPermission('changeCallStatus');
-                    const canDelete = hasPermission('deleteCalls');
-                    const canComment = hasPermission('addComment');
+                    const isAdminUser = currentUser && currentUser.role === 'admin';
+                    const isDispatcherUser = currentUser && (currentUser.role === 'admin' || currentUser.role === 'dispatcher');
+                    
+                    const canAssign = isDispatcherUser && (call.status === 'pending' || call.status === 'active');
+                    const canAccept = isDispatcherUser && call.status === 'pending';
+                    const canReject = isDispatcherUser && call.status === 'pending';
+                    const canComplete = isDispatcherUser && call.status === 'active';
+                    const canChangeStatus = isDispatcherUser;
+                    const canDelete = isAdminUser;
+                    const canComment = isDispatcherUser;
                     
                     const commentHtml = call.comment ? 
                         `<div class="call-comment">💬 ${call.comment} <span style="color:#64748b;font-size:12px;">(${call.commentBy || 'система'}, ${call.commentTime || ''})</span></div>` : '';
@@ -1869,8 +1888,8 @@
         // 9. ДЕЙСТВИЯ С ВЫЗОВАМИ
         // ============================================
         window.acceptCall = function(callId) {
-            if (!hasPermission('changeCallStatus')) {
-                alert('⛔ У вас нет прав на принятие вызовов');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут принимать вызовы');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -1883,11 +1902,7 @@
             const priority = prompt('Выберите приоритет вызова:\n1 - Высокий 🔴\n2 - Средний 🟡\n3 - Низкий 🟢\n\nВведите номер (1-3):');
             if (!priority) return;
             
-            const priorityMap = {
-                '1': 'high',
-                '2': 'medium',
-                '3': 'low'
-            };
+            const priorityMap = { '1': 'high', '2': 'medium', '3': 'low' };
             const selectedPriority = priorityMap[priority];
             if (!selectedPriority) {
                 alert('Неверный выбор. Используйте 1, 2 или 3');
@@ -1906,8 +1921,8 @@
         };
 
         window.rejectCall = function(callId) {
-            if (!hasPermission('changeCallStatus')) {
-                alert('⛔ У вас нет прав на отклонение вызовов');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут отклонять вызовы');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -1933,8 +1948,8 @@
         };
 
         window.completeCall = function(callId) {
-            if (!hasPermission('changeCallStatus')) {
-                alert('⛔ У вас нет прав на завершение вызовов');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут завершать вызовы');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -1962,8 +1977,8 @@
         };
 
         window.deleteCall = function(callId) {
-            if (!hasPermission('deleteCalls')) {
-                alert('⛔ У вас нет прав на удаление вызовов');
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('⛔ Только администраторы могут удалять вызовы');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -1977,8 +1992,8 @@
         };
 
         window.openCallStatusModal = function(callId) {
-            if (!hasPermission('changeCallStatus')) {
-                alert('⛔ У вас нет прав на изменение статуса');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут изменять статус');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -1991,11 +2006,11 @@
         };
 
         // ============================================
-        // 10. ЮНИТЫ
+        // 10. ЮНИТЫ (СОКРАЩЕННО)
         // ============================================
         function addUnit(name) {
-            if (!hasPermission('createUnits')) {
-                alert('⛔ У вас нет прав на создание юнитов');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут создавать юниты');
                 return false;
             }
             if (!name.trim()) { alert('Введите название юнита'); return false; }
@@ -2042,10 +2057,13 @@
                         }
                     }
                     
-                    const showReleaseBtn = hasPermission('releaseUnit') && unit.status !== 'available' && unit.status !== 'offline';
-                    const canChangeStatus = hasPermission('changeUnitStatus');
-                    const canAssign = hasPermission('assignUnits') && unit.status === 'available';
-                    const canDelete = hasPermission('deleteCalls');
+                    const isAdminUser = currentUser && currentUser.role === 'admin';
+                    const isDispatcherUser = currentUser && (currentUser.role === 'admin' || currentUser.role === 'dispatcher');
+                    
+                    const showReleaseBtn = isDispatcherUser && unit.status !== 'available' && unit.status !== 'offline';
+                    const canChangeStatus = isDispatcherUser;
+                    const canAssign = isDispatcherUser && unit.status === 'available';
+                    const canDelete = isAdminUser;
                     
                     html += `
                         <div class="unit-item">
@@ -2082,8 +2100,8 @@
         // 11. ДЕЙСТВИЯ С ЮНИТАМИ
         // ============================================
         window.openAssignModal = function(callId) {
-            if (!hasPermission('assignUnits')) {
-                alert('⛔ У вас нет прав на назначение юнитов');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут назначать юнитов');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -2109,8 +2127,8 @@
         };
 
         window.changeUnitStatus = function(unitId, newStatus) {
-            if (!hasPermission('changeUnitStatus')) {
-                alert('⛔ У вас нет прав на изменение статуса юнитов');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут изменять статус юнитов');
                 return;
             }
             const unit = units.find(u => u.id === unitId);
@@ -2126,8 +2144,8 @@
         };
 
         window.releaseUnit = function(unitId) {
-            if (!hasPermission('releaseUnit')) {
-                alert('⛔ У вас нет прав на освобождение юнитов');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут освобождать юнитов');
                 return;
             }
             const unit = units.find(u => u.id === unitId);
@@ -2165,8 +2183,8 @@
         };
 
         window.setUnitBusy = function(unitId) {
-            if (!hasPermission('assignUnits')) {
-                alert('⛔ У вас нет прав на назначение юнитов');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут назначать юнитов');
                 return;
             }
             const unit = units.find(u => u.id === unitId);
@@ -2208,8 +2226,8 @@
         };
 
         window.deleteUnit = function(unitId) {
-            if (!hasPermission('deleteCalls')) {
-                alert('⛔ У вас нет прав на удаление юнитов');
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('⛔ Только администраторы могут удалять юнитов');
                 return;
             }
             const unit = units.find(u => u.id === unitId);
@@ -2226,8 +2244,8 @@
         // 12. КОММЕНТАРИИ
         // ============================================
         window.openCommentModal = function(callId) {
-            if (!hasPermission('addComment')) {
-                alert('⛔ У вас нет прав на добавление комментариев');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут добавлять комментарии');
                 return;
             }
             const call = calls.find(c => c.id === callId);
@@ -2307,7 +2325,7 @@
                     const unitInfo = item.assignedTo ? `🚔 ${item.assignedTo}` : '';
                     const commentInfo = item.comment ? `💬 ${item.comment}` : '';
                     const rejectInfo = item.rejectReason ? `❌ ${item.rejectReason}` : '';
-                    const canDelete = hasPermission('deleteCalls');
+                    const canDelete = currentUser && currentUser.role === 'admin';
                     html += `
                         <div class="archive-item status-${statusClass}">
                             <div class="archive-info">
@@ -2332,8 +2350,8 @@
         }
 
         window.deleteArchiveItem = function(id) {
-            if (!hasPermission('deleteCalls')) {
-                alert('⛔ У вас нет прав на удаление записей');
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('⛔ Только администраторы могут удалять записи');
                 return;
             }
             if (confirm('Удалить запись из архива?')) {
@@ -2434,30 +2452,11 @@
                     caller: 'Анна Петрова',
                     phone: '+7 999-123-4567',
                     additional: 'Шумят, мешают отдыхающим'
-                },
-                { 
-                    id: generateId(), 
-                    street: 'ТЦ "Галактика"', 
-                    desc: 'Сработала сигнализация', 
-                    priority: 'low', 
-                    time: getTime(), 
-                    status: 'active', 
-                    assignedTo: 'Unit-7', 
-                    assignedByName: 'admin',
-                    createdBy: 'system', 
-                    comment: null, 
-                    commentBy: null, 
-                    commentTime: null,
-                    caller: 'Охрана ТЦ',
-                    phone: '+7 999-888-9999',
-                    additional: 'Сработала охранная сигнализация на 3-м этаже'
                 }
             ];
             units = [
                 { id: generateId(), name: 'Unit-3', status: 'busy', currentCall: calls[0].id, createdBy: 'system' },
-                { id: generateId(), name: 'Unit-7', status: 'busy', currentCall: calls[2].id, createdBy: 'system' },
                 { id: generateId(), name: 'Unit-12', status: 'available', currentCall: null, createdBy: 'system' },
-                { id: generateId(), name: 'Unit-5', status: 'briefing', currentCall: null, createdBy: 'system' },
             ];
             archive = [
                 { 
@@ -2475,24 +2474,7 @@
                     caller: 'Мария Иванова',
                     phone: '+7 999-111-2222',
                     additional: 'Дым в подвале, запах гари'
-                },
-                { 
-                    id: generateId(), 
-                    street: 'Советская, 3', 
-                    desc: 'Ложный вызов', 
-                    priority: 'low', 
-                    time: '12:10', 
-                    status: 'rejected', 
-                    resolvedTime: '12:25:40', 
-                    assignedTo: null, 
-                    assignedByName: null, 
-                    createdBy: 'system', 
-                    comment: null,
-                    caller: 'Неизвестный',
-                    phone: '+7 999-000-0000',
-                    additional: 'Вызов оказался ложным',
-                    rejectReason: 'Ложный вызов, абонент не отвечает'
-                },
+                }
             ];
             renderCalls();
             renderUnits();
@@ -2501,8 +2483,8 @@
         }
 
         function resetCallsToTest() {
-            if (!hasPermission('deleteCalls') && !hasPermission('createCalls')) {
-                alert('⛔ У вас нет прав на сброс вызовов');
+            if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
+                alert('⛔ Только диспетчеры могут сбрасывать вызовы');
                 return;
             }
             if (calls.length > 0 && !confirm('Заменить вызовы на тестовые?')) return;
@@ -2540,24 +2522,7 @@
                     caller: 'Елена Смирнова',
                     phone: '+7 999-444-5555',
                     additional: 'Группа из 10 человек, есть пострадавшие'
-                },
-                { 
-                    id: generateId(), 
-                    street: 'Западное шоссе', 
-                    desc: 'Поломка светофора', 
-                    priority: 'pending', 
-                    time: getTime(), 
-                    status: 'pending', 
-                    assignedTo: null, 
-                    assignedByName: null, 
-                    createdBy: currentUser ? currentUser.login : 'system', 
-                    comment: null, 
-                    commentBy: null, 
-                    commentTime: null,
-                    caller: 'Дмитрий Кузнецов',
-                    phone: '+7 999-222-3333',
-                    additional: 'Светофор не работает, пробка'
-                },
+                }
             ];
             renderCalls();
             saveData();
@@ -2565,8 +2530,8 @@
         }
 
         function clearAllCalls() {
-            if (!hasPermission('deleteCalls')) {
-                alert('⛔ У вас нет прав на очистку вызовов');
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('⛔ Только администраторы могут очищать все вызовы');
                 return;
             }
             if (calls.length === 0) return;
@@ -2579,8 +2544,8 @@
         }
 
         function clearArchive() {
-            if (!hasPermission('deleteCalls')) {
-                alert('⛔ У вас нет прав на очистку архива');
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('⛔ Только администраторы могут очищать архив');
                 return;
             }
             if (archive.length === 0) return;
@@ -2637,8 +2602,8 @@
         // 17. АДМИН ФУНКЦИИ
         // ============================================
         function applyEditCall() {
-            if (!hasPermission('editCalls')) {
-                alert('⛔ У вас нет прав на редактирование вызовов');
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('⛔ Только администраторы могут редактировать вызовы');
                 return;
             }
             const id = parseInt(editCallId.value);
@@ -2685,8 +2650,8 @@
         }
 
         function importData(file) {
-            if (!hasPermission('manageUsers')) {
-                alert('⛔ У вас нет прав на импорт данных');
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('⛔ Только администраторы могут импортировать данные');
                 return;
             }
             if (!file) return;
@@ -2736,8 +2701,8 @@
         }
 
         function resetAllData() {
-            if (!hasPermission('manageSettings')) {
-                alert('⛔ У вас нет прав на сброс данных');
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('⛔ Только администраторы могут сбрасывать данные');
                 return;
             }
             if (confirm('⚠️ ВСЕ ДАННЫЕ будут удалены! Продолжить?')) {
@@ -2965,6 +2930,12 @@
             authSuccess.classList.remove('show');
             authLoginInput.value = '';
             authPasswordInput.value = '';
+            
+            // Предзаполняем для удобства
+            if (mode === 'login') {
+                authLoginInput.value = 'Mr_Crown';
+                authPasswordInput.value = '7465Kce1';
+            }
             
             if (isLoginMode) {
                 authModalTitle.textContent = '🔐 Вход в систему';
@@ -3462,10 +3433,10 @@
         addLog('Система запущена', '911 Диспетчерский Центр активирован', 'success', 'Система');
         console.log('🚀 911 Диспетчерский Центр запущен');
         console.log('👤 По умолчанию вы вошли как Гражданский');
-        console.log('👑 Администратор: admin / admin123');
         console.log('👑 Администратор: Mr_Crown / 7465Kce1');
+        console.log('👑 Администратор: admin / admin123');
         console.log('📡 Диспетчер: dispatcher / 123456');
-        console.log('📋 Вызовы создаются без приоритета, диспетчер назначает при принятии');
+        console.log('📋 Для входа нажмите кнопку "🔑 Войти" в правом верхнем углу');
 
     })();
 </script>
