@@ -21,7 +21,7 @@
         }
 
         .container {
-            max-width: 1500px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
@@ -276,6 +276,13 @@
         .btn-outline:hover {
             background: #1e293b;
         }
+        .btn-pulse {
+            animation: btnPulse 1.5s infinite;
+        }
+        @keyframes btnPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+        }
 
         /* ===== ВКЛАДКИ ===== */
         .tabs {
@@ -393,7 +400,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            max-height: 420px;
+            max-height: 500px;
             overflow-y: auto;
             padding-right: 6px;
         }
@@ -416,7 +423,7 @@
             border-left: 5px solid #475569;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             transition: all 0.15s ease;
             border: 1px solid #1a2636;
         }
@@ -435,7 +442,11 @@
             border-left-color: #22c55e;
             background: rgba(34, 197, 94, 0.04);
         }
-        .call-item.status-assigned {
+        .call-item.status-pending {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.04);
+        }
+        .call-item.status-active {
             border-left-color: #3b82f6;
             background: rgba(59, 130, 246, 0.06);
         }
@@ -443,13 +454,9 @@
             border-left-color: #22c55e;
             opacity: 0.6;
         }
-        .call-item.status-backup {
-            border-left-color: #8b5cf6;
-            background: rgba(139, 92, 246, 0.06);
-        }
-        .call-item.status-help {
-            border-left-color: #ec4899;
-            background: rgba(236, 72, 153, 0.06);
+        .call-item.status-rejected {
+            border-left-color: #6b7280;
+            opacity: 0.5;
         }
         .call-item .call-header {
             display: flex;
@@ -478,23 +485,43 @@
             color: #94a3b8;
         }
         .call-item .call-meta {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px 16px;
             font-size: 13px;
             color: #64748b;
+            padding: 4px 0;
+            background: #0a0f17;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+        .call-item .call-meta .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .call-item .call-meta .meta-label {
+            color: #475569;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .call-item .call-meta .meta-value {
+            color: #e2e8f0;
+            font-weight: 500;
         }
         .call-item .call-status {
             font-size: 12px;
             font-weight: 600;
             padding: 2px 14px;
             border-radius: 40px;
+            display: inline-block;
         }
         .call-item .call-status.pending {
             color: #fbbf24;
             background: rgba(245, 158, 11, 0.15);
         }
-        .call-item .call-status.assigned {
+        .call-item .call-status.active {
             color: #60a5fa;
             background: rgba(59, 130, 246, 0.15);
         }
@@ -502,13 +529,9 @@
             color: #4ade80;
             background: rgba(34, 197, 94, 0.15);
         }
-        .call-item .call-status.backup {
-            color: #a78bfa;
-            background: rgba(139, 92, 246, 0.15);
-        }
-        .call-item .call-status.help {
-            color: #f472b6;
-            background: rgba(236, 72, 153, 0.15);
+        .call-item .call-status.rejected {
+            color: #94a3b8;
+            background: rgba(71, 85, 105, 0.15);
         }
         .call-item .call-actions {
             display: flex;
@@ -524,6 +547,32 @@
             border-radius: 8px;
             border-left: 3px solid #3b82f6;
             margin-top: 4px;
+        }
+
+        .call-item .call-info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px 12px;
+            background: #0a0f17;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 4px;
+        }
+        .call-item .call-info-grid .info-item {
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .call-item .call-info-grid .info-item .info-label {
+            color: #475569;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .call-item .call-info-grid .info-item .info-value {
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 13px;
         }
 
         /* ===== ЮНИТЫ ===== */
@@ -737,7 +786,7 @@
         .archive-item.status-resolved {
             border-left-color: #22c55e;
         }
-        .archive-item.status-cancelled {
+        .archive-item.status-rejected {
             border-left-color: #6b7280;
         }
         .archive-item .archive-info {
@@ -766,7 +815,7 @@
             color: #4ade80;
             background: rgba(34, 197, 94, 0.15);
         }
-        .archive-item .archive-status.cancelled {
+        .archive-item .archive-status.rejected {
             color: #94a3b8;
             background: rgba(71, 85, 105, 0.15);
         }
@@ -1025,6 +1074,54 @@
             margin-top: 12px;
         }
 
+        /* ===== ЛОГИ ===== */
+        .log-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .log-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .log-list::-webkit-scrollbar-thumb {
+            background: #2a3a4a;
+            border-radius: 12px;
+        }
+        .log-item {
+            background: #0a0f17;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            border-left: 3px solid #475569;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .log-item .log-time {
+            color: #475569;
+            font-size: 12px;
+            min-width: 80px;
+        }
+        .log-item .log-user {
+            color: #60a5fa;
+            font-weight: 500;
+        }
+        .log-item .log-action {
+            color: #e2e8f0;
+        }
+        .log-item .log-detail {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+        .log-item.type-info { border-left-color: #3b82f6; }
+        .log-item.type-success { border-left-color: #22c55e; }
+        .log-item.type-warning { border-left-color: #f59e0b; }
+        .log-item.type-danger { border-left-color: #dc2626; }
+
         /* ===== СТАТУС БАР ВНИЗУ ===== */
         .footer-bar {
             margin-top: 24px;
@@ -1058,7 +1155,7 @@
         .unit-status-dot.helping { background: #34d399; }
         .unit-status-dot.offline { background: #6b7280; }
 
-        /* Модалка для редактирования названия */
+        /* ===== МОДАЛКА РЕДАКТИРОВАНИЯ ПРИПИСОК ===== */
         .badge-edit-modal .modal {
             max-width: 450px;
         }
@@ -1146,12 +1243,13 @@
                         <div class="form-row">
                             <input type="text" id="streetInput" placeholder="Адрес / Местоположение">
                             <input type="text" id="descInput" placeholder="Описание происшествия">
-                            <select id="prioritySelect">
-                                <option value="high">🔴 Высокий</option>
-                                <option value="medium">🟡 Средний</option>
-                                <option value="low">🟢 Низкий</option>
-                            </select>
-                            <button class="btn btn-primary" id="addCallBtn">➕ Добавить</button>
+                            <input type="text" id="callerInput" placeholder="Заявитель (имя)">
+                            <input type="text" id="phoneInput" placeholder="Телефон">
+                            <button class="btn btn-primary btn-pulse" id="addCallBtn">🚨 Запустить вызов</button>
+                        </div>
+                        <div class="form-row" style="margin-top: 6px;">
+                            <input type="text" id="additionalInfoInput" placeholder="Дополнительная информация" style="flex:2;">
+                            <span style="color:#475569; font-size:12px; display:flex; align-items:center;">Приоритет назначает диспетчер</span>
                         </div>
                     </div>
                     <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
@@ -1194,7 +1292,7 @@
                     <select id="archiveFilter">
                         <option value="all">Все статусы</option>
                         <option value="resolved">✅ Завершены</option>
-                        <option value="cancelled">❌ Отменены</option>
+                        <option value="rejected">❌ Отклонены</option>
                     </select>
                     <button class="btn btn-sm btn-danger" id="clearArchiveBtn">🗑 Очистить</button>
                     <button class="btn btn-sm btn-outline" id="exportArchiveBtn">📥 Экспорт TXT</button>
@@ -1206,7 +1304,7 @@
             </div>
         </div>
 
-        <!-- ===== ВКЛАДКА 3: АДМИН ===== -->
+        <!-- ===== ВКЛАДКА 3: АДМИНИСТРИРОВАНИЕ ===== -->
         <div class="tab-content" id="tab-admin">
             <div class="card">
                 <div class="card-title">
@@ -1214,7 +1312,24 @@
                     <span class="count-badge" id="adminRoleBadge">🔐 Админ</span>
                 </div>
 
-                <!-- ===== НАСТРОЙКА НАЗВАНИЯ ===== -->
+                <!-- ===== ЛОГИ САЙТА ===== -->
+                <div style="margin-bottom: 24px;">
+                    <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">📋 Логи системы</h3>
+                    <div class="log-list" id="logList">
+                        <div class="log-item type-info">
+                            <span class="log-time">[--:--:--]</span>
+                            <span class="log-action">Система запущена</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-sm btn-outline" id="clearLogsBtn">🗑 Очистить логи</button>
+                        <button class="btn btn-sm btn-outline" id="exportLogsBtn">📥 Экспорт логов</button>
+                    </div>
+                </div>
+
+                <hr style="border-color: #1a2636; margin: 20px 0;">
+
+                <!-- ===== НАСТРОЙКА ПРИПИСОК ===== -->
                 <div style="margin-bottom: 24px;">
                     <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">🏷️ Настройка названия и приписок</h3>
                     <div class="settings-group">
@@ -1241,6 +1356,20 @@
                                 <span style="background:#1a2330; padding:2px 12px; border-radius:40px; font-size:12px; color:#94a3b8; border:1px solid #2a3a4a;" id="previewSub">v3.0</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <hr style="border-color: #1a2636; margin: 20px 0;">
+
+                <!-- ===== НАСТРОЙКА РОЛЕЙ ===== -->
+                <div style="margin-bottom: 24px;">
+                    <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">👑 Настройка ролей и прав</h3>
+                    <div class="settings-group" id="roleSettings">
+                        <!-- JS заполнит -->
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn btn-success btn-sm" id="saveRoleSettingsBtn">💾 Сохранить настройки</button>
+                        <button class="btn btn-warning btn-sm" id="resetRoleSettingsBtn">↩️ Сбросить</button>
                     </div>
                 </div>
 
@@ -1373,50 +1502,13 @@
         <p id="statusTargetInfo">Вызов: ...</p>
         <select id="statusSelect" style="width:100%;">
             <option value="pending">⏳ Ожидает</option>
-            <option value="assigned">🚔 Назначен</option>
-            <option value="backup">🟣 Требуется подмога</option>
-            <option value="help">🩷 Требуется помощь</option>
-            <option value="completed">✅ Выполнен</option>
-            <option value="cancelled">❌ Отменён</option>
+            <option value="active">🔄 Активен</option>
+            <option value="completed">✅ Завершён</option>
+            <option value="rejected">❌ Отклонён</option>
         </select>
         <div class="modal-actions">
             <button class="btn btn-primary" id="statusConfirmBtn">🔄 Применить</button>
             <button class="btn btn-outline" id="statusCancelBtn">Отмена</button>
-        </div>
-    </div>
-</div>
-
-<!-- ===== МОДАЛЬНОЕ ОКНО: РЕДАКТИРОВАНИЕ ПРИПИСОК ===== -->
-<div class="modal-overlay badge-edit-modal" id="badgeEditModal">
-    <div class="modal">
-        <h2>✏️ Редактирование приписок</h2>
-        <p>Измените основное название и приписки к нему</p>
-        
-        <div style="margin-bottom: 16px;">
-            <label style="color:#94a3b8; font-size:14px; display:block; margin-bottom:4px;">Основное название</label>
-            <input type="text" id="badgeEditMain" placeholder="Основное название" style="width:100%;">
-        </div>
-        <div style="margin-bottom: 16px;">
-            <label style="color:#94a3b8; font-size:14px; display:block; margin-bottom:4px;">Приписка слева (красный бейдж)</label>
-            <input type="text" id="badgeEditLeft" placeholder="Например: ДС, RP, 911" maxlength="10" style="width:100%;">
-        </div>
-        <div style="margin-bottom: 16px;">
-            <label style="color:#94a3b8; font-size:14px; display:block; margin-bottom:4px;">Приписка справа (серый бейдж)</label>
-            <input type="text" id="badgeEditRight" placeholder="Например: v3.0, Beta, Проект" maxlength="15" style="width:100%;">
-        </div>
-        
-        <div style="background:#0f172a; padding:12px 16px; border-radius:12px; border:1px solid #1a2636; margin-bottom:16px;">
-            <label style="color:#94a3b8; font-size:13px; display:block; margin-bottom:6px;">Предпросмотр:</label>
-            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <span style="font-weight:700; color:#f1f5f9; font-size:18px;" id="badgePreviewMain">911 Диспетчерский Центр</span>
-                <span style="background:#dc2626; padding:2px 14px; border-radius:40px; font-size:13px; font-weight:700; color:#fff;" id="badgePreviewLeft">ДС</span>
-                <span style="background:#1a2330; padding:2px 12px; border-radius:40px; font-size:12px; color:#94a3b8; border:1px solid #2a3a4a;" id="badgePreviewRight">v3.0</span>
-            </div>
-        </div>
-        
-        <div class="modal-actions">
-            <button class="btn btn-primary" id="badgeEditSaveBtn">💾 Сохранить</button>
-            <button class="btn btn-outline" id="badgeEditCancelBtn">Отмена</button>
         </div>
     </div>
 </div>
@@ -1455,7 +1547,6 @@
             document.getElementById('mainBadge').textContent = TITLE_CONFIG.leftBadge;
             document.getElementById('subBadge').textContent = TITLE_CONFIG.rightBadge;
             
-            // Обновляем превью в админке
             const previewMain = document.getElementById('previewMain');
             const previewBadge = document.getElementById('previewBadge');
             const previewSub = document.getElementById('previewSub');
@@ -1463,7 +1554,6 @@
             if (previewBadge) previewBadge.textContent = TITLE_CONFIG.leftBadge;
             if (previewSub) previewSub.textContent = TITLE_CONFIG.rightBadge;
             
-            // Обновляем поля в админке
             const nameField = document.getElementById('systemNameSetting');
             const badgeField = document.getElementById('mainBadgeSetting');
             const subField = document.getElementById('subBadgeSetting');
@@ -1473,7 +1563,58 @@
         }
 
         // ============================================
-        // 2. ОСТАЛЬНЫЕ НАСТРОЙКИ
+        // 2. ЛОГИ
+        // ============================================
+        let systemLogs = [];
+
+        function addLog(action, detail = '', type = 'info', user = null) {
+            const time = new Date().toLocaleTimeString('ru-RU');
+            const userName = user || (currentUser ? currentUser.login : 'Гость');
+            systemLogs.push({ time, user: userName, action, detail, type });
+            renderLogs();
+            saveLogs();
+        }
+
+        function renderLogs() {
+            const container = document.getElementById('logList');
+            if (!container) return;
+            const logs = systemLogs.slice(-100).reverse();
+            if (logs.length === 0) {
+                container.innerHTML = `<div class="log-item type-info"><span class="log-time">[--:--:--]</span><span class="log-action">Логов нет</span></div>`;
+                return;
+            }
+            let html = '';
+            logs.forEach(log => {
+                html += `
+                    <div class="log-item type-${log.type}">
+                        <span class="log-time">[${log.time}]</span>
+                        <span class="log-user">${log.user}</span>
+                        <span class="log-action">${log.action}</span>
+                        ${log.detail ? `<span class="log-detail">${log.detail}</span>` : ''}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function saveLogs() {
+            localStorage.setItem('911_logs', JSON.stringify(systemLogs));
+        }
+
+        function loadLogs() {
+            const saved = localStorage.getItem('911_logs');
+            if (saved) {
+                try {
+                    systemLogs = JSON.parse(saved);
+                    renderLogs();
+                    return true;
+                } catch(e) {}
+            }
+            return false;
+        }
+
+        // ============================================
+        // 3. ОСТАЛЬНЫЕ НАСТРОЙКИ
         // ============================================
         let CONFIG = {
             SYSTEM_NAME: '911 Диспетчерский Центр',
@@ -1483,7 +1624,7 @@
         };
 
         // ============================================
-        // 3. ПРАВА ДОСТУПА
+        // 4. ПРАВА ДОСТУПА
         // ============================================
         let ROLES_CONFIG = {
             civilian: {
@@ -1504,7 +1645,8 @@
                     deleteCalls: false,
                     manageUsers: false,
                     manageRoles: false,
-                    manageSettings: false
+                    manageSettings: false,
+                    viewLogs: false
                 }
             },
             user: {
@@ -1525,7 +1667,8 @@
                     deleteCalls: false,
                     manageUsers: false,
                     manageRoles: false,
-                    manageSettings: false
+                    manageSettings: false,
+                    viewLogs: false
                 }
             },
             dispatcher: {
@@ -1534,7 +1677,7 @@
                 permissions: {
                     viewCalls: true,
                     viewArchive: true,
-                    createCalls: true,
+                    createCalls: false,
                     viewUnits: true,
                     assignUnits: true,
                     changeCallStatus: true,
@@ -1542,11 +1685,12 @@
                     releaseUnit: true,
                     createUnits: true,
                     addComment: true,
-                    editCalls: false,
+                    editCalls: true,
                     deleteCalls: false,
                     manageUsers: false,
                     manageRoles: false,
-                    manageSettings: false
+                    manageSettings: false,
+                    viewLogs: true
                 }
             },
             admin: {
@@ -1555,7 +1699,7 @@
                 permissions: {
                     viewCalls: true,
                     viewArchive: true,
-                    createCalls: true,
+                    createCalls: false,
                     viewUnits: true,
                     assignUnits: true,
                     changeCallStatus: true,
@@ -1567,7 +1711,8 @@
                     deleteCalls: true,
                     manageUsers: true,
                     manageRoles: true,
-                    manageSettings: true
+                    manageSettings: true,
+                    viewLogs: true
                 }
             }
         };
@@ -1589,7 +1734,7 @@
         }
 
         // ============================================
-        // 4. ПОЛЬЗОВАТЕЛИ
+        // 5. ПОЛЬЗОВАТЕЛИ
         // ============================================
         let users = [];
         let currentUser = null;
@@ -1597,14 +1742,14 @@
         let isDispatcher = false;
 
         // ============================================
-        // 5. ОСНОВНЫЕ ДАННЫЕ
+        // 6. ОСНОВНЫЕ ДАННЫЕ
         // ============================================
         let calls = [];
         let units = [];
         let archive = [];
 
         // ============================================
-        // 6. ВСПОМОГАТЕЛЬНЫЕ
+        // 7. ВСПОМОГАТЕЛЬНЫЕ
         // ============================================
         function getTime() {
             const d = new Date();
@@ -1640,7 +1785,7 @@
         }
 
         // ============================================
-        // 7. ПОЛЬЗОВАТЕЛИ
+        // 8. ПОЛЬЗОВАТЕЛИ
         // ============================================
         function loadUsers() {
             const saved = localStorage.getItem('911_users');
@@ -1677,6 +1822,7 @@
             isAdmin = user.role === 'admin';
             isDispatcher = user.role === 'admin' || user.role === 'dispatcher';
             updateUI();
+            addLog('Вход в систему', `Пользователь ${login} вошёл`, 'success', login);
             return { success: true, user };
         }
 
@@ -1691,22 +1837,19 @@
             const newUser = { login, password, role: defaultRole };
             users.push(newUser);
             saveUsers();
+            addLog('Регистрация', `Новый пользователь ${login} (${defaultRole})`, 'success', login);
             return { success: true, user: newUser };
         }
 
         function logoutUser() {
-            // Выход из системы - сбрасываем пользователя
+            if (currentUser) {
+                addLog('Выход', `Пользователь ${currentUser.login} вышел`, 'info', currentUser.login);
+            }
             currentUser = null;
             isAdmin = false;
             isDispatcher = false;
-            
-            // Показываем модалку входа
             showAuthModal('login');
-            
-            // Обновляем UI
             updateUI();
-            
-            // Переключаем на главную вкладку
             document.querySelector('[data-tab="main"]').click();
         }
 
@@ -1722,6 +1865,7 @@
             users = users.filter(u => u.login !== login);
             saveUsers();
             renderUsersList();
+            addLog('Удаление пользователя', `Удалён пользователь ${login}`, 'danger', currentUser?.login);
             return true;
         }
 
@@ -1735,6 +1879,7 @@
             user.role = newRole;
             saveUsers();
             renderUsersList();
+            addLog('Изменение роли', `Пользователь ${login} теперь ${newRole}`, 'warning', currentUser?.login);
             return true;
         }
 
@@ -1779,9 +1924,9 @@
         window.changeUserRole = changeUserRole;
 
         // ============================================
-        // 8. ОСНОВНЫЕ ФУНКЦИИ (сокращённо)
+        // 9. ОСНОВНЫЕ ФУНКЦИИ
         // ============================================
-        function addCall(street, desc, priority) {
+        function addCall(street, desc, caller, phone, additional) {
             if (!hasPermission('createCalls')) {
                 alert('⛔ У вас нет прав на создание вызовов');
                 return false;
@@ -1793,7 +1938,10 @@
                 id: generateId(),
                 street: street.trim(),
                 desc: desc.trim(),
-                priority: priority || 'medium',
+                caller: caller.trim() || 'Неизвестно',
+                phone: phone.trim() || 'Не указан',
+                additional: additional.trim() || '',
+                priority: 'pending', // Без приоритета, назначается диспетчером
                 time: getTime(),
                 status: 'pending',
                 assignedTo: null,
@@ -1806,6 +1954,7 @@
             calls.push(call);
             renderCalls();
             saveData();
+            addLog('Новый вызов', `Создан вызов: ${street} - ${desc}`, 'info', currentUser?.login);
             return true;
         }
 
@@ -1813,34 +1962,40 @@
             if (calls.length === 0) {
                 callListEl.innerHTML = `<div class="empty-state">📭 Нет активных вызовов</div>`;
             } else {
-                const priorityOrder = { high: 0, medium: 1, low: 2 };
-                const sortedCalls = [...calls].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+                const priorityOrder = { high: 0, medium: 1, low: 2, pending: 3 };
+                const sortedCalls = [...calls].sort((a, b) => {
+                    const pa = priorityOrder[a.priority] !== undefined ? priorityOrder[a.priority] : 3;
+                    const pb = priorityOrder[b.priority] !== undefined ? priorityOrder[b.priority] : 3;
+                    return pa - pb;
+                });
                 
                 let html = '';
                 sortedCalls.forEach((call, index) => {
-                    const priorityClass = call.priority;
+                    const priorityClass = call.priority === 'high' ? 'high' : call.priority === 'medium' ? 'medium' : call.priority === 'low' ? 'low' : '';
                     const priorityLabel = call.priority === 'high' ? '🔴 Высокий' : 
-                                         call.priority === 'low' ? '🟢 Низкий' : '🟡 Средний';
+                                         call.priority === 'medium' ? '🟡 Средний' : 
+                                         call.priority === 'low' ? '🟢 Низкий' : '⏳ Ожидает назначения';
                     
                     const statusMap = {
                         'pending': { class: 'pending', label: '⏳ Ожидает' },
-                        'assigned': { class: 'assigned', label: '🚔 Назначен' },
-                        'backup': { class: 'backup', label: '🟣 Требуется подмога' },
-                        'help': { class: 'help', label: '🩷 Требуется помощь' },
-                        'completed': { class: 'completed', label: '✅ Выполнен' },
-                        'cancelled': { class: 'cancelled', label: '❌ Отменён' }
+                        'active': { class: 'active', label: '🔄 Активен' },
+                        'completed': { class: 'completed', label: '✅ Завершён' },
+                        'rejected': { class: 'rejected', label: '❌ Отклонён' }
                     };
                     const statusInfo = statusMap[call.status] || statusMap.pending;
                     
-                    const assignedInfo = call.assignedTo ? `🚔 ${call.assignedTo}` : '';
-                    const commentHtml = call.comment ? 
-                        `<div class="call-comment">💬 ${call.comment} <span style="color:#64748b;font-size:12px;">(${call.commentBy || 'система'}, ${call.commentTime || ''})</span></div>` : '';
+                    const assignedInfo = call.assignedTo ? `🚔 ${call.assignedTo}` : 'Не назначен';
                     
                     const canAssign = hasPermission('assignUnits') && call.status === 'pending';
-                    const canComplete = hasPermission('changeCallStatus') && (call.status === 'assigned' || call.status === 'backup' || call.status === 'help');
-                    const canComment = hasPermission('addComment');
+                    const canAccept = hasPermission('changeCallStatus') && call.status === 'pending';
+                    const canReject = hasPermission('changeCallStatus') && call.status === 'pending';
+                    const canComplete = hasPermission('changeCallStatus') && call.status === 'active';
                     const canChangeStatus = hasPermission('changeCallStatus');
                     const canDelete = hasPermission('deleteCalls');
+                    const canComment = hasPermission('addComment');
+                    
+                    const commentHtml = call.comment ? 
+                        `<div class="call-comment">💬 ${call.comment} <span style="color:#64748b;font-size:12px;">(${call.commentBy || 'система'}, ${call.commentTime || ''})</span></div>` : '';
                     
                     html += `
                         <div class="call-item priority-${priorityClass} status-${statusInfo.class}">
@@ -1849,14 +2004,35 @@
                                 <span class="call-priority ${priorityClass}">${priorityLabel}</span>
                             </div>
                             <div class="call-desc">${call.desc}</div>
+                            <div class="call-info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Заявитель</span>
+                                    <span class="info-value">${call.caller || 'Неизвестно'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Телефон</span>
+                                    <span class="info-value">${call.phone || 'Не указан'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Время</span>
+                                    <span class="info-value">${call.time}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Статус</span>
+                                    <span class="call-status ${statusInfo.class}">${statusInfo.label}</span>
+                                </div>
+                            </div>
+                            ${call.additional ? `<div style="font-size:13px; color:#64748b; padding:4px 0;">📌 ${call.additional}</div>` : ''}
                             <div class="call-meta">
-                                <span>⏱ ${call.time}</span>
-                                ${assignedInfo ? `<span>${assignedInfo}</span>` : ''}
-                                <span class="call-status ${statusInfo.class}">${statusInfo.label}</span>
+                                <span class="meta-item"><span class="meta-label">Назначен:</span> <span class="meta-value">${assignedInfo}</span></span>
+                                <span class="meta-item"><span class="meta-label">Создал:</span> <span class="meta-value">${call.createdBy || 'система'}</span></span>
+                                <span class="meta-item"><span class="meta-label">ID:</span> <span class="meta-value">#${call.id.slice(-6)}</span></span>
                             </div>
                             ${commentHtml}
                             <div class="call-actions">
                                 ${canAssign ? `<button class="btn btn-primary btn-xs" onclick="window.openAssignModal('${call.id}')">🎯 Назначить</button>` : ''}
+                                ${canAccept ? `<button class="btn btn-success btn-xs btn-pulse" onclick="window.acceptCall('${call.id}')">✅ Принять</button>` : ''}
+                                ${canReject ? `<button class="btn btn-danger btn-xs" onclick="window.rejectCall('${call.id}')">❌ Отклонить</button>` : ''}
                                 ${canComplete ? `<button class="btn btn-success btn-xs" onclick="window.completeCall('${call.id}')">✅ Завершить</button>` : ''}
                                 ${canComment ? `<button class="btn btn-info btn-xs" onclick="window.openCommentModal('${call.id}')">💬 Коммент</button>` : ''}
                                 ${canChangeStatus ? `<button class="btn btn-warning btn-xs" onclick="window.openCallStatusModal('${call.id}')">🔄 Статус</button>` : ''}
@@ -1871,7 +2047,132 @@
         }
 
         // ============================================
-        // 9. ЮНИТЫ (сокращённо)
+        // 10. ДЕЙСТВИЯ С ВЫЗОВАМИ
+        // ============================================
+        window.acceptCall = function(callId) {
+            if (!hasPermission('changeCallStatus')) {
+                alert('⛔ У вас нет прав на принятие вызовов');
+                return;
+            }
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            if (call.status !== 'pending') {
+                alert('Этот вызов уже обрабатывается');
+                return;
+            }
+            
+            const priority = prompt('Выберите приоритет вызова:\n1 - Высокий 🔴\n2 - Средний 🟡\n3 - Низкий 🟢\n\nВведите номер (1-3):');
+            if (!priority) return;
+            
+            const priorityMap = {
+                '1': 'high',
+                '2': 'medium',
+                '3': 'low'
+            };
+            const selectedPriority = priorityMap[priority];
+            if (!selectedPriority) {
+                alert('Неверный выбор. Используйте 1, 2 или 3');
+                return;
+            }
+            
+            call.status = 'active';
+            call.priority = selectedPriority;
+            call.acceptedBy = currentUser ? currentUser.login : 'system';
+            call.acceptedTime = getFullTime();
+            
+            renderCalls();
+            saveData();
+            addLog('Принят вызов', `${call.street} - ${call.desc} (${selectedPriority})`, 'success', currentUser?.login);
+            alert(`✅ Вызов принят! Приоритет: ${selectedPriority.toUpperCase()}`);
+        };
+
+        window.rejectCall = function(callId) {
+            if (!hasPermission('changeCallStatus')) {
+                alert('⛔ У вас нет прав на отклонение вызовов');
+                return;
+            }
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            if (call.status !== 'pending') {
+                alert('Этот вызов уже обрабатывается');
+                return;
+            }
+            
+            const reason = prompt('Укажите причину отклонения (необязательно):');
+            call.status = 'rejected';
+            call.rejectedBy = currentUser ? currentUser.login : 'system';
+            call.rejectedTime = getFullTime();
+            call.rejectReason = reason || 'Не указана';
+            
+            addToArchive(call, 'rejected');
+            calls = calls.filter(c => c.id !== callId);
+            renderCalls();
+            renderArchive();
+            saveData();
+            addLog('Отклонён вызов', `${call.street} - ${call.desc} (Причина: ${call.rejectReason})`, 'danger', currentUser?.login);
+            alert('❌ Вызов отклонён');
+        };
+
+        window.completeCall = function(callId) {
+            if (!hasPermission('changeCallStatus')) {
+                alert('⛔ У вас нет прав на завершение вызовов');
+                return;
+            }
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            
+            if (confirm(`Завершить вызов "${call.street}"?`)) {
+                if (call.assignedTo) {
+                    const unit = units.find(u => u.name === call.assignedTo);
+                    if (unit) {
+                        unit.status = 'available';
+                        unit.currentCall = null;
+                    }
+                }
+                call.status = 'completed';
+                call.completedBy = currentUser ? currentUser.login : 'system';
+                call.completedTime = getFullTime();
+                addToArchive(call, 'resolved');
+                calls = calls.filter(c => c.id !== callId);
+                renderCalls();
+                renderUnits();
+                renderArchive();
+                saveData();
+                addLog('Завершён вызов', `${call.street} - ${call.desc}`, 'success', currentUser?.login);
+            }
+        };
+
+        window.deleteCall = function(callId) {
+            if (!hasPermission('deleteCalls')) {
+                alert('⛔ У вас нет прав на удаление вызовов');
+                return;
+            }
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            if (confirm(`Удалить вызов "${call.street}"?`)) {
+                calls = calls.filter(c => c.id !== callId);
+                renderCalls();
+                saveData();
+                addLog('Удалён вызов', `${call.street} - ${call.desc}`, 'danger', currentUser?.login);
+            }
+        };
+
+        window.openCallStatusModal = function(callId) {
+            if (!hasPermission('changeCallStatus')) {
+                alert('⛔ У вас нет прав на изменение статуса');
+                return;
+            }
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            statusTargetType = 'call';
+            statusTargetId = callId;
+            statusTargetInfo.textContent = `📍 ${call.street} - ${call.desc}`;
+            statusSelect.value = call.status;
+            statusModal.classList.add('active');
+        };
+
+        // ============================================
+        // 11. ЮНИТЫ
         // ============================================
         function addUnit(name) {
             if (!hasPermission('createUnits')) {
@@ -1893,6 +2194,7 @@
             });
             renderUnits();
             saveData();
+            addLog('Создан юнит', `Юнит ${name.trim()} создан`, 'info', currentUser?.login);
             return true;
         }
 
@@ -1958,7 +2260,7 @@
         }
 
         // ============================================
-        // 10. ОСТАЛЬНЫЕ ФУНКЦИИ (быстрые действия)
+        // 12. ДЕЙСТВИЯ С ЮНИТАМИ
         // ============================================
         window.openAssignModal = function(callId) {
             if (!hasPermission('assignUnits')) {
@@ -1967,8 +2269,8 @@
             }
             const call = calls.find(c => c.id === callId);
             if (!call) return;
-            if (call.status !== 'pending') {
-                alert('Этот вызов уже обрабатывается');
+            if (call.status !== 'pending' && call.status !== 'active') {
+                alert('Этот вызов уже обрабатывается или завершён');
                 return;
             }
             
@@ -1987,60 +2289,6 @@
             assignModal.classList.add('active');
         };
 
-        window.completeCall = function(callId) {
-            if (!hasPermission('changeCallStatus')) {
-                alert('⛔ У вас нет прав на завершение вызовов');
-                return;
-            }
-            const call = calls.find(c => c.id === callId);
-            if (!call) return;
-            
-            if (confirm(`Завершить вызов "${call.street}"?`)) {
-                if (call.assignedTo) {
-                    const unit = units.find(u => u.name === call.assignedTo);
-                    if (unit) {
-                        unit.status = 'available';
-                        unit.currentCall = null;
-                    }
-                }
-                call.status = 'completed';
-                addToArchive(call, 'resolved');
-                calls = calls.filter(c => c.id !== callId);
-                renderCalls();
-                renderUnits();
-                renderArchive();
-                saveData();
-            }
-        };
-
-        window.deleteCall = function(callId) {
-            if (!hasPermission('deleteCalls')) {
-                alert('⛔ У вас нет прав на удаление вызовов');
-                return;
-            }
-            const call = calls.find(c => c.id === callId);
-            if (!call) return;
-            if (confirm(`Удалить вызов "${call.street}"?`)) {
-                calls = calls.filter(c => c.id !== callId);
-                renderCalls();
-                saveData();
-            }
-        };
-
-        window.openCallStatusModal = function(callId) {
-            if (!hasPermission('changeCallStatus')) {
-                alert('⛔ У вас нет прав на изменение статуса');
-                return;
-            }
-            const call = calls.find(c => c.id === callId);
-            if (!call) return;
-            statusTargetType = 'call';
-            statusTargetId = callId;
-            statusTargetInfo.textContent = `📍 ${call.street} - ${call.desc}`;
-            statusSelect.value = call.status;
-            statusModal.classList.add('active');
-        };
-
         window.changeUnitStatus = function(unitId, newStatus) {
             if (!hasPermission('changeUnitStatus')) {
                 alert('⛔ У вас нет прав на изменение статуса юнитов');
@@ -2048,12 +2296,14 @@
             }
             const unit = units.find(u => u.id === unitId);
             if (!unit) return;
+            const oldStatus = unit.status;
             unit.status = newStatus;
             if (newStatus === 'available') {
                 unit.currentCall = null;
             }
             renderUnits();
             saveData();
+            addLog('Изменён статус юнита', `${unit.name}: ${oldStatus} → ${newStatus}`, 'info', currentUser?.login);
         };
 
         window.releaseUnit = function(unitId) {
@@ -2070,9 +2320,10 @@
             
             if (unit.currentCall) {
                 const call = calls.find(c => c.id === unit.currentCall);
-                if (call && (call.status === 'assigned' || call.status === 'backup' || call.status === 'help')) {
-                    if (confirm(`Освободить ${unit.name}? Вызов "${call.street}" будет отменён и отправлен в архив.`)) {
-                        addToArchive(call, 'cancelled');
+                if (call && (call.status === 'active' || call.status === 'pending')) {
+                    if (confirm(`Освободить ${unit.name}? Вызов "${call.street}" будет отклонён и отправлен в архив.`)) {
+                        call.status = 'rejected';
+                        addToArchive(call, 'rejected');
                         calls = calls.filter(c => c.id !== call.id);
                         unit.status = 'available';
                         unit.currentCall = null;
@@ -2080,6 +2331,7 @@
                         renderCalls();
                         renderArchive();
                         saveData();
+                        addLog('Освобождён юнит', `${unit.name} (вызов ${call.street} отклонён)`, 'warning', currentUser?.login);
                         return;
                     }
                     return;
@@ -2090,6 +2342,7 @@
             unit.currentCall = null;
             renderUnits();
             saveData();
+            addLog('Освобождён юнит', `${unit.name}`, 'info', currentUser?.login);
         };
 
         window.setUnitBusy = function(unitId) {
@@ -2104,13 +2357,13 @@
                 return;
             }
             
-            const pendingCalls = calls.filter(c => c.status === 'pending');
+            const pendingCalls = calls.filter(c => c.status === 'pending' || c.status === 'active');
             if (pendingCalls.length === 0) {
                 alert('Нет активных вызовов для назначения');
                 return;
             }
             
-            const callOptions = pendingCalls.map((c, i) => `${i+1}. ${c.street} - ${c.desc}`).join('\n');
+            const callOptions = pendingCalls.map((c, i) => `${i+1}. ${c.street} - ${c.desc} [${c.status}]`).join('\n');
             const choice = prompt(`Выберите вызов для ${unit.name}:\n${callOptions}\n\nВведите номер:`);
             if (!choice) return;
             
@@ -2123,13 +2376,16 @@
             const call = pendingCalls[idx];
             unit.status = 'busy';
             unit.currentCall = call.id;
-            call.status = 'assigned';
             call.assignedTo = unit.name;
             call.assignedByName = currentUser ? currentUser.login : 'system';
+            if (call.status === 'pending') {
+                call.status = 'active';
+            }
             
             renderUnits();
             renderCalls();
             saveData();
+            addLog('Назначен юнит', `${unit.name} → ${call.street}`, 'success', currentUser?.login);
         };
 
         window.deleteUnit = function(unitId) {
@@ -2143,9 +2399,13 @@
                 units = units.filter(u => u.id !== unitId);
                 renderUnits();
                 saveData();
+                addLog('Удалён юнит', `${unit.name}`, 'danger', currentUser?.login);
             }
         };
 
+        // ============================================
+        // 13. КОММЕНТАРИИ
+        // ============================================
         window.openCommentModal = function(callId) {
             if (!hasPermission('addComment')) {
                 alert('⛔ У вас нет прав на добавление комментариев');
@@ -2168,25 +2428,33 @@
             call.commentTime = getFullTime();
             renderCalls();
             saveData();
+            addLog('Добавлен комментарий', `К вызову ${call.street}: ${text}`, 'info', currentUser?.login);
         }
 
         // ============================================
-        // 11. АРХИВ
+        // 14. АРХИВ
         // ============================================
         function addToArchive(call, status) {
-            archive.push({
+            const archiveItem = {
                 id: generateId(),
                 street: call.street,
                 desc: call.desc,
-                priority: call.priority,
+                priority: call.priority || 'unknown',
                 time: call.time,
                 status: status,
                 resolvedTime: getFullTime(),
                 assignedTo: call.assignedTo || null,
                 assignedByName: call.assignedByName || null,
                 createdBy: call.createdBy || 'system',
-                comment: call.comment || null
-            });
+                comment: call.comment || null,
+                caller: call.caller || 'Неизвестно',
+                phone: call.phone || 'Не указан',
+                additional: call.additional || '',
+                acceptedBy: call.acceptedBy || null,
+                rejectedBy: call.rejectedBy || null,
+                rejectReason: call.rejectReason || null
+            };
+            archive.push(archiveItem);
             updateArchiveCounters();
             saveData();
         }
@@ -2199,7 +2467,8 @@
             if (search) {
                 filtered = filtered.filter(item =>
                     item.street.toLowerCase().includes(search) ||
-                    item.desc.toLowerCase().includes(search)
+                    item.desc.toLowerCase().includes(search) ||
+                    (item.caller && item.caller.toLowerCase().includes(search))
                 );
             }
             if (filter !== 'all') {
@@ -2212,11 +2481,13 @@
                 let html = '';
                 filtered.forEach((item, idx) => {
                     const statusClass = item.status;
-                    const statusLabel = item.status === 'resolved' ? '✅ Завершён' : '❌ Отменён';
+                    const statusLabel = item.status === 'resolved' ? '✅ Завершён' : '❌ Отклонён';
                     const priorityIcon = item.priority === 'high' ? '🔴' : 
-                                        item.priority === 'low' ? '🟢' : '🟡';
+                                        item.priority === 'medium' ? '🟡' :
+                                        item.priority === 'low' ? '🟢' : '⚪';
                     const unitInfo = item.assignedTo ? `🚔 ${item.assignedTo}` : '';
                     const commentInfo = item.comment ? `💬 ${item.comment}` : '';
+                    const rejectInfo = item.rejectReason ? `❌ ${item.rejectReason}` : '';
                     const canDelete = hasPermission('deleteCalls');
                     html += `
                         <div class="archive-item status-${statusClass}">
@@ -2228,6 +2499,7 @@
                                     <span>📌 ${item.resolvedTime}</span>
                                     ${unitInfo ? `<span>${unitInfo}</span>` : ''}
                                     ${commentInfo ? `<span>${commentInfo}</span>` : ''}
+                                    ${rejectInfo ? `<span>${rejectInfo}</span>` : ''}
                                     <span class="archive-status ${statusClass}">${statusLabel}</span>
                                 </div>
                             </div>
@@ -2250,6 +2522,7 @@
                 renderArchive();
                 updateArchiveCounters();
                 saveData();
+                addLog('Удалена запись из архива', `ID: ${id}`, 'danger', currentUser?.login);
             }
         };
 
@@ -2261,7 +2534,7 @@
         }
 
         // ============================================
-        // 12. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
+        // 15. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
         // ============================================
         function updateCounters() {
             callCounter.textContent = calls.length;
@@ -2278,7 +2551,7 @@
         }
 
         // ============================================
-        // 13. СОХРАНЕНИЕ ДАННЫХ
+        // 16. СОХРАНЕНИЕ ДАННЫХ
         // ============================================
         function saveData() {
             const data = { calls, units, archive, timestamp: new Date().toISOString() };
@@ -2303,25 +2576,121 @@
         }
 
         // ============================================
-        // 14. ТЕСТОВЫЕ ДАННЫЕ
+        // 17. ТЕСТОВЫЕ ДАННЫЕ
         // ============================================
         function loadTestData() {
             if (loadData()) return;
             
             calls = [
-                { id: generateId(), street: 'Бродвей, 12', desc: 'Перестрелка, требуется помощь', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system', comment: null, commentBy: null, commentTime: null },
-                { id: generateId(), street: 'Парк им. Ленина', desc: 'Группа лиц в состоянии алкогольного опьянения', priority: 'medium', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system', comment: null, commentBy: null, commentTime: null },
-                { id: generateId(), street: 'ТЦ "Галактика"', desc: 'Сработала сигнализация', priority: 'low', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system', comment: null, commentBy: null, commentTime: null },
+                { 
+                    id: generateId(), 
+                    street: 'Бродвей, 12', 
+                    desc: 'Перестрелка, требуется помощь', 
+                    priority: 'high', 
+                    time: getTime(), 
+                    status: 'active', 
+                    assignedTo: 'Unit-3', 
+                    assignedByName: 'admin',
+                    createdBy: 'system', 
+                    comment: null, 
+                    commentBy: null, 
+                    commentTime: null,
+                    caller: 'Джон Смит',
+                    phone: '+1 555-0101',
+                    additional: 'Слышны выстрелы, люди в панике'
+                },
+                { 
+                    id: generateId(), 
+                    street: 'Парк им. Ленина', 
+                    desc: 'Группа лиц в состоянии алкогольного опьянения', 
+                    priority: 'medium', 
+                    time: getTime(), 
+                    status: 'pending', 
+                    assignedTo: null, 
+                    assignedByName: null,
+                    createdBy: 'system', 
+                    comment: null, 
+                    commentBy: null, 
+                    commentTime: null,
+                    caller: 'Анна Петрова',
+                    phone: '+7 999-123-4567',
+                    additional: 'Шумят, мешают отдыхающим'
+                },
+                { 
+                    id: generateId(), 
+                    street: 'ТЦ "Галактика"', 
+                    desc: 'Сработала сигнализация', 
+                    priority: 'low', 
+                    time: getTime(), 
+                    status: 'active', 
+                    assignedTo: 'Unit-7', 
+                    assignedByName: 'admin',
+                    createdBy: 'system', 
+                    comment: null, 
+                    commentBy: null, 
+                    commentTime: null,
+                    caller: 'Охрана ТЦ',
+                    phone: '+7 999-888-9999',
+                    additional: 'Сработала охранная сигнализация на 3-м этаже'
+                },
+                { 
+                    id: generateId(), 
+                    street: 'Центральная, 15', 
+                    desc: 'Ограбление банка', 
+                    priority: 'pending', 
+                    time: getTime(), 
+                    status: 'pending', 
+                    assignedTo: null, 
+                    assignedByName: null,
+                    createdBy: 'system', 
+                    comment: null, 
+                    commentBy: null, 
+                    commentTime: null,
+                    caller: 'Иван Сидоров',
+                    phone: '+7 999-555-3333',
+                    additional: 'Двое в масках, угрожают оружием'
+                },
             ];
             units = [
-                { id: generateId(), name: 'Unit-3', status: 'available', currentCall: null, createdBy: 'system' },
-                { id: generateId(), name: 'Unit-7', status: 'en-route', currentCall: null, createdBy: 'system' },
-                { id: generateId(), name: 'Unit-12', status: 'busy', currentCall: null, createdBy: 'system' },
+                { id: generateId(), name: 'Unit-3', status: 'busy', currentCall: calls[0].id, createdBy: 'system' },
+                { id: generateId(), name: 'Unit-7', status: 'busy', currentCall: calls[2].id, createdBy: 'system' },
+                { id: generateId(), name: 'Unit-12', status: 'available', currentCall: null, createdBy: 'system' },
                 { id: generateId(), name: 'Unit-5', status: 'briefing', currentCall: null, createdBy: 'system' },
             ];
             archive = [
-                { id: generateId(), street: 'Центральная, 15', desc: 'Ограбление банка', priority: 'high', time: '14:23', status: 'resolved', resolvedTime: '15:10:22', assignedTo: 'Unit-3', assignedByName: 'admin', createdBy: 'system', comment: 'Задержан грабитель' },
-                { id: generateId(), street: 'Лесная, 7', desc: 'Пожар в подвале', priority: 'high', time: '13:45', status: 'resolved', resolvedTime: '14:30:15', assignedTo: 'Unit-7', assignedByName: 'admin', createdBy: 'system', comment: null },
+                { 
+                    id: generateId(), 
+                    street: 'Лесная, 7', 
+                    desc: 'Пожар в подвале', 
+                    priority: 'high', 
+                    time: '13:45', 
+                    status: 'resolved', 
+                    resolvedTime: '14:30:15', 
+                    assignedTo: 'Unit-7', 
+                    assignedByName: 'admin', 
+                    createdBy: 'system', 
+                    comment: 'Пожар потушен, пострадавших нет',
+                    caller: 'Мария Иванова',
+                    phone: '+7 999-111-2222',
+                    additional: 'Дым в подвале, запах гари'
+                },
+                { 
+                    id: generateId(), 
+                    street: 'Советская, 3', 
+                    desc: 'Ложный вызов', 
+                    priority: 'low', 
+                    time: '12:10', 
+                    status: 'rejected', 
+                    resolvedTime: '12:25:40', 
+                    assignedTo: null, 
+                    assignedByName: null, 
+                    createdBy: 'system', 
+                    comment: null,
+                    caller: 'Неизвестный',
+                    phone: '+7 999-000-0000',
+                    additional: 'Вызов оказался ложным',
+                    rejectReason: 'Ложный вызов, абонент не отвечает'
+                },
             ];
             renderCalls();
             renderUnits();
@@ -2336,12 +2705,61 @@
             }
             if (calls.length > 0 && !confirm('Заменить вызовы на тестовые?')) return;
             calls = [
-                { id: generateId(), street: 'Океанская, 7', desc: 'Неизвестный предмет', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system', comment: null, commentBy: null, commentTime: null },
-                { id: generateId(), street: 'Центр, пл. Победы', desc: 'Массовая драка', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system', comment: null, commentBy: null, commentTime: null },
-                { id: generateId(), street: 'Западное шоссе', desc: 'Поломка светофора', priority: 'low', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system', comment: null, commentBy: null, commentTime: null },
+                { 
+                    id: generateId(), 
+                    street: 'Океанская, 7', 
+                    desc: 'Неизвестный предмет', 
+                    priority: 'high', 
+                    time: getTime(), 
+                    status: 'pending', 
+                    assignedTo: null, 
+                    assignedByName: null, 
+                    createdBy: currentUser ? currentUser.login : 'system', 
+                    comment: null, 
+                    commentBy: null, 
+                    commentTime: null,
+                    caller: 'Сергей Волков',
+                    phone: '+7 999-777-8888',
+                    additional: 'Подозрительный предмет у метро'
+                },
+                { 
+                    id: generateId(), 
+                    street: 'Центр, пл. Победы', 
+                    desc: 'Массовая драка', 
+                    priority: 'high', 
+                    time: getTime(), 
+                    status: 'pending', 
+                    assignedTo: null, 
+                    assignedByName: null, 
+                    createdBy: currentUser ? currentUser.login : 'system', 
+                    comment: null, 
+                    commentBy: null, 
+                    commentTime: null,
+                    caller: 'Елена Смирнова',
+                    phone: '+7 999-444-5555',
+                    additional: 'Группа из 10 человек, есть пострадавшие'
+                },
+                { 
+                    id: generateId(), 
+                    street: 'Западное шоссе', 
+                    desc: 'Поломка светофора', 
+                    priority: 'low', 
+                    time: getTime(), 
+                    status: 'pending', 
+                    assignedTo: null, 
+                    assignedByName: null, 
+                    createdBy: currentUser ? currentUser.login : 'system', 
+                    comment: null, 
+                    commentBy: null, 
+                    commentTime: null,
+                    caller: 'Дмитрий Кузнецов',
+                    phone: '+7 999-222-3333',
+                    additional: 'Светофор не работает, пробка'
+                },
             ];
             renderCalls();
             saveData();
+            addLog('Сброс вызовов', 'Загружены тестовые вызовы', 'info', currentUser?.login);
         }
 
         function clearAllCalls() {
@@ -2354,6 +2772,7 @@
                 calls = [];
                 renderCalls();
                 saveData();
+                addLog('Очистка вызовов', 'Все активные вызовы удалены', 'danger', currentUser?.login);
             }
         }
 
@@ -2368,6 +2787,7 @@
                 renderArchive();
                 updateArchiveCounters();
                 saveData();
+                addLog('Очистка архива', 'Все записи архива удалены', 'danger', currentUser?.login);
             }
         }
 
@@ -2380,14 +2800,20 @@
             text += `Дата: ${new Date().toLocaleString()}\n`;
             text += '='.repeat(50) + '\n\n';
             archive.forEach((item, idx) => {
-                const statusLabel = item.status === 'resolved' ? 'ЗАВЕРШЁН' : 'ОТМЕНЁН';
+                const statusLabel = item.status === 'resolved' ? 'ЗАВЕРШЁН' : 'ОТКЛОНЁН';
+                const priorityLabel = item.priority === 'high' ? 'ВЫСОКИЙ' : 
+                                     item.priority === 'medium' ? 'СРЕДНИЙ' : 
+                                     item.priority === 'low' ? 'НИЗКИЙ' : 'НЕ ЗАДАН';
                 text += `#${idx+1} | ${item.street}\n`;
                 text += `  Описание: ${item.desc}\n`;
-                text += `  Приоритет: ${item.priority.toUpperCase()}\n`;
-                text += `  Время: ${item.time}\n`;
-                text += `  Завершён: ${item.resolvedTime}\n`;
+                text += `  Заявитель: ${item.caller || 'Неизвестно'}\n`;
+                text += `  Телефон: ${item.phone || 'Не указан'}\n`;
+                text += `  Приоритет: ${priorityLabel}\n`;
+                text += `  Время вызова: ${item.time}\n`;
+                text += `  Время завершения: ${item.resolvedTime}\n`;
                 text += `  Назначен: ${item.assignedTo || 'не назначен'}\n`;
                 text += `  Комментарий: ${item.comment || 'нет'}\n`;
+                if (item.rejectReason) text += `  Причина отклонения: ${item.rejectReason}\n`;
                 text += `  Статус: ${statusLabel}\n`;
                 text += '-'.repeat(40) + '\n';
             });
@@ -2402,10 +2828,11 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            addLog('Экспорт архива', `Экспортировано ${archive.length} записей`, 'info', currentUser?.login);
         }
 
         // ============================================
-        // 15. АДМИН ФУНКЦИИ
+        // 18. АДМИН ФУНКЦИИ
         // ============================================
         function applyEditCall() {
             if (!hasPermission('editCalls')) {
@@ -2429,6 +2856,7 @@
             calls[id].priority = priority;
             renderCalls();
             saveData();
+            addLog('Редактирование вызова', `Вызов #${id} изменён`, 'warning', currentUser?.login);
             alert('✅ Вызов обновлён');
         }
 
@@ -2439,6 +2867,7 @@
                 users: users,
                 roles: ROLES_CONFIG,
                 title: TITLE_CONFIG,
+                logs: systemLogs,
                 timestamp: new Date().toISOString() 
             };
             const json = JSON.stringify(data, null, 2);
@@ -2451,6 +2880,7 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            addLog('Экспорт данных', 'Все данные экспортированы', 'info', currentUser?.login);
         }
 
         function importData(file) {
@@ -2485,6 +2915,11 @@
                                 saveTitleConfig();
                                 applyTitleConfig();
                             }
+                            if (data.logs) {
+                                systemLogs = data.logs;
+                                renderLogs();
+                                saveLogs();
+                            }
                             renderCalls();
                             renderUnits();
                             renderArchive();
@@ -2492,6 +2927,7 @@
                             saveData();
                             saveUsers();
                             saveConfig();
+                            addLog('Импорт данных', 'Данные импортированы', 'success', currentUser?.login);
                             alert('✅ Импорт успешен!');
                         }
                     } else {
@@ -2513,19 +2949,22 @@
                 calls = [];
                 units = [];
                 archive = [];
+                systemLogs = [];
                 renderCalls();
                 renderUnits();
                 renderArchive();
+                renderLogs();
                 saveData();
+                saveLogs();
+                addLog('Сброс данных', 'Все данные сброшены', 'danger', currentUser?.login);
                 alert('✅ Данные сброшены');
             }
         }
 
         // ============================================
-        // 16. НАСТРОЙКИ СИСТЕМЫ
+        // 19. НАСТРОЙКИ СИСТЕМЫ
         // ============================================
         function applySystemSettings() {
-            // Применяем настройки темы
             if (CONFIG.THEME === 'light') {
                 document.body.style.background = '#f0f2f5';
                 document.body.style.color = '#1a1a2e';
@@ -2578,7 +3017,167 @@
         }
 
         // ============================================
-        // 17. DOM ЭЛЕМЕНТЫ
+        // 20. РОЛИ (UI)
+        // ============================================
+        function renderRoleSettings() {
+            const container = document.getElementById('roleSettings');
+            if (!container) return;
+            
+            const permissionLabels = {
+                viewCalls: 'Просмотр вызовов',
+                viewArchive: 'Просмотр архива',
+                createCalls: 'Создание вызовов',
+                viewUnits: 'Просмотр юнитов',
+                assignUnits: 'Назначение юнитов',
+                changeCallStatus: 'Изменение статуса вызовов',
+                changeUnitStatus: 'Изменение статуса юнитов',
+                releaseUnit: 'Освобождение юнитов',
+                createUnits: 'Создание юнитов',
+                addComment: 'Добавление комментариев',
+                editCalls: 'Редактирование вызовов',
+                deleteCalls: 'Удаление вызовов',
+                manageUsers: 'Управление пользователями',
+                manageRoles: 'Управление ролями',
+                manageSettings: 'Управление настройками',
+                viewLogs: 'Просмотр логов'
+            };
+            
+            let html = '';
+            for (const [roleKey, roleData] of Object.entries(ROLES_CONFIG)) {
+                const roleIcon = roleData.icon || '👤';
+                const roleName = roleData.name || roleKey;
+                html += `
+                    <div class="setting-row">
+                        <div style="min-width:120px; font-weight:600; color:#e2e8f0;">${roleIcon} ${roleName}</div>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                `;
+                for (const [permKey, permValue] of Object.entries(roleData.permissions)) {
+                    const label = permissionLabels[permKey] || permKey;
+                    html += `
+                        <label style="font-size:13px; color:#94a3b8; display:flex; align-items:center; gap:4px; cursor:pointer;">
+                            <input type="checkbox" class="role-perm-checkbox" 
+                                   data-role="${roleKey}" data-perm="${permKey}"
+                                   ${permValue ? 'checked' : ''}>
+                            ${label}
+                        </label>
+                    `;
+                }
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+            
+            container.querySelectorAll('.role-perm-checkbox').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const role = this.dataset.role;
+                    const perm = this.dataset.perm;
+                    if (ROLES_CONFIG[role]) {
+                        ROLES_CONFIG[role].permissions[perm] = this.checked;
+                    }
+                });
+            });
+        }
+
+        function resetRoleSettingsToDefault() {
+            const defaultRoles = {
+                civilian: {
+                    name: 'Гражданский',
+                    icon: '👤',
+                    permissions: {
+                        viewCalls: true,
+                        viewArchive: true,
+                        createCalls: true,
+                        viewUnits: true,
+                        assignUnits: false,
+                        changeCallStatus: false,
+                        changeUnitStatus: false,
+                        releaseUnit: false,
+                        createUnits: false,
+                        addComment: false,
+                        editCalls: false,
+                        deleteCalls: false,
+                        manageUsers: false,
+                        manageRoles: false,
+                        manageSettings: false,
+                        viewLogs: false
+                    }
+                },
+                user: {
+                    name: 'Пользователь',
+                    icon: '👤',
+                    permissions: {
+                        viewCalls: true,
+                        viewArchive: true,
+                        createCalls: true,
+                        viewUnits: true,
+                        assignUnits: false,
+                        changeCallStatus: false,
+                        changeUnitStatus: false,
+                        releaseUnit: false,
+                        createUnits: false,
+                        addComment: false,
+                        editCalls: false,
+                        deleteCalls: false,
+                        manageUsers: false,
+                        manageRoles: false,
+                        manageSettings: false,
+                        viewLogs: false
+                    }
+                },
+                dispatcher: {
+                    name: 'Диспетчер',
+                    icon: '📡',
+                    permissions: {
+                        viewCalls: true,
+                        viewArchive: true,
+                        createCalls: false,
+                        viewUnits: true,
+                        assignUnits: true,
+                        changeCallStatus: true,
+                        changeUnitStatus: true,
+                        releaseUnit: true,
+                        createUnits: true,
+                        addComment: true,
+                        editCalls: true,
+                        deleteCalls: false,
+                        manageUsers: false,
+                        manageRoles: false,
+                        manageSettings: false,
+                        viewLogs: true
+                    }
+                },
+                admin: {
+                    name: 'Администратор',
+                    icon: '👑',
+                    permissions: {
+                        viewCalls: true,
+                        viewArchive: true,
+                        createCalls: false,
+                        viewUnits: true,
+                        assignUnits: true,
+                        changeCallStatus: true,
+                        changeUnitStatus: true,
+                        releaseUnit: true,
+                        createUnits: true,
+                        addComment: true,
+                        editCalls: true,
+                        deleteCalls: true,
+                        manageUsers: true,
+                        manageRoles: true,
+                        manageSettings: true,
+                        viewLogs: true
+                    }
+                }
+            };
+            Object.assign(ROLES_CONFIG, defaultRoles);
+            saveRoleSettings();
+            renderRoleSettings();
+        }
+
+        // ============================================
+        // 21. DOM ЭЛЕМЕНТЫ
         // ============================================
         const callListEl = document.getElementById('callList');
         const unitListEl = document.getElementById('unitList');
@@ -2604,7 +3203,9 @@
 
         const streetInput = document.getElementById('streetInput');
         const descInput = document.getElementById('descInput');
-        const prioritySelect = document.getElementById('prioritySelect');
+        const callerInput = document.getElementById('callerInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const additionalInfoInput = document.getElementById('additionalInfoInput');
         const addCallBtn = document.getElementById('addCallBtn');
 
         const unitNameInput = document.getElementById('unitNameInput');
@@ -2645,6 +3246,12 @@
         const newUserRole = document.getElementById('newUserRole');
         const addUserBtn = document.getElementById('addUserBtn');
 
+        const saveRoleSettingsBtn = document.getElementById('saveRoleSettingsBtn');
+        const resetRoleSettingsBtn = document.getElementById('resetRoleSettingsBtn');
+
+        const clearLogsBtn = document.getElementById('clearLogsBtn');
+        const exportLogsBtn = document.getElementById('exportLogsBtn');
+
         // Модальные окна
         const authModal = document.getElementById('authModal');
         const authModalTitle = document.getElementById('authModalTitle');
@@ -2680,19 +3287,8 @@
         let statusTargetType = null;
         let statusTargetId = null;
 
-        // Модалка редактирования приписок
-        const badgeEditModal = document.getElementById('badgeEditModal');
-        const badgeEditMain = document.getElementById('badgeEditMain');
-        const badgeEditLeft = document.getElementById('badgeEditLeft');
-        const badgeEditRight = document.getElementById('badgeEditRight');
-        const badgePreviewMain = document.getElementById('badgePreviewMain');
-        const badgePreviewLeft = document.getElementById('badgePreviewLeft');
-        const badgePreviewRight = document.getElementById('badgePreviewRight');
-        const badgeEditSaveBtn = document.getElementById('badgeEditSaveBtn');
-        const badgeEditCancelBtn = document.getElementById('badgeEditCancelBtn');
-
         // ============================================
-        // 18. UI ОБНОВЛЕНИЕ
+        // 22. UI ОБНОВЛЕНИЕ
         // ============================================
         function updateUI() {
             if (currentUser) {
@@ -2709,7 +3305,8 @@
                 roleBadge.textContent = roleLabels[currentUser.role] || '👤 Пользователь';
                 roleBadge.className = 'role-badge ' + currentUser.role;
 
-                adminTabBtn.style.display = hasPermission('manageSettings') || hasPermission('manageUsers') || hasPermission('manageRoles') ? 'inline-block' : 'none';
+                const showAdmin = hasPermission('manageSettings') || hasPermission('manageUsers') || hasPermission('manageRoles') || hasPermission('viewLogs');
+                adminTabBtn.style.display = showAdmin ? 'inline-block' : 'none';
                 if (hasPermission('manageSettings')) adminRoleBadge.textContent = '🔐 Админ';
                 
                 authToggleBtn.textContent = '🚪 Выйти';
@@ -2725,7 +3322,7 @@
         }
 
         // ============================================
-        // 19. АВТОРИЗАЦИЯ
+        // 23. АВТОРИЗАЦИЯ
         // ============================================
         let isLoginMode = true;
 
@@ -2811,7 +3408,7 @@
         }
 
         // ============================================
-        // 20. ОБРАБОТЧИКИ СОБЫТИЙ
+        // 24. ОБРАБОТЧИКИ СОБЫТИЙ
         // ============================================
 
         // Вкладки
@@ -2824,23 +3421,24 @@
                 if (this.dataset.tab === 'archive') {
                     renderArchive();
                 }
-                if (this.dataset.tab === 'admin' && !hasPermission('manageSettings') && !hasPermission('manageUsers') && !hasPermission('manageRoles')) {
-                    alert('⚠️ У вас нет прав на управление системой!');
-                    document.querySelector('[data-tab="main"]').click();
-                    return;
+                if (this.dataset.tab === 'admin') {
+                    // Проверяем права
+                    if (!hasPermission('viewLogs') && !hasPermission('manageUsers') && !hasPermission('manageRoles') && !hasPermission('manageSettings')) {
+                        alert('⚠️ У вас нет прав на управление системой!');
+                        document.querySelector('[data-tab="main"]').click();
+                        return;
+                    }
                 }
             });
         });
 
-        // Кнопка входа/выхода - ОСНОВНАЯ ФИКСАЦИЯ
+        // Кнопка входа/выхода
         authToggleBtn.addEventListener('click', function() {
             if (currentUser) {
-                // Если пользователь залогинен - выходим
                 if (confirm('Вы уверены, что хотите выйти из системы?')) {
                     logoutUser();
                 }
             } else {
-                // Если не залогинен - показываем модалку входа
                 showAuthModal('login');
             }
         });
@@ -2866,7 +3464,13 @@
 
         // Добавление вызова
         addCallBtn.addEventListener('click', function() {
-            addCall(streetInput.value, descInput.value, prioritySelect.value);
+            addCall(streetInput.value, descInput.value, callerInput.value, phoneInput.value, additionalInfoInput.value);
+            // Очищаем поля после добавления
+            streetInput.value = '';
+            descInput.value = '';
+            callerInput.value = '';
+            phoneInput.value = '';
+            additionalInfoInput.value = '';
         });
 
         // Добавление юнита
@@ -2905,6 +3509,9 @@
             renderUnits();
             renderArchive();
             renderUsersList();
+            renderRoleSettings();
+            renderLogs();
+            addLog('Обновление данных', 'Администратор обновил данные', 'info', currentUser?.login);
         });
 
         // Настройка названия
@@ -2921,6 +3528,7 @@
             TITLE_CONFIG.main = name;
             saveTitleConfig();
             applyTitleConfig();
+            addLog('Изменение названия', `Новое название: ${name}`, 'warning', currentUser?.login);
             alert('✅ Название изменено!');
         });
 
@@ -2937,6 +3545,7 @@
             TITLE_CONFIG.leftBadge = badge;
             saveTitleConfig();
             applyTitleConfig();
+            addLog('Изменение приписки', `Левая приписка: ${badge}`, 'warning', currentUser?.login);
             alert('✅ Приписка изменена!');
         });
 
@@ -2953,6 +3562,7 @@
             TITLE_CONFIG.rightBadge = badge;
             saveTitleConfig();
             applyTitleConfig();
+            addLog('Изменение приписки', `Правая приписка: ${badge}`, 'warning', currentUser?.login);
             alert('✅ Приписка изменена!');
         });
 
@@ -2962,28 +3572,33 @@
                 alert('⛔ У вас нет прав на изменение приписок');
                 return;
             }
-            badgeEditMain.value = TITLE_CONFIG.main;
-            badgeEditLeft.value = TITLE_CONFIG.leftBadge;
-            badgeEditRight.value = TITLE_CONFIG.rightBadge;
-            updateBadgePreview();
-            badgeEditModal.classList.add('active');
+            const modal = document.getElementById('badgeEditModal');
+            if (modal) {
+                document.getElementById('badgeEditMain').value = TITLE_CONFIG.main;
+                document.getElementById('badgeEditLeft').value = TITLE_CONFIG.leftBadge;
+                document.getElementById('badgeEditRight').value = TITLE_CONFIG.rightBadge;
+                updateBadgePreview();
+                modal.classList.add('active');
+            }
         });
 
-        // Обновление превью в модалке
         function updateBadgePreview() {
-            badgePreviewMain.textContent = badgeEditMain.value || 'Название';
-            badgePreviewLeft.textContent = badgeEditLeft.value || 'Бейдж';
-            badgePreviewRight.textContent = badgeEditRight.value || 'v1.0';
+            const main = document.getElementById('badgeEditMain');
+            const left = document.getElementById('badgeEditLeft');
+            const right = document.getElementById('badgeEditRight');
+            document.getElementById('badgePreviewMain').textContent = main ? (main.value || 'Название') : 'Название';
+            document.getElementById('badgePreviewLeft').textContent = left ? (left.value || 'Бейдж') : 'Бейдж';
+            document.getElementById('badgePreviewRight').textContent = right ? (right.value || 'v1.0') : 'v1.0';
         }
 
-        badgeEditMain.addEventListener('input', updateBadgePreview);
-        badgeEditLeft.addEventListener('input', updateBadgePreview);
-        badgeEditRight.addEventListener('input', updateBadgePreview);
+        document.getElementById('badgeEditMain')?.addEventListener('input', updateBadgePreview);
+        document.getElementById('badgeEditLeft')?.addEventListener('input', updateBadgePreview);
+        document.getElementById('badgeEditRight')?.addEventListener('input', updateBadgePreview);
 
-        badgeEditSaveBtn.addEventListener('click', function() {
-            const main = badgeEditMain.value.trim();
-            const left = badgeEditLeft.value.trim();
-            const right = badgeEditRight.value.trim();
+        document.getElementById('badgeEditSaveBtn')?.addEventListener('click', function() {
+            const main = document.getElementById('badgeEditMain').value.trim();
+            const left = document.getElementById('badgeEditLeft').value.trim();
+            const right = document.getElementById('badgeEditRight').value.trim();
             
             if (!main) {
                 alert('Введите основное название');
@@ -2996,15 +3611,16 @@
             
             saveTitleConfig();
             applyTitleConfig();
-            badgeEditModal.classList.remove('active');
+            document.getElementById('badgeEditModal').classList.remove('active');
+            addLog('Изменение приписок', `Название: ${main} [${left}] [${right}]`, 'warning', currentUser?.login);
             alert('✅ Приписки обновлены!');
         });
 
-        badgeEditCancelBtn.addEventListener('click', function() {
-            badgeEditModal.classList.remove('active');
+        document.getElementById('badgeEditCancelBtn')?.addEventListener('click', function() {
+            document.getElementById('badgeEditModal').classList.remove('active');
         });
 
-        badgeEditModal.addEventListener('click', function(e) {
+        document.getElementById('badgeEditModal')?.addEventListener('click', function(e) {
             if (e.target === this) this.classList.remove('active');
         });
 
@@ -3017,6 +3633,7 @@
             CONFIG.THEME = themeSelector.value;
             applySystemSettings();
             saveConfig();
+            addLog('Изменение темы', `Новая тема: ${themeSelector.value}`, 'info', currentUser?.login);
             alert('✅ Тема применена!');
         });
 
@@ -3029,6 +3646,7 @@
             }
             CONFIG.DEFAULT_ROLE = this.value;
             saveConfig();
+            addLog('Изменение настроек', `Роль по умолчанию: ${this.value}`, 'info', currentUser?.login);
         });
 
         autoLoginSelect.addEventListener('change', function() {
@@ -3039,6 +3657,7 @@
             }
             CONFIG.AUTO_LOGIN = this.value;
             saveConfig();
+            addLog('Изменение настроек', `Автовход: ${this.value}`, 'info', currentUser?.login);
         });
 
         // Управление пользователями
@@ -3066,6 +3685,74 @@
             } else {
                 alert('❌ ' + result.message);
             }
+        });
+
+        // Настройки ролей
+        saveRoleSettingsBtn.addEventListener('click', function() {
+            if (!hasPermission('manageRoles')) {
+                alert('⛔ У вас нет прав на управление ролями');
+                return;
+            }
+            saveRoleSettings();
+            addLog('Сохранение ролей', 'Настройки ролей сохранены', 'info', currentUser?.login);
+            alert('✅ Настройки ролей сохранены!');
+        });
+
+        resetRoleSettingsBtn.addEventListener('click', function() {
+            if (!hasPermission('manageRoles')) {
+                alert('⛔ У вас нет прав на управление ролями');
+                return;
+            }
+            if (confirm('Сбросить настройки ролей к стандартным?')) {
+                resetRoleSettingsToDefault();
+                addLog('Сброс ролей', 'Настройки ролей сброшены к стандартным', 'warning', currentUser?.login);
+                alert('✅ Настройки сброшены!');
+            }
+        });
+
+        // Логи
+        clearLogsBtn.addEventListener('click', function() {
+            if (!hasPermission('viewLogs')) {
+                alert('⛔ У вас нет прав на просмотр логов');
+                return;
+            }
+            if (confirm('Очистить все логи?')) {
+                systemLogs = [];
+                renderLogs();
+                saveLogs();
+                addLog('Очистка логов', 'Все логи очищены', 'danger', currentUser?.login);
+            }
+        });
+
+        exportLogsBtn.addEventListener('click', function() {
+            if (!hasPermission('viewLogs')) {
+                alert('⛔ У вас нет прав на просмотр логов');
+                return;
+            }
+            if (systemLogs.length === 0) {
+                alert('Логов нет');
+                return;
+            }
+            let text = '=== ЛОГИ СИСТЕМЫ ===\n';
+            text += `Дата: ${new Date().toLocaleString()}\n`;
+            text += '='.repeat(50) + '\n\n';
+            systemLogs.forEach(log => {
+                text += `[${log.time}] ${log.user} | ${log.action}`;
+                if (log.detail) text += ` | ${log.detail}`;
+                text += ` [${log.type}]\n`;
+            });
+            text += '\nВсего: ' + systemLogs.length;
+
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `logs_911_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            addLog('Экспорт логов', `Экспортировано ${systemLogs.length} записей`, 'info', currentUser?.login);
         });
 
         // Модальные окна: Назначение
@@ -3096,14 +3783,17 @@
             
             unit.status = 'busy';
             unit.currentCall = call.id;
-            call.status = 'assigned';
             call.assignedTo = unit.name;
             call.assignedByName = currentUser ? currentUser.login : 'system';
+            if (call.status === 'pending') {
+                call.status = 'active';
+            }
             
             assignModal.classList.remove('active');
             renderCalls();
             renderUnits();
             saveData();
+            addLog('Назначение юнита', `${unit.name} → ${call.street}`, 'success', currentUser?.login);
         });
 
         assignCancelBtn.addEventListener('click', function() {
@@ -3139,14 +3829,31 @@
             if (statusTargetType === 'call') {
                 const call = calls.find(c => c.id === statusTargetId);
                 if (!call) return;
+                const oldStatus = call.status;
                 call.status = newStatus;
-                if (newStatus === 'completed' || newStatus === 'cancelled') {
-                    const status = newStatus === 'completed' ? 'resolved' : 'cancelled';
-                    addToArchive(call, status);
+                
+                if (newStatus === 'completed') {
+                    if (call.assignedTo) {
+                        const unit = units.find(u => u.name === call.assignedTo);
+                        if (unit) {
+                            unit.status = 'available';
+                            unit.currentCall = null;
+                        }
+                    }
+                    addToArchive(call, 'resolved');
                     calls = calls.filter(c => c.id !== statusTargetId);
+                    addLog('Завершение вызова', `${call.street} (статус: ${oldStatus} → ${newStatus})`, 'success', currentUser?.login);
+                } else if (newStatus === 'rejected') {
+                    addToArchive(call, 'rejected');
+                    calls = calls.filter(c => c.id !== statusTargetId);
+                    addLog('Отклонение вызова', `${call.street} (статус: ${oldStatus} → ${newStatus})`, 'danger', currentUser?.login);
+                } else {
+                    addLog('Изменение статуса вызова', `${call.street} (${oldStatus} → ${newStatus})`, 'info', currentUser?.login);
                 }
+                
                 renderCalls();
                 renderArchive();
+                renderUnits();
                 saveData();
             }
             statusModal.classList.remove('active');
@@ -3163,10 +3870,13 @@
         // Enter в полях
         streetInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallBtn.click(); });
         descInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallBtn.click(); });
+        callerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallBtn.click(); });
+        phoneInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallBtn.click(); });
+        additionalInfoInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallBtn.click(); });
         unitNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addUnitBtn.click(); });
 
         // ============================================
-        // 21. ЗАПУСК
+        // 25. ЗАПУСК
         // ============================================
         
         // Загружаем все настройки
@@ -3174,10 +3884,11 @@
         loadTitleConfig();
         loadRoleSettings();
         loadUsers();
+        loadLogs();
         applySystemSettings();
         applyTitleConfig();
 
-        // Устанавливаем гражданского по умолчанию, если он есть
+        // Устанавливаем гражданского по умолчанию
         const defaultUser = findUser('civilian');
         if (defaultUser) {
             currentUser = defaultUser;
@@ -3200,12 +3911,14 @@
 
         updateUI();
         renderUsersList();
+        renderRoleSettings();
 
+        addLog('Система запущена', '911 Диспетчерский Центр активирован', 'success', 'Система');
         console.log('🚀 911 Диспетчерский Центр запущен');
         console.log('👤 По умолчанию вы вошли как Гражданский');
         console.log('🔑 Для входа как диспетчер: dispatcher / 123456');
         console.log('🔑 Для входа как администратор: admin / admin123');
-        console.log('✏️ Нажмите на кнопку с карандашом рядом с названием, чтобы изменить приписки');
+        console.log('📋 Вызовы создаются без приоритета, диспетчер назначает при принятии');
 
     })();
 </script>
