@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Диспетчер 911 | RP Проект</title>
+    <style>
+        /* ----- ГЛОБАЛЬНЫЙ СТИЛЬ ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: #0b0e14;
+            color: #e8edf2;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        .dashboard {
+            background: #141a22;
+            border-radius: 32px;
+            padding: 28px 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+            border: 1px solid #2c3540;
+        }
+
+        /* ----- ШАПКА ----- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            border-bottom: 2px solid #1f2937;
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+        }
+
+        .logo h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .logo span {
+            color: #ef4444;
+            background: #2c1a1a;
+            padding: 2px 14px;
+            border-radius: 40px;
+            font-size: 18px;
+            margin-left: 10px;
+            border: 1px solid #7f1d1d;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            background: #1e2a3a;
+            padding: 10px 22px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            border: 1px solid #334155;
+        }
+        .live-dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+            box-shadow: 0 0 12px #22c55e88;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .role-badge {
+            background: #1f2937;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            border: 1px solid #374151;
+        }
+        .role-badge.admin {
+            background: #1e2a4a;
+            border-color: #3b82f6;
+            color: #60a5fa;
+        }
+        .role-badge.dispatcher {
+            background: #1a2a1a;
+            border-color: #22c55e;
+            color: #4ade80;
+        }
+        .role-badge.user {
+            background: #1f2937;
+            border-color: #374151;
+            color: #9ca3af;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #0f171f;
+            padding: 4px 16px 4px 12px;
+            border-radius: 40px;
+            border: 1px solid #25303e;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+        }
+
+        /* ----- ВКЛАДКИ ----- */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #1f2937;
+            padding-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #8a9bb0;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 12px 12px 0 0;
+            transition: 0.2s;
+            position: relative;
+        }
+        .tab-btn:hover {
+            color: #e8edf2;
+            background: #1a212b;
+        }
+        .tab-btn.active {
+            color: #60a5fa;
+            background: #1a212b;
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ----- СЕТКА ----- */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+        }
+
+        @media (max-width: 1200px) {
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 900px) {
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ----- КАРТОЧКИ ----- */
+        .card {
+            background: #1a212b;
+            border-radius: 24px;
+            padding: 22px 24px;
+            border: 1px solid #2a3543;
+            transition: 0.15s;
+        }
+        .card:hover {
+            border-color: #3e4d5f;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #b9c7db;
+        }
+
+        /* ----- ВЫЗОВЫ ----- */
+        .call-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+        .call-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .call-list::-webkit-scrollbar-track {
+            background: #0f161e;
+            border-radius: 12px;
+        }
+        .call-list::-webkit-scrollbar-thumb {
+            background: #3b4a5c;
+            border-radius: 12px;
+        }
+
+        .call-item {
+            background: #0f171f;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border-left: 6px solid #f59e0b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            transition: 0.1s;
+        }
+        .call-item.priority-high {
+            border-left-color: #ef4444;
+            background: #1e1418;
+        }
+        .call-item.priority-low {
+            border-left-color: #22c55e;
+        }
+        .call-item.assigned {
+            border-left-color: #3b82f6;
+            background: #141e30;
+        }
+        .call-item.completed {
+            border-left-color: #22c55e;
+            background: #0f1f1a;
+            opacity: 0.7;
+        }
+        .call-item .call-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 150px;
+        }
+        .call-item .call-street {
+            font-weight: 600;
+            font-size: 17px;
+        }
+        .call-item .call-desc {
+            font-size: 14px;
+            color: #9aaec9;
+        }
+        .call-item .call-time {
+            font-size: 13px;
+            color: #6a7f99;
+        }
+        .call-item .call-assigned {
+            font-size: 12px;
+            color: #60a5fa;
+            background: #1a1f3a;
+            padding: 2px 12px;
+            border-radius: 40px;
+            display: inline-block;
+        }
+        .call-item .call-status {
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 40px;
+            display: inline-block;
+        }
+        .call-item .call-status.pending {
+            background: #1a1a2a;
+            color: #facc15;
+        }
+        .call-item .call-status.assigned {
+            background: #1a1f3a;
+            color: #60a5fa;
+        }
+        .call-item .call-status.completed {
+            background: #064e3b;
+            color: #4ade80;
+        }
+
+        .btn {
+            border: none;
+            background: #2a3a4e;
+            color: white;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #3f5167;
+        }
+        .btn:hover {
+            background: #3a4e66;
+            transform: scale(1.02);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-primary {
+            background: #2563eb;
+            border-color: #3b82f6;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        .btn-success {
+            background: #16a34a;
+            border-color: #22c55e;
+        }
+        .btn-success:hover {
+            background: #15803d;
+        }
+        .btn-danger {
+            background: #b91c1c;
+            border-color: #dc2626;
+        }
+        .btn-danger:hover {
+            background: #991b1b;
+        }
+        .btn-warning {
+            background: #d97706;
+            border-color: #f59e0b;
+        }
+        .btn-warning:hover {
+            background: #b45309;
+        }
+        .btn-sm {
+            padding: 5px 14px;
+            font-size: 13px;
+        }
+        .btn-xs {
+            padding: 3px 10px;
+            font-size: 12px;
+        }
+
+        /* ----- ФОРМЫ ----- */
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .form-row input, .form-row select {
+            flex: 1 1 140px;
+            background: #0f171f;
+            border: 1px solid #2b3a4b;
+            border-radius: 40px;
+            padding: 12px 18px;
+            color: #e8edf2;
+            font-size: 14px;
+            outline: none;
+            transition: 0.1s;
+        }
+        .form-row input:focus, .form-row select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px #1e3a5f;
+        }
+
+        /* ----- ЮНИТЫ ----- */
+        .unit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .unit-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .unit-list::-webkit-scrollbar-thumb {
+            background: #3b4a5c;
+            border-radius: 12px;
+        }
+        .unit-item {
+            background: #0f171f;
+            padding: 12px 18px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #25303e;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .unit-item.available {
+            border-left: 4px solid #22c55e;
+        }
+        .unit-item.busy {
+            border-left: 4px solid #facc15;
+        }
+        .unit-item.offline {
+            border-left: 4px solid #6b7280;
+            opacity: 0.5;
+        }
+        .unit-item .unit-name {
+            font-weight: 600;
+            color: #60a5fa;
+        }
+        .unit-item .unit-status {
+            font-size: 13px;
+            padding: 2px 14px;
+            border-radius: 40px;
+        }
+        .unit-item .unit-status.available {
+            background: #064e3b;
+            color: #4ade80;
+        }
+        .unit-item .unit-status.busy {
+            background: #1a1a2a;
+            color: #facc15;
+        }
+        .unit-item .unit-status.offline {
+            background: #1f2937;
+            color: #9ca3af;
+        }
+        .unit-item .unit-call {
+            font-size: 13px;
+            color: #9aaec9;
+        }
+
+        /* ----- АРХИВ ----- */
+        .archive-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+        .archive-controls input {
+            flex: 1;
+            min-width: 180px;
+            background: #0f171f;
+            border: 1px solid #2b3a4b;
+            border-radius: 40px;
+            padding: 10px 18px;
+            color: #e8edf2;
+            font-size: 14px;
+            outline: none;
+        }
+        .archive-controls input:focus {
+            border-color: #3b82f6;
+        }
+        .archive-controls select {
+            background: #0f171f;
+            border: 1px solid #2b3a4b;
+            border-radius: 40px;
+            padding: 10px 18px;
+            color: #e8edf2;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .archive-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+        .archive-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .archive-list::-webkit-scrollbar-track {
+            background: #0f161e;
+            border-radius: 12px;
+        }
+        .archive-list::-webkit-scrollbar-thumb {
+            background: #3b4a5c;
+            border-radius: 12px;
+        }
+
+        .archive-item {
+            background: #0f171f;
+            padding: 14px 18px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-left: 4px solid #4a5a6e;
+            transition: 0.1s;
+        }
+        .archive-item:hover {
+            background: #15202b;
+        }
+        .archive-item.resolved {
+            border-left-color: #22c55e;
+        }
+        .archive-item.cancelled {
+            border-left-color: #6b7280;
+        }
+        .archive-item .archive-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .archive-item .archive-street {
+            font-weight: 600;
+        }
+        .archive-item .archive-meta {
+            font-size: 13px;
+            color: #8a9bb0;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .archive-item .archive-status {
+            font-size: 13px;
+            padding: 2px 14px;
+            border-radius: 40px;
+            background: #1f2937;
+        }
+        .archive-item .archive-status.resolved {
+            background: #064e3b;
+            color: #4ade80;
+        }
+        .archive-item .archive-status.cancelled {
+            background: #1f2937;
+            color: #9ca3af;
+        }
+
+        .empty-state {
+            color: #5e738b;
+            text-align: center;
+            padding: 28px 0;
+            font-style: italic;
+        }
+
+        /* ----- СТАТИСТИКА ----- */
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid #1f2937;
+        }
+        .stat-item {
+            background: #0f171f;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            border: 1px solid #25303e;
+        }
+        .stat-item strong {
+            color: #facc15;
+            font-size: 18px;
+        }
+        .stat-item .archive-count {
+            color: #60a5fa;
+        }
+
+        .badge {
+            background: #1f2937;
+            padding: 0 14px;
+            border-radius: 40px;
+            font-size: 15px;
+            margin-left: auto;
+        }
+
+        /* ----- АДМИН ПАНЕЛЬ ----- */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 700px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .admin-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .admin-field label {
+            font-size: 14px;
+            color: #9aaec9;
+            font-weight: 500;
+        }
+        .admin-field input, .admin-field select {
+            background: #0f171f;
+            border: 1px solid #2b3a4b;
+            border-radius: 12px;
+            padding: 10px 16px;
+            color: #e8edf2;
+            font-size: 14px;
+            outline: none;
+            transition: 0.1s;
+        }
+        .admin-field input:focus, .admin-field select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px #1e3a5f;
+        }
+        .admin-field .hint {
+            font-size: 12px;
+            color: #6a7f99;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        /* ----- МОДАЛЬНОЕ ОКНО ----- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: #1a212b;
+            border-radius: 32px;
+            padding: 40px;
+            max-width: 440px;
+            width: 90%;
+            border: 1px solid #2a3543;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+        .modal h2 {
+            margin-bottom: 8px;
+            color: #e8edf2;
+        }
+        .modal p {
+            color: #8a9bb0;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .modal input, .modal select {
+            width: 100%;
+            background: #0f171f;
+            border: 1px solid #2b3a4b;
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: #e8edf2;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 12px;
+        }
+        .modal input:focus, .modal select:focus {
+            border-color: #3b82f6;
+        }
+        .modal .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .modal .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+        .modal .error-msg {
+            color: #ef4444;
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        .modal .error-msg.show {
+            display: block;
+        }
+        .modal .success-msg {
+            color: #4ade80;
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        .modal .success-msg.show {
+            display: block;
+        }
+
+        .settings-group {
+            background: #0f171f;
+            border-radius: 16px;
+            padding: 16px 20px;
+            border: 1px solid #25303e;
+            margin-bottom: 16px;
+        }
+        .settings-group .setting-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 6px 0;
+        }
+        .settings-group .setting-row label {
+            min-width: 140px;
+            color: #9aaec9;
+            font-size: 14px;
+        }
+        .settings-group .setting-row input, 
+        .settings-group .setting-row select {
+            flex: 1;
+            min-width: 200px;
+            background: #0a0f15;
+            border: 1px solid #2b3a4b;
+            border-radius: 12px;
+            padding: 8px 14px;
+            color: #e8edf2;
+            font-size: 14px;
+            outline: none;
+        }
+        .settings-group .setting-row input:focus,
+        .settings-group .setting-row select:focus {
+            border-color: #3b82f6;
+        }
+
+        /* ----- ПОЛЬЗОВАТЕЛИ ----- */
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .user-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .user-list::-webkit-scrollbar-thumb {
+            background: #3b4a5c;
+            border-radius: 12px;
+        }
+        .user-item {
+            background: #0f171f;
+            padding: 12px 18px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #25303e;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .user-item .user-name {
+            font-weight: 600;
+            color: #e8edf2;
+        }
+        .user-item .user-role {
+            font-size: 13px;
+            padding: 2px 14px;
+            border-radius: 40px;
+            background: #1f2937;
+        }
+        .user-item .user-role.admin {
+            background: #1e2a4a;
+            color: #60a5fa;
+        }
+        .user-item .user-role.dispatcher {
+            background: #1a2a1a;
+            color: #4ade80;
+        }
+        .user-item .user-role.user {
+            background: #1f2937;
+            color: #9ca3af;
+        }
+
+        /* Анимация для новых элементов */
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .call-item, .unit-item, .archive-item {
+            animation: slideIn 0.25s ease;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="dashboard" id="app">
+
+        <!-- ШАПКА -->
+        <div class="header">
+            <div class="logo">
+                <h1 id="systemTitle">🚨 911 ДИСПЕТЧЕР <span>RP</span></h1>
+            </div>
+            <div class="header-controls">
+                <div class="status-badge">
+                    <span class="live-dot"></span>
+                    <span>Онлайн</span>
+                </div>
+                <div class="user-info" id="userInfo" style="display:none;">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span id="userNameDisplay">Пользователь</span>
+                </div>
+                <div class="role-badge" id="roleBadge">👤 Гость</div>
+                <button class="btn btn-sm" id="authToggleBtn">🔑 Войти</button>
+            </div>
+        </div>
+
+        <!-- ВКЛАДКИ -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="main">📋 Основная панель</button>
+            <button class="tab-btn" data-tab="archive">📦 Архив вызовов <span id="archiveBadge" style="background:#1f2937; padding:0 10px; border-radius:30px; font-size:13px; margin-left:6px;">0</span></button>
+            <button class="tab-btn" data-tab="admin" id="adminTabBtn" style="display:none;">⚙️ Админ панель</button>
+        </div>
+
+        <!-- ВКЛАДКА 1: ОСНОВНАЯ -->
+        <div class="tab-content active" id="tab-main">
+            <div class="grid-3">
+                <!-- ЛЕВАЯ КОЛОНКА: ВЫЗОВЫ -->
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-title">
+                        <span>📞</span> Входящие вызовы
+                        <span class="badge" id="callCounter">0</span>
+                    </div>
+                    <div class="call-list" id="callList"></div>
+                    <div style="margin-top: 20px;">
+                        <div class="form-row">
+                            <input type="text" id="streetInput" placeholder="Улица / место">
+                            <input type="text" id="descInput" placeholder="Описание">
+                            <select id="prioritySelect">
+                                <option value="medium">Средний</option>
+                                <option value="high">🔥 Высокий</option>
+                                <option value="low">Низкий</option>
+                            </select>
+                            <button class="btn btn-primary" id="addCallBtn">➕ Добавить</button>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-sm" id="resetCallsBtn" style="background: #2d3748;">🔄 Сбросить тестовые</button>
+                        <button class="btn btn-sm btn-danger" id="clearAllCallsBtn">🗑 Очистить все</button>
+                    </div>
+                </div>
+
+                <!-- ПРАВАЯ КОЛОНКА: ЮНИТЫ -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>🚔</span> Юниты
+                        <span class="badge" id="unitCounter">0</span>
+                    </div>
+                    <div class="unit-list" id="unitList"></div>
+                    <div style="margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap;">
+                        <input type="text" id="unitNameInput" placeholder="Название юнита (напр. Unit-7)" style="flex:2; background:#0f171f; border:1px solid #2b3a4b; border-radius:40px; padding:10px 18px; color:white;">
+                        <button class="btn btn-success" id="addUnitBtn">➕ Создать юнит</button>
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">📌 Активных вызовов: <strong id="statActiveCalls">0</strong></div>
+                        <div class="stat-item">🚓 Юнитов в работе: <strong id="statBusyUnits">0</strong></div>
+                        <div class="stat-item">📦 В архиве: <strong id="statArchive" class="archive-count">0</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ВКЛАДКА 2: АРХИВ -->
+        <div class="tab-content" id="tab-archive">
+            <div class="card">
+                <div class="card-title">
+                    <span>📦</span> Архив вызовов
+                    <span class="badge" id="archiveCounter">0</span>
+                </div>
+                <div class="archive-controls">
+                    <input type="text" id="archiveSearch" placeholder="🔍 Поиск по улице или описанию...">
+                    <select id="archiveFilter">
+                        <option value="all">Все статусы</option>
+                        <option value="resolved">✅ Завершены</option>
+                        <option value="cancelled">❌ Отменены</option>
+                    </select>
+                    <button class="btn btn-danger btn-sm" id="clearArchiveBtn">🗑 Очистить архив</button>
+                </div>
+                <div class="archive-list" id="archiveList"></div>
+                <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                    <span style="color: #8a9bb0; font-size: 14px;">Всего записей: <strong id="archiveTotal">0</strong></span>
+                    <button class="btn btn-sm" id="exportArchiveBtn" style="background: #2d3748;">📥 Экспорт (TXT)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ВКЛАДКА 3: АДМИН ПАНЕЛЬ -->
+        <div class="tab-content" id="tab-admin">
+            <div class="card">
+                <div class="card-title">
+                    <span>⚙️</span> Административная панель
+                    <span class="badge" id="adminRoleBadge">🔐 Админ</span>
+                </div>
+
+                <!-- УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ -->
+                <div style="margin-bottom: 24px;">
+                    <h3 style="color: #60a5fa; margin-bottom: 12px;">👥 Управление пользователями</h3>
+                    <div class="admin-grid" style="margin-bottom: 16px;">
+                        <div class="admin-field">
+                            <label>Добавить пользователя</label>
+                            <input type="text" id="newUserLogin" placeholder="Логин">
+                            <input type="text" id="newUserPassword" placeholder="Пароль">
+                            <select id="newUserRole">
+                                <option value="user">👤 Пользователь</option>
+                                <option value="dispatcher">📡 Диспетчер</option>
+                                <option value="admin">👑 Администратор</option>
+                            </select>
+                            <button class="btn btn-success btn-sm" id="addUserBtn" style="margin-top: 8px;">➕ Добавить пользователя</button>
+                        </div>
+                        <div class="admin-field">
+                            <label>Список пользователей</label>
+                            <div class="user-list" id="userList"></div>
+                            <span class="hint">Всего пользователей: <strong id="totalUsersCount">0</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border-color: #1f2937; margin: 20px 0;">
+
+                <!-- НАСТРОЙКИ СИСТЕМЫ -->
+                <div style="margin-bottom: 24px;">
+                    <h3 style="color: #60a5fa; margin-bottom: 12px;">⚙️ Настройки системы</h3>
+                    <div class="settings-group">
+                        <div class="setting-row">
+                            <label>Название системы</label>
+                            <input type="text" id="systemNameSetting" placeholder="Название">
+                            <button class="btn btn-primary btn-sm" id="changeSystemNameBtn">Изменить</button>
+                        </div>
+                        <div class="setting-row">
+                            <label>Цветовая схема</label>
+                            <select id="themeSelector">
+                                <option value="dark">Тёмная (по умолчанию)</option>
+                                <option value="light">Светлая</option>
+                                <option value="blue">Синяя</option>
+                                <option value="red">Красная</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" id="applyThemeBtn">Применить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border-color: #1f2937; margin: 20px 0;">
+
+                <!-- Управление данными -->
+                <h3 style="color: #60a5fa; margin-bottom: 16px;">📊 Управление данными</h3>
+                <div class="admin-grid">
+                    <div class="admin-field">
+                        <label>Редактировать вызов (ID)</label>
+                        <input type="number" id="editCallId" placeholder="Номер вызова" min="0">
+                        <input type="text" id="editCallStreet" placeholder="Новая улица" style="margin-top: 6px;">
+                        <input type="text" id="editCallDesc" placeholder="Новое описание" style="margin-top: 6px;">
+                        <select id="editCallPriority" style="margin-top: 6px;">
+                            <option value="medium">Средний</option>
+                            <option value="high">🔥 Высокий</option>
+                            <option value="low">Низкий</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" id="applyEditBtn" style="margin-top: 8px;">✏️ Применить изменения</button>
+                    </div>
+                    <div class="admin-field">
+                        <label>Экспорт / Импорт</label>
+                        <button class="btn btn-sm" id="exportAllBtn" style="background: #2d3748; width:100%; margin-top:6px;">📥 Экспорт всех данных (JSON)</button>
+                        <div style="display: flex; gap: 8px; margin-top: 6px;">
+                            <input type="file" id="importFileInput" accept=".json" style="flex:1; background:#0f171f; border:1px solid #2b3a4b; border-radius:12px; padding:8px; color:#e8edf2;">
+                            <button class="btn btn-sm btn-success" id="importBtn">📤 Импорт</button>
+                        </div>
+                        <span class="hint">Импорт заменит все текущие данные</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-danger" id="resetAllDataBtn">⚠️ Сбросить все данные</button>
+                    <button class="btn btn-sm" id="refreshAdminBtn" style="background: #2d3748;">🔄 Обновить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ВХОДА/РЕГИСТРАЦИИ -->
+<div class="modal-overlay" id="authModal">
+    <div class="modal">
+        <h2 id="authModalTitle">🔐 Вход в систему</h2>
+        <p id="authModalDesc">Войдите или зарегистрируйтесь для доступа к диспетчерской</p>
+        <div class="error-msg" id="authError">❌ Ошибка</div>
+        <div class="success-msg" id="authSuccess">✅ Успешно!</div>
+        <input type="text" id="authLoginInput" placeholder="Логин">
+        <input type="password" id="authPasswordInput" placeholder="Пароль">
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+            <button class="btn btn-primary" id="authLoginBtn" style="flex:1;">Войти</button>
+            <button class="btn btn-success" id="authRegisterBtn" style="flex:1;">Зарегистрироваться</button>
+        </div>
+        <div class="modal-actions">
+            <button class="btn" id="authCancelBtn" style="flex:1;">Отмена</button>
+        </div>
+        <div style="margin-top: 12px; text-align: center; color: #6a7f99; font-size: 13px;">
+            <span id="authSwitchText">Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрируйтесь</a></span>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ НАЗНАЧЕНИЯ ЮНИТА -->
+<div class="modal-overlay" id="assignModal">
+    <div class="modal">
+        <h2>🚔 Назначить юнит на вызов</h2>
+        <p id="assignCallInfo">Вызов: ...</p>
+        <select id="assignUnitSelect" style="width:100%; background:#0f171f; border:1px solid #2b3a4b; border-radius:16px; padding:14px 18px; color:#e8edf2; font-size:16px; outline:none; margin-bottom:12px;">
+            <option value="">Выберите юнит...</option>
+        </select>
+        <div class="modal-actions">
+            <button class="btn btn-success" id="assignConfirmBtn">✅ Назначить</button>
+            <button class="btn" id="assignCancelBtn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        // ============================================
+        // 1. НАСТРОЙКИ
+        // ============================================
+        let CONFIG = {
+            SYSTEM_NAME: '🚨 911 ДИСПЕТЧЕР RP',
+            THEME: 'dark',
+        };
+
+        // ============================================
+        // 2. ПОЛЬЗОВАТЕЛИ
+        // ============================================
+        let users = [];
+        let currentUser = null;
+        let isAdmin = false;
+        let isDispatcher = false;
+
+        // ============================================
+        // 3. ОСНОВНЫЕ ДАННЫЕ
+        // ============================================
+        let calls = [];
+        let units = [];
+        let archive = [];
+        let callIdCounter = 0;
+
+        // ============================================
+        // 4. DOM
+        // ============================================
+        const callListEl = document.getElementById('callList');
+        const unitListEl = document.getElementById('unitList');
+        const archiveListEl = document.getElementById('archiveList');
+        const userListEl = document.getElementById('userList');
+        const callCounter = document.getElementById('callCounter');
+        const unitCounter = document.getElementById('unitCounter');
+        const archiveCounter = document.getElementById('archiveCounter');
+        const archiveBadge = document.getElementById('archiveBadge');
+        const statActiveCalls = document.getElementById('statActiveCalls');
+        const statBusyUnits = document.getElementById('statBusyUnits');
+        const statArchive = document.getElementById('statArchive');
+        const archiveTotal = document.getElementById('archiveTotal');
+        const totalUsersCount = document.getElementById('totalUsersCount');
+        const roleBadge = document.getElementById('roleBadge');
+        const adminTabBtn = document.getElementById('adminTabBtn');
+        const adminRoleBadge = document.getElementById('adminRoleBadge');
+        const userInfo = document.getElementById('userInfo');
+        const userAvatar = document.getElementById('userAvatar');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const authToggleBtn = document.getElementById('authToggleBtn');
+        const systemTitle = document.getElementById('systemTitle');
+
+        const streetInput = document.getElementById('streetInput');
+        const descInput = document.getElementById('descInput');
+        const prioritySelect = document.getElementById('prioritySelect');
+        const addCallBtn = document.getElementById('addCallBtn');
+
+        const unitNameInput = document.getElementById('unitNameInput');
+        const addUnitBtn = document.getElementById('addUnitBtn');
+
+        const resetCallsBtn = document.getElementById('resetCallsBtn');
+        const clearAllCallsBtn = document.getElementById('clearAllCallsBtn');
+
+        const archiveSearch = document.getElementById('archiveSearch');
+        const archiveFilter = document.getElementById('archiveFilter');
+        const clearArchiveBtn = document.getElementById('clearArchiveBtn');
+        const exportArchiveBtn = document.getElementById('exportArchiveBtn');
+
+        // Модальное окно авторизации
+        const authModal = document.getElementById('authModal');
+        const authModalTitle = document.getElementById('authModalTitle');
+        const authModalDesc = document.getElementById('authModalDesc');
+        const authLoginInput = document.getElementById('authLoginInput');
+        const authPasswordInput = document.getElementById('authPasswordInput');
+        const authLoginBtn = document.getElementById('authLoginBtn');
+        const authRegisterBtn = document.getElementById('authRegisterBtn');
+        const authCancelBtn = document.getElementById('authCancelBtn');
+        const authError = document.getElementById('authError');
+        const authSuccess = document.getElementById('authSuccess');
+        const authSwitchText = document.getElementById('authSwitchText');
+        const authSwitchLink = document.getElementById('authSwitchLink');
+
+        // Модальное окно назначения
+        const assignModal = document.getElementById('assignModal');
+        const assignCallInfo = document.getElementById('assignCallInfo');
+        const assignUnitSelect = document.getElementById('assignUnitSelect');
+        const assignConfirmBtn = document.getElementById('assignConfirmBtn');
+        const assignCancelBtn = document.getElementById('assignCancelBtn');
+        let assignTargetCallId = null;
+
+        // Admin
+        const editCallId = document.getElementById('editCallId');
+        const editCallStreet = document.getElementById('editCallStreet');
+        const editCallDesc = document.getElementById('editCallDesc');
+        const editCallPriority = document.getElementById('editCallPriority');
+        const applyEditBtn = document.getElementById('applyEditBtn');
+        const exportAllBtn = document.getElementById('exportAllBtn');
+        const importFileInput = document.getElementById('importFileInput');
+        const importBtn = document.getElementById('importBtn');
+        const resetAllDataBtn = document.getElementById('resetAllDataBtn');
+        const refreshAdminBtn = document.getElementById('refreshAdminBtn');
+
+        const systemNameSetting = document.getElementById('systemNameSetting');
+        const changeSystemNameBtn = document.getElementById('changeSystemNameBtn');
+        const themeSelector = document.getElementById('themeSelector');
+        const applyThemeBtn = document.getElementById('applyThemeBtn');
+
+        // Users
+        const newUserLogin = document.getElementById('newUserLogin');
+        const newUserPassword = document.getElementById('newUserPassword');
+        const newUserRole = document.getElementById('newUserRole');
+        const addUserBtn = document.getElementById('addUserBtn');
+
+        // ============================================
+        // 5. ВСПОМОГАТЕЛЬНЫЕ
+        // ============================================
+        function getTime() {
+            const d = new Date();
+            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        }
+
+        function getFullTime() {
+            const d = new Date();
+            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+        }
+
+        function getTimestamp() {
+            return new Date().toLocaleTimeString();
+        }
+
+        function getAvatar(login) {
+            return login.charAt(0).toUpperCase();
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        // ============================================
+        // 6. УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ
+        // ============================================
+        function loadUsers() {
+            const saved = localStorage.getItem('911_users');
+            if (saved) {
+                try {
+                    users = JSON.parse(saved);
+                    return true;
+                } catch(e) {}
+            }
+            users = [
+                { login: 'admin', password: 'admin123', role: 'admin' },
+                { login: 'dispatcher', password: '123456', role: 'dispatcher' },
+                { login: 'user', password: '123456', role: 'user' },
+            ];
+            saveUsers();
+            return false;
+        }
+
+        function saveUsers() {
+            localStorage.setItem('911_users', JSON.stringify(users));
+        }
+
+        function findUser(login) {
+            return users.find(u => u.login.toLowerCase() === login.toLowerCase());
+        }
+
+        function loginUser(login, password) {
+            const user = findUser(login);
+            if (!user || user.password !== password) {
+                return { success: false, message: 'Неверный логин или пароль' };
+            }
+            currentUser = user;
+            isAdmin = user.role === 'admin';
+            isDispatcher = user.role === 'admin' || user.role === 'dispatcher';
+            updateUI();
+            return { success: true, user };
+        }
+
+        function registerUser(login, password, role = 'user') {
+            if (findUser(login)) {
+                return { success: false, message: 'Пользователь с таким логином уже существует' };
+            }
+            if (login.length < 3 || password.length < 3) {
+                return { success: false, message: 'Логин и пароль должны быть не менее 3 символов' };
+            }
+            const newUser = { login, password, role };
+            users.push(newUser);
+            saveUsers();
+            return { success: true, user: newUser };
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            isAdmin = false;
+            isDispatcher = false;
+            updateUI();
+        }
+
+        function deleteUser(login) {
+            if (login === 'admin') {
+                alert('Нельзя удалить главного администратора');
+                return false;
+            }
+            if (currentUser && currentUser.login === login) {
+                alert('Нельзя удалить самого себя');
+                return false;
+            }
+            users = users.filter(u => u.login !== login);
+            saveUsers();
+            renderUsersList();
+            return true;
+        }
+
+        function changeUserRole(login, newRole) {
+            if (login === 'admin') {
+                alert('Нельзя изменить роль главного администратора');
+                return false;
+            }
+            const user = findUser(login);
+            if (!user) return false;
+            user.role = newRole;
+            saveUsers();
+            renderUsersList();
+            return true;
+        }
+
+        function renderUsersList() {
+            if (userListEl) {
+                let html = '';
+                users.forEach(user => {
+                    const roleClass = user.role === 'admin' ? 'admin' : user.role === 'dispatcher' ? 'dispatcher' : 'user';
+                    const isCurrent = currentUser && currentUser.login === user.login;
+                    html += `
+                        <div class="user-item">
+                            <div>
+                                <span class="user-name">${user.login}</span>
+                                <span class="user-role ${roleClass}">${user.role.toUpperCase()}</span>
+                                ${isCurrent ? ' <span style="color:#60a5fa;font-size:12px;">(Вы)</span>' : ''}
+                            </div>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                ${user.role !== 'admin' ? `
+                                    <select onchange="window.changeUserRole('${user.login}', this.value)" style="background:#0f171f; border:1px solid #2b3a4b; border-radius:40px; padding:4px 12px; color:#e8edf2; font-size:12px;">
+                                        <option value="user" ${user.role === 'user' ? 'selected' : ''}>👤 Пользователь</option>
+                                        <option value="dispatcher" ${user.role === 'dispatcher' ? 'selected' : ''}>📡 Диспетчер</option>
+                                        <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Админ</option>
+                                    </select>
+                                ` : ''}
+                                ${user.login !== 'admin' ? `<button class="btn btn-danger btn-xs" onclick="window.deleteUser('${user.login}')">✖</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                userListEl.innerHTML = html || '<div class="empty-state">👤 Нет пользователей</div>';
+                totalUsersCount.textContent = users.length;
+            }
+        }
+
+        window.deleteUser = deleteUser;
+        window.changeUserRole = changeUserRole;
+
+        // ============================================
+        // 7. ОСНОВНЫЕ ФУНКЦИИ
+        // ============================================
+        function addCall(street, desc, priority) {
+            if (!isDispatcher && !isAdmin) {
+                alert('⛔ Только диспетчеры и администраторы могут добавлять вызовы');
+                return false;
+            }
+            if (!street.trim()) { alert('Введите улицу или место'); return false; }
+            if (!desc.trim()) { alert('Введите описание'); return false; }
+            
+            const call = {
+                id: generateId(),
+                street: street.trim(),
+                desc: desc.trim(),
+                priority: priority || 'medium',
+                time: getTime(),
+                status: 'pending', // pending, assigned, completed
+                assignedTo: null,
+                assignedByName: null,
+                createdBy: currentUser ? currentUser.login : 'system'
+            };
+            calls.push(call);
+            renderCalls();
+            saveData();
+            return true;
+        }
+
+        function renderCalls() {
+            if (calls.length === 0) {
+                callListEl.innerHTML = `<div class="empty-state">📭 Нет активных вызовов</div>`;
+            } else {
+                let html = '';
+                calls.forEach((call, index) => {
+                    const priorityClass = call.priority === 'high' ? 'priority-high' : call.priority === 'low' ? 'priority-low' : '';
+                    const priorityLabel = call.priority === 'high' ? '🔥' : call.priority === 'low' ? '🟢' : '🟡';
+                    
+                    let statusClass = 'pending';
+                    let statusLabel = '⏳ Ожидает';
+                    if (call.status === 'assigned') {
+                        statusClass = 'assigned';
+                        statusLabel = '🚔 Назначен';
+                    } else if (call.status === 'completed') {
+                        statusClass = 'completed';
+                        statusLabel = '✅ Выполнен';
+                    }
+                    
+                    const assignedInfo = call.assignedTo ? 
+                        `<span class="call-assigned">🚔 ${call.assignedTo} ${call.assignedByName ? '(назначил: ' + call.assignedByName + ')' : ''}</span>` : '';
+                    
+                    html += `
+                        <div class="call-item ${priorityClass} ${call.status === 'assigned' ? 'assigned' : ''} ${call.status === 'completed' ? 'completed' : ''}">
+                            <div class="call-info">
+                                <div class="call-street">${priorityLabel} ${call.street}</div>
+                                <div class="call-desc">${call.desc}</div>
+                                <div class="call-time">⏱ ${call.time} ${assignedInfo}</div>
+                            </div>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                                <span class="call-status ${statusClass}">${statusLabel}</span>
+                                ${call.status === 'pending' && isDispatcher ? `
+                                    <button class="btn btn-primary btn-sm" onclick="window.openAssignModal('${call.id}')">🎯 Назначить</button>
+                                ` : ''}
+                                ${call.status === 'assigned' && isDispatcher ? `
+                                    <button class="btn btn-success btn-sm" onclick="window.completeCall('${call.id}')">✅ Завершить</button>
+                                ` : ''}
+                                ${isAdmin ? `
+                                    <button class="btn btn-danger btn-sm" onclick="window.deleteCall('${call.id}')">✖</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                callListEl.innerHTML = html;
+            }
+            updateCounters();
+        }
+
+        window.openAssignModal = function(callId) {
+            if (!isDispatcher && !isAdmin) {
+                alert('⛔ Только диспетчеры могут назначать юниты');
+                return;
+            }
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            if (call.status !== 'pending') {
+                alert('Этот вызов уже обрабатывается');
+                return;
+            }
+            
+            assignTargetCallId = callId;
+            assignCallInfo.textContent = `Вызов: ${call.street} - ${call.desc}`;
+            
+            // Заполняем список доступных юнитов
+            const availableUnits = units.filter(u => u.status === 'available');
+            assignUnitSelect.innerHTML = '<option value="">Выберите юнит...</option>';
+            availableUnits.forEach(u => {
+                assignUnitSelect.innerHTML += `<option value="${u.id}">${u.name} (${u.status})</option>`;
+            });
+            if (availableUnits.length === 0) {
+                assignUnitSelect.innerHTML += '<option value="" disabled>Нет доступных юнитов</option>';
+            }
+            
+            assignModal.classList.add('active');
+        };
+
+        window.completeCall = function(callId) {
+            if (!isDispatcher && !isAdmin) {
+                alert('⛔ Только диспетчеры могут завершать вызовы');
+                return;
+            }
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            
+            if (confirm(`Завершить вызов "${call.street}" и отправить в архив?`)) {
+                // Освобождаем юнит
+                if (call.assignedTo) {
+                    const unit = units.find(u => u.id === call.assignedTo);
+                    if (unit) {
+                        unit.status = 'available';
+                        unit.currentCall = null;
+                    }
+                }
+                call.status = 'completed';
+                addToArchive(call, 'resolved');
+                calls = calls.filter(c => c.id !== callId);
+                renderCalls();
+                renderUnits();
+                renderArchive();
+                saveData();
+            }
+        };
+
+        window.deleteCall = function(callId) {
+            if (!isAdmin) {
+                alert('⛔ Только администраторы могут удалять вызовы');
+                return;
+            }
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            if (confirm(`Удалить вызов "${call.street}" без архивации?`)) {
+                calls = calls.filter(c => c.id !== callId);
+                renderCalls();
+                saveData();
+            }
+        };
+
+        // ============================================
+        // 8. ЮНИТЫ
+        // ============================================
+        function addUnit(name) {
+            if (!isDispatcher && !isAdmin) {
+                alert('⛔ Только диспетчеры и администраторы могут создавать юниты');
+                return false;
+            }
+            if (!name.trim()) { alert('Введите название юнита'); return false; }
+            if (units.find(u => u.name.toLowerCase() === name.trim().toLowerCase())) {
+                alert('Юнит с таким названием уже существует');
+                return false;
+            }
+            
+            units.push({
+                id: generateId(),
+                name: name.trim(),
+                status: 'available', // available, busy, offline
+                currentCall: null,
+                createdBy: currentUser ? currentUser.login : 'system'
+            });
+            renderUnits();
+            saveData();
+            return true;
+        }
+
+        function renderUnits() {
+            if (units.length === 0) {
+                unitListEl.innerHTML = `<div class="empty-state">🚫 Нет созданных юнитов</div>`;
+            } else {
+                let html = '';
+                units.forEach(unit => {
+                    const statusClass = unit.status;
+                    const statusLabel = unit.status === 'available' ? '🟢 Доступен' : 
+                                      unit.status === 'busy' ? '🟡 Занят' : '⚫ Офлайн';
+                    
+                    let callInfo = '';
+                    if (unit.currentCall) {
+                        const call = calls.find(c => c.id === unit.currentCall);
+                        if (call) {
+                            callInfo = `<span class="unit-call">📞 ${call.street}</span>`;
+                        }
+                    }
+                    
+                    html += `
+                        <div class="unit-item ${statusClass}">
+                            <div>
+                                <span class="unit-name">${unit.name}</span>
+                                <span class="unit-status ${statusClass}">${statusLabel}</span>
+                                ${callInfo}
+                            </div>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                ${isDispatcher && unit.status === 'available' ? `
+                                    <button class="btn btn-warning btn-xs" onclick="window.setUnitBusy('${unit.id}')">📋 Занять</button>
+                                ` : ''}
+                                ${isDispatcher && unit.status === 'busy' ? `
+                                    <button class="btn btn-success btn-xs" onclick="window.setUnitAvailable('${unit.id}')">🟢 Освободить</button>
+                                ` : ''}
+                                ${isAdmin ? `
+                                    <button class="btn btn-danger btn-xs" onclick="window.deleteUnit('${unit.id}')">✖</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                unitListEl.innerHTML = html;
+            }
+            updateCounters();
+        }
+
+        window.setUnitBusy = function(unitId) {
+            const unit = units.find(u => u.id === unitId);
+            if (!unit) return;
+            if (unit.status === 'busy') return;
+            
+            // Находим активные вызовы без назначения
+            const pendingCalls = calls.filter(c => c.status === 'pending');
+            if (pendingCalls.length === 0) {
+                alert('Нет активных вызовов для назначения');
+                return;
+            }
+            
+            // Предлагаем выбрать вызов
+            const callOptions = pendingCalls.map((c, i) => `${i+1}. ${c.street} - ${c.desc}`).join('\n');
+            const choice = prompt(`Выберите вызов для юнита ${unit.name}:\n${callOptions}\n\nВведите номер:`);
+            if (!choice) return;
+            
+            const idx = parseInt(choice) - 1;
+            if (isNaN(idx) || idx < 0 || idx >= pendingCalls.length) {
+                alert('Неверный номер');
+                return;
+            }
+            
+            const call = pendingCalls[idx];
+            unit.status = 'busy';
+            unit.currentCall = call.id;
+            call.status = 'assigned';
+            call.assignedTo = unit.id;
+            call.assignedByName = currentUser ? currentUser.login : 'system';
+            
+            renderUnits();
+            renderCalls();
+            saveData();
+        };
+
+        window.setUnitAvailable = function(unitId) {
+            const unit = units.find(u => u.id === unitId);
+            if (!unit) return;
+            if (unit.status !== 'busy') return;
+            
+            if (unit.currentCall) {
+                const call = calls.find(c => c.id === unit.currentCall);
+                if (call && call.status === 'assigned') {
+                    if (confirm(`Освободить юнит ${unit.name}? Вызов "${call.street}" будет отменён и отправлен в архив.`)) {
+                        addToArchive(call, 'cancelled');
+                        calls = calls.filter(c => c.id !== call.id);
+                        unit.status = 'available';
+                        unit.currentCall = null;
+                        renderUnits();
+                        renderCalls();
+                        renderArchive();
+                        saveData();
+                    }
+                    return;
+                }
+            }
+            
+            unit.status = 'available';
+            unit.currentCall = null;
+            renderUnits();
+            saveData();
+        };
+
+        window.deleteUnit = function(unitId) {
+            if (!isAdmin) {
+                alert('⛔ Только администраторы могут удалять юниты');
+                return;
+            }
+            const unit = units.find(u => u.id === unitId);
+            if (!unit) return;
+            if (confirm(`Удалить юнит "${unit.name}"?`)) {
+                units = units.filter(u => u.id !== unitId);
+                renderUnits();
+                saveData();
+            }
+        };
+
+        // ============================================
+        // 9. АРХИВ
+        // ============================================
+        function addToArchive(call, status) {
+            archive.push({
+                id: generateId(),
+                street: call.street,
+                desc: call.desc,
+                priority: call.priority,
+                time: call.time,
+                status: status || 'resolved',
+                resolvedTime: getFullTime(),
+                assignedTo: call.assignedTo || null,
+                assignedByName: call.assignedByName || null,
+                createdBy: call.createdBy || 'system'
+            });
+            updateArchiveCounters();
+            saveData();
+        }
+
+        function renderArchive() {
+            const search = archiveSearch.value.toLowerCase();
+            const filter = archiveFilter.value;
+
+            let filtered = archive;
+            if (search) {
+                filtered = filtered.filter(item =>
+                    item.street.toLowerCase().includes(search) ||
+                    item.desc.toLowerCase().includes(search)
+                );
+            }
+            if (filter !== 'all') {
+                filtered = filtered.filter(item => item.status === filter);
+            }
+
+            if (filtered.length === 0) {
+                archiveListEl.innerHTML = `<div class="empty-state">📭 В архиве нет записей</div>`;
+            } else {
+                let html = '';
+                filtered.forEach((item, idx) => {
+                    const statusClass = item.status;
+                    const statusLabel = item.status === 'resolved' ? '✅ Завершён' : '❌ Отменён';
+                    const priorityIcon = item.priority === 'high' ? '🔥' : item.priority === 'low' ? '🟢' : '🟡';
+                    const unitInfo = item.assignedTo ? `🚔 ${item.assignedTo}` : '';
+                    html += `
+                        <div class="archive-item ${statusClass}">
+                            <div class="archive-info">
+                                <div class="archive-street">${priorityIcon} ${item.street}</div>
+                                <div class="archive-meta">
+                                    <span>${item.desc}</span>
+                                    <span>⏱ ${item.time}</span>
+                                    <span>📌 ${item.resolvedTime}</span>
+                                    ${unitInfo ? `<span>${unitInfo}</span>` : ''}
+                                    <span class="archive-status ${statusClass}">${statusLabel}</span>
+                                </div>
+                            </div>
+                            ${isAdmin ? `<button class="btn btn-danger btn-xs" onclick="window.deleteArchiveItem('${item.id}')">✖</button>` : ''}
+                        </div>
+                    `;
+                });
+                archiveListEl.innerHTML = html;
+            }
+            updateArchiveCounters();
+        }
+
+        window.deleteArchiveItem = function(id) {
+            if (!isAdmin) {
+                alert('⛔ Только администраторы могут удалять записи из архива');
+                return;
+            }
+            if (confirm('Удалить эту запись из архива?')) {
+                archive = archive.filter(item => item.id !== id);
+                renderArchive();
+                updateArchiveCounters();
+                saveData();
+            }
+        };
+
+        function updateArchiveCounters() {
+            const count = archive.length;
+            archiveCounter.textContent = count;
+            archiveBadge.textContent = count;
+            statArchive.textContent = count;
+            archiveTotal.textContent = count;
+        }
+
+        // ============================================
+        // 10. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
+        // ============================================
+        function updateCounters() {
+            callCounter.textContent = calls.length;
+            unitCounter.textContent = units.length;
+            statActiveCalls.textContent = calls.length;
+            const busyUnits = units.filter(u => u.status === 'busy').length;
+            statBusyUnits.textContent = busyUnits;
+            updateArchiveCounters();
+            updateOnlineUsers();
+        }
+
+        function updateOnlineUsers() {
+            // В локальной версии считаем всех пользователей
+            const onlineCount = document.getElementById('onlineUsersCount');
+            if (onlineCount) onlineCount.textContent = users.length;
+        }
+
+        // ============================================
+        // 11. СОХРАНЕНИЕ ДАННЫХ
+        // ============================================
+        function saveData() {
+            const data = { calls, units, archive, timestamp: new Date().toISOString() };
+            localStorage.setItem('911_data', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('911_data');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.calls) calls = data.calls;
+                    if (data.units) units = data.units;
+                    if (data.archive) archive = data.archive;
+                    renderCalls();
+                    renderUnits();
+                    renderArchive();
+                    return true;
+                } catch(e) {}
+            }
+            return false;
+        }
+
+        // ============================================
+        // 12. ТЕСТОВЫЕ ДАННЫЕ
+        // ============================================
+        function loadTestData() {
+            if (loadData()) return;
+            
+            calls = [
+                { id: generateId(), street: 'Бродвей, 12', desc: 'Перестрелка, нужна помощь', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system' },
+                { id: generateId(), street: 'Парк им. Ленина', desc: 'Пьяный дебош', priority: 'medium', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system' },
+            ];
+            units = [
+                { id: generateId(), name: 'Unit-3', status: 'available', currentCall: null, createdBy: 'system' },
+                { id: generateId(), name: 'Unit-7', status: 'available', currentCall: null, createdBy: 'system' },
+                { id: generateId(), name: 'Unit-12', status: 'busy', currentCall: null, createdBy: 'system' },
+            ];
+            archive = [
+                { id: generateId(), street: 'Центральная, 15', desc: 'Ограбление банка', priority: 'high', time: '14:23', status: 'resolved', resolvedTime: '15:10:22', assignedTo: 'Unit-3', assignedByName: 'admin', createdBy: 'system' },
+                { id: generateId(), street: 'Лесная, 7', desc: 'Пожар в подвале', priority: 'high', time: '13:45', status: 'resolved', resolvedTime: '14:30:15', assignedTo: 'Unit-7', assignedByName: 'admin', createdBy: 'system' },
+            ];
+            renderCalls();
+            renderUnits();
+            renderArchive();
+            saveData();
+        }
+
+        function resetCallsToTest() {
+            if (!isDispatcher && !isAdmin) {
+                alert('⛔ Только диспетчеры и администраторы могут сбрасывать вызовы');
+                return;
+            }
+            if (calls.length > 0 && !confirm('Заменить текущие вызовы на тестовые? (архив и юниты останутся)')) return;
+            calls = [
+                { id: generateId(), street: 'Океанская, 7', desc: 'Неизвестный предмет', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system' },
+                { id: generateId(), street: 'Центр, пл. Победы', desc: 'Массовая драка', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system' },
+                { id: generateId(), street: 'Западное шоссе', desc: 'Поломка светофора', priority: 'low', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system' },
+            ];
+            renderCalls();
+            saveData();
+        }
+
+        function clearAllCalls() {
+            if (!isAdmin) {
+                alert('⛔ Только администраторы могут очищать все вызовы');
+                return;
+            }
+            if (calls.length === 0) return;
+            if (confirm('Удалить ВСЕ активные вызовы без архивации?')) {
+                calls = [];
+                renderCalls();
+                saveData();
+            }
+        }
+
+        function clearArchive() {
+            if (!isAdmin) {
+                alert('⛔ Только администраторы могут очищать архив');
+                return;
+            }
+            if (archive.length === 0) return;
+            if (confirm('Удалить ВСЕ записи из архива?')) {
+                archive = [];
+                renderArchive();
+                updateArchiveCounters();
+                saveData();
+            }
+        }
+
+        function exportArchive() {
+            if (archive.length === 0) {
+                alert('Архив пуст!');
+                return;
+            }
+            let text = '=== АРХИВ ВЫЗОВОВ 911 ===\n';
+            text += `Дата экспорта: ${new Date().toLocaleString()}\n`;
+            text += '='.repeat(50) + '\n\n';
+            archive.forEach((item, idx) => {
+                const statusLabel = item.status === 'resolved' ? 'ЗАВЕРШЁН' : 'ОТМЕНЁН';
+                text += `#${idx+1} | ${item.street}\n`;
+                text += `  Описание: ${item.desc}\n`;
+                text += `  Приоритет: ${item.priority.toUpperCase()}\n`;
+                text += `  Время вызова: ${item.time}\n`;
+                text += `  Завершён: ${item.resolvedTime}\n`;
+                text += `  Назначен: ${item.assignedTo || 'не назначен'}\n`;
+                text += `  Статус: ${statusLabel}\n`;
+                text += '-'.repeat(40) + '\n';
+            });
+            text += '\nВсего записей: ' + archive.length;
+
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `archive_911_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================
+        // 13. НАЗНАЧЕНИЕ ЮНИТА (обработчик)
+        // ============================================
+        assignConfirmBtn.addEventListener('click', function() {
+            const unitId = assignUnitSelect.value;
+            if (!unitId) {
+                alert('Выберите юнит');
+                return;
+            }
+            
+            const call = calls.find(c => c.id === assignTargetCallId);
+            if (!call) {
+                alert('Вызов не найден');
+                assignModal.classList.remove('active');
+                return;
+            }
+            
+            const unit = units.find(u => u.id === unitId);
+            if (!unit) {
+                alert('Юнит не найден');
+                return;
+            }
+            
+            if (unit.status !== 'available') {
+                alert('Юнит недоступен');
+                return;
+            }
+            
+            unit.status = 'busy';
+            unit.currentCall = call.id;
+            call.status = 'assigned';
+            call.assignedTo = unit.name;
+            call.assignedByName = currentUser ? currentUser.login : 'system';
+            
+            assignModal.classList.remove('active');
+            renderCalls();
+            renderUnits();
+            saveData();
+        });
+
+        assignCancelBtn.addEventListener('click', function() {
+            assignModal.classList.remove('active');
+        });
+
+        assignModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // 14. АДМИН ФУНКЦИИ
+        // ============================================
+        function applyEditCall() {
+            if (!isAdmin) {
+                alert('Требуются права администратора!');
+                return;
+            }
+            const id = parseInt(editCallId.value);
+            if (isNaN(id) || id < 0 || id >= calls.length) {
+                alert('Неверный ID вызова');
+                return;
+            }
+            const street = editCallStreet.value.trim();
+            const desc = editCallDesc.value.trim();
+            const priority = editCallPriority.value;
+            if (!street || !desc) {
+                alert('Заполните все поля');
+                return;
+            }
+            calls[id].street = street;
+            calls[id].desc = desc;
+            calls[id].priority = priority;
+            renderCalls();
+            saveData();
+            alert('✅ Вызов обновлён');
+        }
+
+        function exportAllData() {
+            const data = { 
+                calls, units, archive,
+                config: CONFIG,
+                users: users,
+                timestamp: new Date().toISOString() 
+            };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `911_data_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(file) {
+            if (!isAdmin) {
+                alert('Требуются права администратора!');
+                return;
+            }
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.calls && data.units && data.archive) {
+                        if (confirm('Импорт заменит все текущие данные. Продолжить?')) {
+                            calls = data.calls;
+                            units = data.units;
+                            archive = data.archive;
+                            if (data.users) {
+                                users = data.users;
+                                saveUsers();
+                            }
+                            if (data.config) {
+                                Object.assign(CONFIG, data.config);
+                                applySystemSettings();
+                            }
+                            renderCalls();
+                            renderUnits();
+                            renderArchive();
+                            renderUsersList();
+                            saveData();
+                            saveUsers();
+                            saveConfig();
+                            alert('✅ Импорт успешен!');
+                        }
+                    } else {
+                        alert('❌ Неверный формат файла');
+                    }
+                } catch (err) {
+                    alert('❌ Ошибка чтения файла: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetAllData() {
+            if (!isAdmin) {
+                alert('Требуются права администратора!');
+                return;
+            }
+            if (confirm('⚠️ ВСЕ ДАННЫЕ будут удалены безвозвратно! Продолжить?')) {
+                calls = [];
+                units = [];
+                archive = [];
+                renderCalls();
+                renderUnits();
+                renderArchive();
+                saveData();
+                alert('✅ Данные сброшены');
+            }
+        }
+
+        // ============================================
+        // 15. НАСТРОЙКИ СИСТЕМЫ
+        // ============================================
+        function applySystemSettings() {
+            systemTitle.innerHTML = CONFIG.SYSTEM_NAME;
+            
+            if (CONFIG.THEME === 'light') {
+                document.body.style.background = '#f0f2f5';
+                document.body.style.color = '#1a1a2e';
+                document.querySelector('.dashboard').style.background = '#ffffff';
+                document.querySelector('.dashboard').style.borderColor = '#d1d5db';
+                document.querySelectorAll('.card').forEach(el => {
+                    el.style.background = '#f8fafc';
+                    el.style.borderColor = '#d1d5db';
+                });
+            } else if (CONFIG.THEME === 'blue') {
+                document.body.style.background = '#0c1428';
+                document.querySelector('.dashboard').style.background = '#0f1a33';
+                document.querySelector('.dashboard').style.borderColor = '#1e3a5f';
+                document.querySelectorAll('.card').forEach(el => {
+                    el.style.background = '#132142';
+                    el.style.borderColor = '#1e3a5f';
+                });
+            } else if (CONFIG.THEME === 'red') {
+                document.body.style.background = '#1a0a0a';
+                document.querySelector('.dashboard').style.background = '#2a1010';
+                document.querySelector('.dashboard').style.borderColor = '#4a1a1a';
+                document.querySelectorAll('.card').forEach(el => {
+                    el.style.background = '#331515';
+                    el.style.borderColor = '#4a1a1a';
+                });
+            } else {
+                document.body.style.background = '#0b0e14';
+                document.querySelector('.dashboard').style.background = '#141a22';
+                document.querySelector('.dashboard').style.borderColor = '#2c3540';
+                document.querySelectorAll('.card').forEach(el => {
+                    el.style.background = '#1a212b';
+                    el.style.borderColor = '#2a3543';
+                });
+            }
+            saveConfig();
+        }
+
+        function saveConfig() {
+            localStorage.setItem('911_config', JSON.stringify(CONFIG));
+        }
+
+        function loadConfig() {
+            const saved = localStorage.getItem('911_config');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(CONFIG, parsed);
+                } catch(e) {}
+            }
+        }
+
+        // ============================================
+        // 16. UI ОБНОВЛЕНИЕ
+        // ============================================
+        function updateUI() {
+            if (currentUser) {
+                userInfo.style.display = 'flex';
+                userAvatar.textContent = getAvatar(currentUser.login);
+                userNameDisplay.textContent = currentUser.login;
+                authToggleBtn.textContent = '🚪 Выйти';
+                
+                const roleNames = {
+                    'admin': '👑 Администратор',
+                    'dispatcher': '📡 Диспетчер',
+                    'user': '👤 Пользователь'
+                };
+                roleBadge.textContent = roleNames[currentUser.role] || '👤 Пользователь';
+                roleBadge.className = 'role-badge ' + currentUser.role;
+
+                if (isAdmin) {
+                    adminTabBtn.style.display = 'inline-block';
+                    adminRoleBadge.textContent = '🔐 Админ';
+                } else {
+                    adminTabBtn.style.display = 'none';
+                }
+            } else {
+                userInfo.style.display = 'none';
+                authToggleBtn.textContent = '🔑 Войти';
+                roleBadge.textContent = '👤 Гость';
+                roleBadge.className = 'role-badge';
+                adminTabBtn.style.display = 'none';
+            }
+            renderUsersList();
+            updateOnlineUsers();
+        }
+
+        // ============================================
+        // 17. АВТОРИЗАЦИЯ
+        // ============================================
+        let isLoginMode = true;
+
+        function showAuthModal(mode = 'login') {
+            isLoginMode = mode === 'login';
+            authModal.classList.add('active');
+            authError.classList.remove('show');
+            authSuccess.classList.remove('show');
+            authLoginInput.value = '';
+            authPasswordInput.value = '';
+            
+            if (isLoginMode) {
+                authModalTitle.textContent = '🔐 Вход в систему';
+                authModalDesc.textContent = 'Войдите для доступа к диспетчерской';
+                authLoginBtn.style.display = 'block';
+                authRegisterBtn.style.display = 'none';
+                authSwitchText.innerHTML = 'Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрируйтесь</a>';
+            } else {
+                authModalTitle.textContent = '📝 Регистрация';
+                authModalDesc.textContent = 'Создайте аккаунт для доступа к диспетчерской';
+                authLoginBtn.style.display = 'none';
+                authRegisterBtn.style.display = 'block';
+                authSwitchText.innerHTML = 'Уже есть аккаунт? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Войдите</a>';
+            }
+            
+            const link = document.getElementById('authSwitchLink');
+            if (link) {
+                link.onclick = function(e) {
+                    e.preventDefault();
+                    showAuthModal(isLoginMode ? 'register' : 'login');
+                };
+            }
+            
+            setTimeout(() => authLoginInput.focus(), 100);
+        }
+
+        function closeAuthModal() {
+            authModal.classList.remove('active');
+            authError.classList.remove('show');
+            authSuccess.classList.remove('show');
+        }
+
+        function handleAuthLogin() {
+            const login = authLoginInput.value.trim();
+            const password = authPasswordInput.value.trim();
+            
+            if (!login || !password) {
+                authError.textContent = '❌ Заполните все поля';
+                authError.classList.add('show');
+                return;
+            }
+            
+            const result = loginUser(login, password);
+            if (result.success) {
+                authSuccess.textContent = '✅ Вход выполнен!';
+                authSuccess.classList.add('show');
+                setTimeout(() => {
+                    closeAuthModal();
+                }, 500);
+            } else {
+                authError.textContent = '❌ ' + result.message;
+                authError.classList.add('show');
+            }
+        }
+
+        function handleAuthRegister() {
+            const login = authLoginInput.value.trim();
+            const password = authPasswordInput.value.trim();
+            
+            if (!login || !password) {
+                authError.textContent = '❌ Заполните все поля';
+                authError.classList.add('show');
+                return;
+            }
+            
+            const result = registerUser(login, password, 'user');
+            if (result.success) {
+                authSuccess.textContent = '✅ Регистрация выполнена! Теперь войдите.';
+                authSuccess.classList.add('show');
+                setTimeout(() => {
+                    showAuthModal('login');
+                }, 800);
+            } else {
+                authError.textContent = '❌ ' + result.message;
+                authError.classList.add('show');
+            }
+        }
+
+        // ============================================
+        // 18. СОБЫТИЯ
+        // ============================================
+
+        // Вкладки
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+                if (this.dataset.tab === 'archive') {
+                    renderArchive();
+                }
+                if (this.dataset.tab === 'admin' && !isAdmin) {
+                    alert('⚠️ Требуются права администратора!');
+                    document.querySelector('[data-tab="main"]').click();
+                    return;
+                }
+            });
+        });
+
+        // Авторизация
+        authToggleBtn.addEventListener('click', function() {
+            if (currentUser) {
+                if (confirm('Выйти из системы?')) {
+                    logoutUser();
+                }
+            } else {
+                showAuthModal('login');
+            }
+        });
+
+        authLoginBtn.addEventListener('click', handleAuthLogin);
+        authRegisterBtn.addEventListener('click', handleAuthRegister);
+        authCancelBtn.addEventListener('click', closeAuthModal);
+
+        authLoginInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (isLoginMode) {
+                    handleAuthLogin();
+                } else {
+                    handleAuthRegister();
+                }
+            }
+        });
+        authPasswordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (isLoginMode) {
+                    handleAuthLogin();
+                } else {
+                    handleAuthRegister();
+                }
+            }
+        });
+
+        authModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAuthModal();
+            }
+        });
+
+        // Добавление вызова
+        addCallBtn.addEventListener('click', function() {
+            addCall(streetInput.value, descInput.value, prioritySelect.value);
+        });
+
+        // Добавление юнита
+        addUnitBtn.addEventListener('click', function() {
+            addUnit(unitNameInput.value);
+            unitNameInput.value = '';
+        });
+
+        // Сброс и очистка
+        resetCallsBtn.addEventListener('click', resetCallsToTest);
+        clearAllCallsBtn.addEventListener('click', clearAllCalls);
+        clearArchiveBtn.addEventListener('click', clearArchive);
+        exportArchiveBtn.addEventListener('click', exportArchive);
+
+        // Архив поиск и фильтр
+        let archiveTimeout;
+        archiveSearch.addEventListener('input', function() {
+            clearTimeout(archiveTimeout);
+            archiveTimeout = setTimeout(renderArchive, 300);
+        });
+        archiveFilter.addEventListener('change', renderArchive);
+
+        // Админ действия
+        applyEditBtn.addEventListener('click', applyEditCall);
+        exportAllBtn.addEventListener('click', exportAllData);
+        importBtn.addEventListener('click', function() {
+            if (importFileInput.files.length > 0) {
+                importData(importFileInput.files[0]);
+            } else {
+                alert('Выберите файл');
+            }
+        });
+        resetAllDataBtn.addEventListener('click', resetAllData);
+        refreshAdminBtn.addEventListener('click', function() {
+            renderCalls();
+            renderUnits();
+            renderArchive();
+            renderUsersList();
+        });
+
+        // Настройки системы
+        changeSystemNameBtn.addEventListener('click', function() {
+            if (!isAdmin) {
+                alert('Требуются права администратора!');
+                return;
+            }
+            const name = systemNameSetting.value.trim();
+            if (!name) {
+                alert('Введите название');
+                return;
+            }
+            CONFIG.SYSTEM_NAME = name;
+            applySystemSettings();
+            saveConfig();
+            alert('✅ Название изменено!');
+            systemNameSetting.value = '';
+        });
+
+        applyThemeBtn.addEventListener('click', function() {
+            if (!isAdmin) {
+                alert('Требуются права администратора!');
+                return;
+            }
+            CONFIG.THEME = themeSelector.value;
+            applySystemSettings();
+            saveConfig();
+            alert('✅ Тема применена!');
+        });
+
+        // Управление пользователями
+        addUserBtn.addEventListener('click', function() {
+            if (!isAdmin) {
+                alert('Требуются права администратора!');
+                return;
+            }
+            const login = newUserLogin.value.trim();
+            const password = newUserPassword.value.trim();
+            const role = newUserRole.value;
+            
+            if (!login || !password) {
+                alert('Заполните логин и пароль');
+                return;
+            }
+            
+            const result = registerUser(login, password, role);
+            if (result.success) {
+                alert('✅ Пользователь добавлен!');
+                newUserLogin.value = '';
+                newUserPassword.value = '';
+                renderUsersList();
+                updateOnlineUsers();
+            } else {
+                alert('❌ ' + result.message);
+            }
+        });
+
+        // Enter в полях
+        streetInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallBtn.click(); });
+        descInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallBtn.click(); });
+        unitNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addUnitBtn.click(); });
+
+        // ============================================
+        // 19. ЗАПУСК
+        // ============================================
+        
+        loadConfig();
+        loadUsers();
+        applySystemSettings();
+
+        if (!loadData()) {
+            loadTestData();
+        }
+
+        updateUI();
+        renderUsersList();
+
+        console.log('🚀 Система 911 запущена');
+        console.log('👥 Доступны пользователи: admin / dispatcher / user');
+        console.log('🔑 Пароль для admin: admin123, для остальных: 123456');
+
+    })();
+</script>
+</body>
+</html>
