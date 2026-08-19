@@ -121,6 +121,31 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #475569;
+            padding: 4px 12px;
+            background: #0a0f17;
+            border-radius: 40px;
+            border: 1px solid #1a2636;
+        }
+        .sync-status .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .sync-status .sync-dot.online {
+            background: #22c55e;
+            animation: pulse 1.8s infinite;
+        }
+        .sync-status .sync-dot.offline {
+            background: #6b7280;
+        }
+
         .user-info {
             display: flex;
             align-items: center;
@@ -1061,10 +1086,18 @@
             color: #94a3b8;
             font-size: 12px;
         }
+        .log-item .log-sync {
+            color: #a78bfa;
+            font-size: 11px;
+            background: rgba(139, 92, 246, 0.1);
+            padding: 1px 10px;
+            border-radius: 40px;
+        }
         .log-item.type-info { border-left-color: #3b82f6; }
         .log-item.type-success { border-left-color: #22c55e; }
         .log-item.type-warning { border-left-color: #f59e0b; }
         .log-item.type-danger { border-left-color: #dc2626; }
+        .log-item.type-sync { border-left-color: #8b5cf6; }
 
         .settings-group {
             background: #0a0f17;
@@ -1186,6 +1219,49 @@
             font-size: 12px;
             color: #64748b;
         }
+
+        /* Уведомление о синхронизации */
+        .sync-notification {
+            position: fixed;
+            bottom: 80px;
+            right: 30px;
+            background: linear-gradient(145deg, #111927, #0d1520);
+            border: 1px solid #1a2636;
+            border-radius: 16px;
+            padding: 12px 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            display: none;
+            max-width: 350px;
+            animation: slideUp 0.3s ease;
+        }
+        .sync-notification.show {
+            display: block;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sync-notification .sync-title {
+            color: #60a5fa;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .sync-notification .sync-msg {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        .sync-notification .sync-close {
+            background: none;
+            border: none;
+            color: #475569;
+            cursor: pointer;
+            font-size: 16px;
+            float: right;
+        }
+        .sync-notification .sync-close:hover {
+            color: #e8edf2;
+        }
     </style>
 </head>
 <body>
@@ -1206,6 +1282,10 @@
                 <div class="status-badge">
                     <span class="live-dot"></span>
                     <span>Система активна</span>
+                </div>
+                <div class="sync-status" id="syncStatus">
+                    <span class="sync-dot online" id="syncDot"></span>
+                    <span id="syncText">Синхронизация</span>
                 </div>
                 <div class="user-info" id="userInfo">
                     <div class="user-avatar" id="userAvatar">Г</div>
@@ -1425,7 +1505,7 @@
     </div>
 </div>
 
-<!-- ===== МОДАЛЬНОЕ ОКНО: ВХОД ПО РОЛЯМ ===== -->
+<!-- ===== МОДАЛЬНЫЕ ОКНА ===== -->
 <div class="modal-overlay" id="authModal">
     <div class="modal">
         <h2 id="authModalTitle">🔐 Вход в систему</h2>
@@ -1467,7 +1547,6 @@
     </div>
 </div>
 
-<!-- ===== МОДАЛЬНЫЕ ОКНА ДЛЯ ДЕЙСТВИЙ ===== -->
 <div class="modal-overlay" id="assignModal">
     <div class="modal">
         <h2>🚔 Назначить юнит</h2>
@@ -1511,12 +1590,28 @@
     </div>
 </div>
 
+<!-- ===== УВЕДОМЛЕНИЕ О СИНХРОНИЗАЦИИ ===== -->
+<div class="sync-notification" id="syncNotification">
+    <button class="sync-close" onclick="document.getElementById('syncNotification').classList.remove('show')">✕</button>
+    <div class="sync-title">🔄 Синхронизация</div>
+    <div class="sync-msg" id="syncNotificationMsg">Данные обновлены</div>
+</div>
+
 <script>
     (function() {
         "use strict";
 
         // ============================================
-        // 1. НАСТРОЙКИ
+        // 1. НАСТРОЙКИ СЕРВЕРА
+        // ============================================
+        // ⚠️ ИЗМЕНИТЕ ЭТУ СТРОКУ НА ВАШ URL СЕРВЕРА!
+        const SERVER_URL = 'https://91-dispatch-beta.onrender.com';
+        // ============================================
+
+        console.log('🔄 Подключение к серверу:', SERVER_URL);
+
+        // ============================================
+        // 2. НАСТРОЙКИ
         // ============================================
         let TITLE_CONFIG = {
             main: '911 Диспетчерский Центр',
@@ -1530,7 +1625,7 @@
         };
 
         // ============================================
-        // 2. РОЛИ И ИХ ПАРОЛИ (СЛОЖНЫЕ)
+        // 3. РОЛИ И ПАРОЛИ
         // ============================================
         const DEFAULT_ROLES = {
             admin: {
@@ -1634,7 +1729,6 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    // Проверяем, что все роли есть
                     for (const [key, value] of Object.entries(DEFAULT_ROLES)) {
                         if (!parsed[key]) {
                             parsed[key] = JSON.parse(JSON.stringify(value));
@@ -1644,7 +1738,6 @@
                     return true;
                 } catch(e) {}
             }
-            // Если не загрузилось, создаём копию дефолтных
             ROLES_CONFIG = JSON.parse(JSON.stringify(DEFAULT_ROLES));
             saveRolesConfig();
             return false;
@@ -1652,10 +1745,39 @@
 
         function saveRolesConfig() {
             localStorage.setItem('911_roles_config', JSON.stringify(ROLES_CONFIG));
+            // Отправляем на сервер
+            saveToServer('roles', ROLES_CONFIG);
         }
 
         // ============================================
-        // 3. СОСТОЯНИЕ
+        // 4. РАБОТА С СЕРВЕРОМ
+        // ============================================
+        async function saveToServer(section, data) {
+            try {
+                await fetch(`${SERVER_URL}/api/section/${section}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+            } catch(e) {
+                console.error('❌ Ошибка сохранения на сервер:', e);
+            }
+        }
+
+        async function loadFromServer(section) {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/section/${section}`);
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch(e) {
+                console.error('❌ Ошибка загрузки с сервера:', e);
+            }
+            return null;
+        }
+
+        // ============================================
+        // 5. СОСТОЯНИЕ
         // ============================================
         let currentRole = 'civilian';
         let isAdmin = false;
@@ -1666,110 +1788,10 @@
         let units = [];
         let archive = [];
         let systemLogs = [];
-        let callHistory = {}; // Хранит историю изменений для каждого вызова
+        let callHistory = {};
 
         // ============================================
-        // 4. DOM ЭЛЕМЕНТЫ
-        // ============================================
-        const callListEl = document.getElementById('callList');
-        const unitListEl = document.getElementById('unitList');
-        const archiveListEl = document.getElementById('archiveList');
-        const callCounter = document.getElementById('callCounter');
-        const unitCounter = document.getElementById('unitCounter');
-        const archiveCounter = document.getElementById('archiveCounter');
-        const statActiveCalls = document.getElementById('statActiveCalls');
-        const statBusyUnits = document.getElementById('statBusyUnits');
-        const statArchive = document.getElementById('statArchive');
-        const archiveTotal = document.getElementById('archiveTotal');
-        const roleBadge = document.getElementById('roleBadge');
-        const adminTabBtn = document.getElementById('adminTabBtn');
-        const adminRoleBadge = document.getElementById('adminRoleBadge');
-        const userInfo = document.getElementById('userInfo');
-        const userAvatar = document.getElementById('userAvatar');
-        const userNameDisplay = document.getElementById('userNameDisplay');
-        const authToggleBtn = document.getElementById('authToggleBtn');
-        const systemTitle = document.getElementById('systemTitle');
-        const onlineUsersDisplay = document.getElementById('onlineUsersDisplay');
-
-        const streetInput = document.getElementById('streetInput');
-        const descInput = document.getElementById('descInput');
-        const callerInput = document.getElementById('callerInput');
-        const phoneInput = document.getElementById('phoneInput');
-        const additionalInfoInput = document.getElementById('additionalInfoInput');
-        const addCallBtn = document.getElementById('addCallBtn');
-
-        const unitNameInput = document.getElementById('unitNameInput');
-        const addUnitBtn = document.getElementById('addUnitBtn');
-
-        const resetCallsBtn = document.getElementById('resetCallsBtn');
-        const clearAllCallsBtn = document.getElementById('clearAllCallsBtn');
-
-        const archiveSearch = document.getElementById('archiveSearch');
-        const archiveFilter = document.getElementById('archiveFilter');
-        const clearArchiveBtn = document.getElementById('clearArchiveBtn');
-        const exportArchiveBtn = document.getElementById('exportArchiveBtn');
-
-        const editCallId = document.getElementById('editCallId');
-        const editCallStreet = document.getElementById('editCallStreet');
-        const editCallDesc = document.getElementById('editCallDesc');
-        const editCallPriority = document.getElementById('editCallPriority');
-        const applyEditBtn = document.getElementById('applyEditBtn');
-        const exportAllBtn = document.getElementById('exportAllBtn');
-        const importFileInput = document.getElementById('importFileInput');
-        const importBtn = document.getElementById('importBtn');
-        const resetAllDataBtn = document.getElementById('resetAllDataBtn');
-        const refreshAdminBtn = document.getElementById('refreshAdminBtn');
-
-        const systemNameSetting = document.getElementById('systemNameSetting');
-        const changeSystemNameBtn = document.getElementById('changeSystemNameBtn');
-        const mainBadgeSetting = document.getElementById('mainBadgeSetting');
-        const changeMainBadgeBtn = document.getElementById('changeMainBadgeBtn');
-        const subBadgeSetting = document.getElementById('subBadgeSetting');
-        const changeSubBadgeBtn = document.getElementById('changeSubBadgeBtn');
-        const themeSelector = document.getElementById('themeSelector');
-        const applyThemeBtn = document.getElementById('applyThemeBtn');
-
-        const clearLogsBtn = document.getElementById('clearLogsBtn');
-        const exportLogsBtn = document.getElementById('exportLogsBtn');
-        const exportLogsJsonBtn = document.getElementById('exportLogsJsonBtn');
-
-        const saveRoleSettingsBtn = document.getElementById('saveRoleSettingsBtn');
-        const resetRoleSettingsBtn = document.getElementById('resetRoleSettingsBtn');
-
-        // Модальные окна
-        const authModal = document.getElementById('authModal');
-        const authModalTitle = document.getElementById('authModalTitle');
-        const authModalDesc = document.getElementById('authModalDesc');
-        const authLoginBtn = document.getElementById('authLoginBtn');
-        const authCancelBtn = document.getElementById('authCancelBtn');
-        const authError = document.getElementById('authError');
-        const authSuccess = document.getElementById('authSuccess');
-        const authPasswordInput = document.getElementById('authPasswordInput');
-
-        const assignModal = document.getElementById('assignModal');
-        const assignCallInfo = document.getElementById('assignCallInfo');
-        const assignUnitSelect = document.getElementById('assignUnitSelect');
-        const assignConfirmBtn = document.getElementById('assignConfirmBtn');
-        const assignCancelBtn = document.getElementById('assignCancelBtn');
-        let assignTargetCallId = null;
-
-        const commentModal = document.getElementById('commentModal');
-        const commentCallInfo = document.getElementById('commentCallInfo');
-        const commentInput = document.getElementById('commentInput');
-        const commentConfirmBtn = document.getElementById('commentConfirmBtn');
-        const commentCancelBtn = document.getElementById('commentCancelBtn');
-        let commentTargetCallId = null;
-
-        const statusModal = document.getElementById('statusModal');
-        const statusTargetInfo = document.getElementById('statusTargetInfo');
-        const statusSelect = document.getElementById('statusSelect');
-        const statusConfirmBtn = document.getElementById('statusConfirmBtn');
-        const statusCancelBtn = document.getElementById('statusCancelBtn');
-        let statusTargetType = null;
-        let statusTargetId = null;
-
-        // ============================================
-        // 5. ВСПОМОГАТЕЛЬНЫЕ
+        // 6. ВСПОМОГАТЕЛЬНЫЕ
         // ============================================
         function getTime() {
             const d = new Date();
@@ -1815,28 +1837,27 @@
             return roleData.permissions[perm] === true;
         }
 
-        function getRoleName(role) {
-            return ROLES_CONFIG[role]?.name || role;
-        }
-
-        function getRoleIcon(role) {
-            return ROLES_CONFIG[role]?.icon || '👤';
-        }
-
         // ============================================
-        // 6. ИСТОРИЯ ИЗМЕНЕНИЙ
+        // 7. ИСТОРИЯ И ЛОГИ (С СЕРВЕРОМ)
         // ============================================
         function addCallHistory(callId, action, detail) {
             if (!callHistory[callId]) {
                 callHistory[callId] = [];
             }
-            callHistory[callId].push({
+            const entry = {
                 time: getDateTime(),
                 action: action,
                 detail: detail,
                 user: currentRole || 'система'
-            });
+            };
+            callHistory[callId].push(entry);
             saveCallHistory();
+            // Отправляем на сервер
+            fetch(`${SERVER_URL}/api/history/${callId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(entry)
+            }).catch(e => console.error('Ошибка сохранения истории:', e));
         }
 
         function getCallHistory(callId) {
@@ -1858,15 +1879,19 @@
             return false;
         }
 
-        // ============================================
-        // 7. ЛОГИ
-        // ============================================
         function addLog(action, detail = '', type = 'info', user = null) {
             const time = new Date().toLocaleTimeString('ru-RU');
             const userName = user || (currentRole || 'Гость');
-            systemLogs.push({ time, user: userName, action, detail, type });
+            const logEntry = { time, user: userName, action, detail, type };
+            systemLogs.push(logEntry);
             renderLogs();
             saveLogs();
+            // Отправляем на сервер
+            fetch(`${SERVER_URL}/api/log`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(logEntry)
+            }).catch(e => console.error('Ошибка сохранения лога:', e));
         }
 
         function renderLogs() {
@@ -1879,12 +1904,15 @@
             }
             let html = '';
             logs.forEach(log => {
+                const syncClass = log.type === 'sync' ? 'log-sync' : '';
+                const syncLabel = log.type === 'sync' ? '🔄 Синхр.' : '';
                 html += `
                     <div class="log-item type-${log.type}">
                         <span class="log-time">[${log.time}]</span>
                         <span class="log-user">${log.user}</span>
                         <span class="log-action">${log.action}</span>
                         ${log.detail ? `<span class="log-detail">${log.detail}</span>` : ''}
+                        ${syncLabel ? `<span class="log-sync">${syncLabel}</span>` : ''}
                     </div>
                 `;
             });
@@ -1908,7 +1936,7 @@
         }
 
         // ============================================
-        // 8. ВХОД ПО РОЛЯМ
+        // 8. ВХОД И ВЫХОД
         // ============================================
         window.selectRole = function(role) {
             selectedRole = role;
@@ -2042,8 +2070,72 @@
         }
 
         // ============================================
-        // 11. ОСНОВНЫЕ ФУНКЦИИ
+        // 11. ОСНОВНЫЕ ФУНКЦИИ (С СЕРВЕРОМ)
         // ============================================
+        async function loadData() {
+            try {
+                // Загружаем с сервера
+                const serverData = await loadFromServer('data');
+                if (serverData) {
+                    calls = serverData.calls || [];
+                    units = serverData.units || [];
+                    archive = serverData.archive || [];
+                    systemLogs = serverData.logs || [];
+                    callHistory = serverData.history || {};
+                    renderCalls();
+                    renderUnits();
+                    renderArchive();
+                    renderLogs();
+                    updateCounters();
+                    console.log('✅ Данные загружены с сервера');
+                    return true;
+                }
+            } catch(e) {
+                console.error('❌ Ошибка загрузки с сервера:', e);
+            }
+            
+            // Если сервер не доступен, пробуем локальное хранилище
+            const saved = localStorage.getItem('911_data');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    calls = data.calls || [];
+                    units = data.units || [];
+                    archive = data.archive || [];
+                    systemLogs = data.logs || [];
+                    callHistory = data.history || {};
+                    renderCalls();
+                    renderUnits();
+                    renderArchive();
+                    renderLogs();
+                    updateCounters();
+                    console.log('✅ Данные загружены из localStorage');
+                    return true;
+                } catch(e) {}
+            }
+            return false;
+        }
+
+        async function saveData() {
+            const data = { 
+                calls, 
+                units, 
+                archive, 
+                logs: systemLogs, 
+                history: callHistory,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('911_data', JSON.stringify(data));
+            
+            try {
+                await saveToServer('data', data);
+                console.log('✅ Данные сохранены на сервер');
+            } catch(e) {
+                console.error('❌ Ошибка сохранения на сервер:', e);
+            }
+        }
+
         function addCall(street, desc, caller, phone, additional) {
             if (!hasPermission('createCalls')) {
                 alert('⛔ У вас нет прав на создание вызовов');
@@ -2071,7 +2163,6 @@
             };
             calls.push(call);
             
-            // Добавляем историю
             callHistory[call.id] = [];
             addCallHistory(call.id, 'Создание вызова', `Создан вызов: ${call.street} - ${call.desc}`);
             
@@ -2173,7 +2264,7 @@
         }
 
         // ============================================
-        // 12. ДЕЙСТВИЯ С ВЫЗОВАМИ
+        // 12. ОБРАБОТЧИКИ ДЕЙСТВИЙ
         // ============================================
         window.acceptCall = function(callId) {
             if (!hasPermission('changeCallStatus')) {
@@ -2196,9 +2287,6 @@
                 alert('Неверный выбор. Используйте 1, 2 или 3');
                 return;
             }
-            
-            const oldStatus = call.status;
-            const oldPriority = call.priority;
             
             call.status = 'active';
             call.priority = selectedPriority;
@@ -2288,20 +2376,6 @@
                 saveData();
                 addLog('Удалён вызов', `${call.street} - ${call.desc}`, 'danger', currentRole);
             }
-        };
-
-        window.openCallStatusModal = function(callId) {
-            if (!hasPermission('changeCallStatus')) {
-                alert('⛔ У вас нет прав на изменение статуса');
-                return;
-            }
-            const call = calls.find(c => c.id === callId);
-            if (!call) return;
-            statusTargetType = 'call';
-            statusTargetId = callId;
-            statusTargetInfo.textContent = `📍 ${call.street} - ${call.desc}`;
-            statusSelect.value = call.status;
-            statusModal.classList.add('active');
         };
 
         // ============================================
@@ -2396,7 +2470,7 @@
         }
 
         // ============================================
-        // 14. ДЕЙСТВИЯ С ЮНИТАМИ
+        // 14. ОСТАЛЬНЫЕ ДЕЙСТВИЯ
         // ============================================
         window.openAssignModal = function(callId) {
             if (!hasPermission('assignUnits')) {
@@ -2542,36 +2616,7 @@
         };
 
         // ============================================
-        // 15. КОММЕНТАРИИ
-        // ============================================
-        window.openCommentModal = function(callId) {
-            if (!hasPermission('addComment')) {
-                alert('⛔ У вас нет прав на добавление комментариев');
-                return;
-            }
-            const call = calls.find(c => c.id === callId);
-            if (!call) return;
-            
-            commentTargetCallId = callId;
-            commentCallInfo.textContent = `📍 ${call.street} - ${call.desc}`;
-            commentInput.value = call.comment || '';
-            commentModal.classList.add('active');
-        };
-
-        function addComment(callId, text) {
-            const call = calls.find(c => c.id === callId);
-            if (!call) return;
-            call.comment = text;
-            call.commentBy = currentRole || 'system';
-            call.commentTime = getFullTime();
-            addCallHistory(call.id, 'Добавлен комментарий', text);
-            renderCalls();
-            saveData();
-            addLog('Добавлен комментарий', `К вызову ${call.street}: ${text}`, 'info', currentRole);
-        }
-
-        // ============================================
-        // 16. АРХИВ С ПОЛНОЙ ОТЧЁТНОСТЬЮ
+        // 15. АРХИВ И ОТЧЁТЫ
         // ============================================
         function addToArchive(call, status) {
             const history = getCallHistory(call.id);
@@ -2631,7 +2676,6 @@
                     const commentInfo = item.comment ? `💬 ${item.comment}` : '';
                     const rejectInfo = item.rejectReason ? `❌ ${item.rejectReason}` : '';
                     
-                    // Считаем количество событий в истории
                     const historyCount = item.history ? item.history.length : 0;
                     
                     const canDelete = currentRole === 'admin';
@@ -2661,7 +2705,7 @@
         }
 
         // ============================================
-        // 17. ОТЧЁТ ПО ВЫЗОВУ
+        // 16. ОТЧЁТ ПО ВЫЗОВУ
         // ============================================
         window.showCallReport = function(callId) {
             const item = archive.find(a => a.id === callId);
@@ -2706,7 +2750,6 @@
             report += `📅 Отчёт создан: ${getDateTime()}\n`;
             report += `👤 Создал: ${currentRole || 'система'}\n`;
             
-            // Создаём и скачиваем файл
             const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2721,7 +2764,7 @@
         };
 
         // ============================================
-        // 18. ЭКСПОРТ АРХИВА С ПОЛНОЙ ОТЧЁТНОСТЬЮ
+        // 17. ЭКСПОРТ АРХИВА
         // ============================================
         function exportArchiveWithReport() {
             if (archive.length === 0) {
@@ -2791,45 +2834,26 @@
         }
 
         // ============================================
-        // 19. ЭКСПОРТ ЛОГОВ
+        // 18. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
         // ============================================
-        function exportLogs(format = 'txt') {
-            if (systemLogs.length === 0) {
-                alert('Логов нет');
-                return;
-            }
-            
-            let text = '';
-            if (format === 'txt') {
-                text = '=== ЛОГИ СИСТЕМЫ ===\n';
-                text += `Дата: ${getDateTime()}\n`;
-                text += '='.repeat(50) + '\n\n';
-                systemLogs.forEach(log => {
-                    text += `[${log.time}] ${log.user} | ${log.action}`;
-                    if (log.detail) text += ` | ${log.detail}`;
-                    text += ` [${log.type}]\n`;
-                });
-                text += '\nВсего: ' + systemLogs.length;
-            } else {
-                text = JSON.stringify(systemLogs, null, 2);
-            }
-            
-            const ext = format === 'txt' ? 'txt' : 'json';
-            const blob = new Blob([text], { type: format === 'txt' ? 'text/plain;charset=utf-8' : 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `logs_911_${new Date().toISOString().slice(0,10)}.${ext}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            addLog('Экспорт логов', `Экспортировано ${systemLogs.length} записей (${format})`, 'info', currentRole);
+        function updateCounters() {
+            callCounter.textContent = calls.length;
+            unitCounter.textContent = units.length;
+            statActiveCalls.textContent = calls.length;
+            const busyUnits = units.filter(u => u.status === 'busy' || u.status === 'en-route' || u.status === 'helping').length;
+            statBusyUnits.textContent = busyUnits;
+            updateArchiveCounters();
+        }
+
+        function updateArchiveCounters() {
+            const count = archive.length;
+            archiveCounter.textContent = count;
+            statArchive.textContent = count;
+            archiveTotal.textContent = count;
         }
 
         // ============================================
-        // 20. НАСТРОЙКА РОЛЕЙ (UI)
+        // 19. НАСТРОЙКА РОЛЕЙ (UI)
         // ============================================
         function renderRoleSettings() {
             const container = document.getElementById('roleSettingsContainer');
@@ -2881,7 +2905,6 @@
             }
             container.innerHTML = html;
             
-            // Обработчики для чекбоксов
             container.querySelectorAll('.role-perm-checkbox').forEach(cb => {
                 cb.addEventListener('change', function() {
                     const role = this.dataset.role;
@@ -2928,257 +2951,7 @@
         }
 
         // ============================================
-        // 21. СОХРАНЕНИЕ ДАННЫХ
-        // ============================================
-        function saveData() {
-            const data = { calls, units, archive, timestamp: new Date().toISOString() };
-            localStorage.setItem('911_data', JSON.stringify(data));
-            saveCallHistory();
-        }
-
-        function loadData() {
-            const saved = localStorage.getItem('911_data');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    if (data.calls) calls = data.calls;
-                    if (data.units) units = data.units;
-                    if (data.archive) archive = data.archive;
-                    renderCalls();
-                    renderUnits();
-                    renderArchive();
-                    return true;
-                } catch(e) {}
-            }
-            return false;
-        }
-
-        // ============================================
-        // 22. ТЕСТОВЫЕ ДАННЫЕ
-        // ============================================
-        function loadTestData() {
-            if (loadData()) return;
-            
-            calls = [
-                { 
-                    id: generateId(), 
-                    street: 'Бродвей, 12', 
-                    desc: 'Перестрелка, требуется помощь', 
-                    priority: 'high', 
-                    time: getTime(), 
-                    status: 'active', 
-                    assignedTo: 'Unit-3', 
-                    assignedByName: 'admin',
-                    createdBy: 'system', 
-                    comment: null, 
-                    commentBy: null, 
-                    commentTime: null,
-                    caller: 'Джон Смит',
-                    phone: '+1 555-0101',
-                    additional: 'Слышны выстрелы, люди в панике'
-                },
-                { 
-                    id: generateId(), 
-                    street: 'Парк им. Ленина', 
-                    desc: 'Группа лиц в состоянии алкогольного опьянения', 
-                    priority: 'pending', 
-                    time: getTime(), 
-                    status: 'pending', 
-                    assignedTo: null, 
-                    assignedByName: null,
-                    createdBy: 'system', 
-                    comment: null, 
-                    commentBy: null, 
-                    commentTime: null,
-                    caller: 'Анна Петрова',
-                    phone: '+7 999-123-4567',
-                    additional: 'Шумят, мешают отдыхающим'
-                }
-            ];
-            
-            // Добавляем историю для тестового вызова
-            const testCallId = calls[0].id;
-            callHistory[testCallId] = [
-                { time: getDateTime(), action: 'Создание вызова', detail: 'Вызов создан', user: 'admin' },
-                { time: getDateTime(), action: 'Назначение юнита', detail: 'Назначен юнит Unit-3', user: 'admin' },
-                { time: getDateTime(), action: 'Изменение статуса', detail: 'Статус изменён на Активен', user: 'admin' }
-            ];
-            
-            units = [
-                { id: generateId(), name: 'Unit-3', status: 'busy', currentCall: calls[0].id, createdBy: 'system' },
-                { id: generateId(), name: 'Unit-12', status: 'available', currentCall: null, createdBy: 'system' },
-            ];
-            
-            archive = [
-                { 
-                    id: generateId(), 
-                    street: 'Лесная, 7', 
-                    desc: 'Пожар в подвале', 
-                    priority: 'high', 
-                    time: '13:45', 
-                    status: 'resolved', 
-                    resolvedTime: '14:30:15', 
-                    assignedTo: 'Unit-7', 
-                    assignedByName: 'admin', 
-                    createdBy: 'system', 
-                    comment: 'Пожар потушен, пострадавших нет',
-                    caller: 'Мария Иванова',
-                    phone: '+7 999-111-2222',
-                    additional: 'Дым в подвале, запах гари',
-                    history: [
-                        { time: '13:45:00', action: 'Создание вызова', detail: 'Вызов создан', user: 'admin' },
-                        { time: '13:50:00', action: 'Назначение юнита', detail: 'Назначен юнит Unit-7', user: 'admin' },
-                        { time: '14:30:00', action: 'Завершение вызова', detail: 'Вызов завершён', user: 'admin' }
-                    ]
-                }
-            ];
-            
-            saveCallHistory();
-            renderCalls();
-            renderUnits();
-            renderArchive();
-            saveData();
-        }
-
-        // ============================================
-        // 23. АДМИН ФУНКЦИИ
-        // ============================================
-        function applyEditCall() {
-            if (currentRole !== 'admin') {
-                alert('⛔ Только администраторы могут редактировать вызовы');
-                return;
-            }
-            const id = parseInt(editCallId.value);
-            if (isNaN(id) || id < 0 || id >= calls.length) {
-                alert('Неверный ID вызова');
-                return;
-            }
-            const street = editCallStreet.value.trim();
-            const desc = editCallDesc.value.trim();
-            const priority = editCallPriority.value;
-            if (!street || !desc) {
-                alert('Заполните все поля');
-                return;
-            }
-            const oldStreet = calls[id].street;
-            const oldDesc = calls[id].desc;
-            calls[id].street = street;
-            calls[id].desc = desc;
-            calls[id].priority = priority;
-            
-            addCallHistory(calls[id].id, 'Редактирование вызова', `Изменён адрес: ${oldStreet} → ${street}, описание: ${oldDesc} → ${desc}`);
-            renderCalls();
-            saveData();
-            addLog('Редактирование вызова', `Вызов #${id} изменён`, 'warning', currentRole);
-            alert('✅ Вызов обновлён');
-        }
-
-        function exportAllData() {
-            if (!hasPermission('exportData')) {
-                alert('⛔ У вас нет прав на экспорт данных');
-                return;
-            }
-            const data = { 
-                calls, units, archive,
-                config: CONFIG,
-                title: TITLE_CONFIG,
-                logs: systemLogs,
-                roles: ROLES_CONFIG,
-                history: callHistory,
-                timestamp: new Date().toISOString() 
-            };
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `911_data_${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            addLog('Экспорт данных', 'Все данные экспортированы', 'info', currentRole);
-        }
-
-        function importData(file) {
-            if (currentRole !== 'admin') {
-                alert('⛔ Только администраторы могут импортировать данные');
-                return;
-            }
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.calls && data.units && data.archive) {
-                        if (confirm('Импорт заменит все данные. Продолжить?')) {
-                            calls = data.calls;
-                            units = data.units;
-                            archive = data.archive;
-                            if (data.config) {
-                                Object.assign(CONFIG, data.config);
-                            }
-                            if (data.title) {
-                                Object.assign(TITLE_CONFIG, data.title);
-                                saveTitleConfig();
-                                applyTitleConfig();
-                            }
-                            if (data.logs) {
-                                systemLogs = data.logs;
-                                renderLogs();
-                                saveLogs();
-                            }
-                            if (data.roles) {
-                                ROLES_CONFIG = data.roles;
-                                saveRolesConfig();
-                                renderRoleSettings();
-                            }
-                            if (data.history) {
-                                callHistory = data.history;
-                                saveCallHistory();
-                            }
-                            renderCalls();
-                            renderUnits();
-                            renderArchive();
-                            saveData();
-                            addLog('Импорт данных', 'Данные импортированы', 'success', currentRole);
-                            alert('✅ Импорт успешен!');
-                        }
-                    } else {
-                        alert('❌ Неверный формат файла');
-                    }
-                } catch (err) {
-                    alert('❌ Ошибка: ' + err.message);
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function resetAllData() {
-            if (currentRole !== 'admin') {
-                alert('⛔ Только администраторы могут сбрасывать данные');
-                return;
-            }
-            if (confirm('⚠️ ВСЕ ДАННЫЕ будут удалены! Продолжить?')) {
-                calls = [];
-                units = [];
-                archive = [];
-                systemLogs = [];
-                callHistory = {};
-                renderCalls();
-                renderUnits();
-                renderArchive();
-                renderLogs();
-                saveData();
-                saveLogs();
-                saveCallHistory();
-                addLog('Сброс данных', 'Все данные сброшены', 'danger', currentRole);
-                alert('✅ Данные сброшены');
-            }
-        }
-
-        // ============================================
-        // 24. НАСТРОЙКИ СИСТЕМЫ
+        // 20. НАСТРОЙКИ СИСТЕМЫ
         // ============================================
         function loadTitleConfig() {
             const saved = localStorage.getItem('911_title_config');
@@ -3265,7 +3038,7 @@
         }
 
         // ============================================
-        // 25. ОБРАБОТЧИКИ СОБЫТИЙ
+        // 21. ОБРАБОТЧИКИ СОБЫТИЙ
         // ============================================
 
         // Вкладки
@@ -3326,7 +3099,7 @@
             unitNameInput.value = '';
         });
 
-        // Сброс и очистка
+        // Сброс вызовов
         resetCallsBtn.addEventListener('click', function() {
             if (!hasPermission('changeCallStatus')) {
                 alert('⛔ У вас нет прав на сброс вызовов');
@@ -3374,6 +3147,7 @@
             addLog('Сброс вызовов', 'Загружены тестовые вызовы', 'info', currentRole);
         });
 
+        // Очистка вызовов
         clearAllCallsBtn.addEventListener('click', function() {
             if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут очищать все вызовы');
@@ -3391,6 +3165,7 @@
             }
         });
 
+        // Очистка архива
         clearArchiveBtn.addEventListener('click', function() {
             if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут очищать архив');
@@ -3406,7 +3181,7 @@
             }
         });
 
-        // Экспорт архива с полным отчётом
+        // Экспорт архива
         exportArchiveBtn.addEventListener('click', function() {
             if (!hasPermission('exportData')) {
                 alert('⛔ У вас нет прав на экспорт данных');
@@ -3424,16 +3199,144 @@
         archiveFilter.addEventListener('change', renderArchive);
 
         // Админ действия
-        applyEditBtn.addEventListener('click', applyEditCall);
-        exportAllBtn.addEventListener('click', exportAllData);
+        applyEditBtn.addEventListener('click', function() {
+            if (currentRole !== 'admin') {
+                alert('⛔ Только администраторы могут редактировать вызовы');
+                return;
+            }
+            const id = parseInt(editCallId.value);
+            if (isNaN(id) || id < 0 || id >= calls.length) {
+                alert('Неверный ID вызова');
+                return;
+            }
+            const street = editCallStreet.value.trim();
+            const desc = editCallDesc.value.trim();
+            const priority = editCallPriority.value;
+            if (!street || !desc) {
+                alert('Заполните все поля');
+                return;
+            }
+            const oldStreet = calls[id].street;
+            const oldDesc = calls[id].desc;
+            calls[id].street = street;
+            calls[id].desc = desc;
+            calls[id].priority = priority;
+            
+            addCallHistory(calls[id].id, 'Редактирование вызова', `Изменён адрес: ${oldStreet} → ${street}, описание: ${oldDesc} → ${desc}`);
+            renderCalls();
+            saveData();
+            addLog('Редактирование вызова', `Вызов #${id} изменён`, 'warning', currentRole);
+            alert('✅ Вызов обновлён');
+        });
+
+        exportAllBtn.addEventListener('click', function() {
+            if (!hasPermission('exportData')) {
+                alert('⛔ У вас нет прав на экспорт данных');
+                return;
+            }
+            const data = { 
+                calls, units, archive,
+                config: CONFIG,
+                title: TITLE_CONFIG,
+                logs: systemLogs,
+                roles: ROLES_CONFIG,
+                history: callHistory,
+                timestamp: new Date().toISOString() 
+            };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `911_data_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            addLog('Экспорт данных', 'Все данные экспортированы', 'info', currentRole);
+        });
+
         importBtn.addEventListener('click', function() {
+            if (currentRole !== 'admin') {
+                alert('⛔ Только администраторы могут импортировать данные');
+                return;
+            }
             if (importFileInput.files.length > 0) {
-                importData(importFileInput.files[0]);
+                const file = importFileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (data.calls && data.units && data.archive) {
+                            if (confirm('Импорт заменит все данные. Продолжить?')) {
+                                calls = data.calls;
+                                units = data.units;
+                                archive = data.archive;
+                                if (data.config) {
+                                    Object.assign(CONFIG, data.config);
+                                }
+                                if (data.title) {
+                                    Object.assign(TITLE_CONFIG, data.title);
+                                    saveTitleConfig();
+                                    applyTitleConfig();
+                                }
+                                if (data.logs) {
+                                    systemLogs = data.logs;
+                                    renderLogs();
+                                    saveLogs();
+                                }
+                                if (data.roles) {
+                                    ROLES_CONFIG = data.roles;
+                                    saveRolesConfig();
+                                    renderRoleSettings();
+                                }
+                                if (data.history) {
+                                    callHistory = data.history;
+                                    saveCallHistory();
+                                }
+                                renderCalls();
+                                renderUnits();
+                                renderArchive();
+                                saveData();
+                                addLog('Импорт данных', 'Данные импортированы', 'success', currentRole);
+                                alert('✅ Импорт успешен!');
+                            }
+                        } else {
+                            alert('❌ Неверный формат файла');
+                        }
+                    } catch (err) {
+                        alert('❌ Ошибка: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
             } else {
                 alert('Выберите файл');
             }
         });
-        resetAllDataBtn.addEventListener('click', resetAllData);
+
+        resetAllDataBtn.addEventListener('click', function() {
+            if (currentRole !== 'admin') {
+                alert('⛔ Только администраторы могут сбрасывать данные');
+                return;
+            }
+            if (confirm('⚠️ ВСЕ ДАННЫЕ будут удалены! Продолжить?')) {
+                calls = [];
+                units = [];
+                archive = [];
+                systemLogs = [];
+                callHistory = {};
+                renderCalls();
+                renderUnits();
+                renderArchive();
+                renderLogs();
+                saveData();
+                saveLogs();
+                saveCallHistory();
+                addLog('Сброс данных', 'Все данные сброшены', 'danger', currentRole);
+                alert('✅ Данные сброшены');
+            }
+        });
+
         refreshAdminBtn.addEventListener('click', function() {
             renderCalls();
             renderUnits();
@@ -3495,7 +3398,6 @@
             alert('✅ Приписка изменена!');
         });
 
-        // Настройки темы
         applyThemeBtn.addEventListener('click', function() {
             if (currentRole !== 'admin') {
                 alert('⛔ Требуются права администратора');
@@ -3527,7 +3429,30 @@
                 alert('⛔ У вас нет прав на экспорт данных');
                 return;
             }
-            exportLogs('txt');
+            if (systemLogs.length === 0) {
+                alert('Логов нет');
+                return;
+            }
+            let text = '=== ЛОГИ СИСТЕМЫ ===\n';
+            text += `Дата: ${getDateTime()}\n`;
+            text += '='.repeat(50) + '\n\n';
+            systemLogs.forEach(log => {
+                text += `[${log.time}] ${log.user} | ${log.action}`;
+                if (log.detail) text += ` | ${log.detail}`;
+                text += ` [${log.type}]\n`;
+            });
+            text += '\nВсего: ' + systemLogs.length;
+
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `logs_911_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            addLog('Экспорт логов', `Экспортировано ${systemLogs.length} записей (TXT)`, 'info', currentRole);
         });
 
         exportLogsJsonBtn.addEventListener('click', function() {
@@ -3535,7 +3460,21 @@
                 alert('⛔ У вас нет прав на экспорт данных');
                 return;
             }
-            exportLogs('json');
+            if (systemLogs.length === 0) {
+                alert('Логов нет');
+                return;
+            }
+            const text = JSON.stringify(systemLogs, null, 2);
+            const blob = new Blob([text], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `logs_911_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            addLog('Экспорт логов', `Экспортировано ${systemLogs.length} записей (JSON)`, 'info', currentRole);
         });
 
         // Настройки ролей
@@ -3549,9 +3488,7 @@
             alert('✅ Настройки ролей сохранены!');
         });
 
-        resetRoleSettingsBtn.addEventListener('click', function() {
-            resetRoleSettings();
-        });
+        resetRoleSettingsBtn.addEventListener('click', resetRoleSettings);
 
         // Модальные окна
         assignConfirmBtn.addEventListener('click', function() {
@@ -3675,7 +3612,7 @@
         unitNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addUnitBtn.click(); });
 
         // ============================================
-        // 26. ЗАПУСК
+        // 22. ЗАПУСК
         // ============================================
         
         loadConfig();
@@ -3686,17 +3623,19 @@
         applySystemSettings();
         applyTitleConfig();
 
-        // Устанавливаем гражданского по умолчанию
         currentRole = 'civilian';
         isAdmin = false;
         isDispatcher = false;
 
-        // Загружаем данные
-        if (!loadData()) {
-            loadTestData();
-        }
+        // Загружаем данные с сервера или локально
+        (async function init() {
+            const loaded = await loadData();
+            if (!loaded) {
+                // Если данных нет, создаём тестовые
+                loadTestData();
+            }
+        })();
 
-        // Загружаем настройки в интерфейс
         if (themeSelector) themeSelector.value = CONFIG.THEME || 'dark';
         if (systemNameSetting) systemNameSetting.value = TITLE_CONFIG.main;
         if (mainBadgeSetting) mainBadgeSetting.value = TITLE_CONFIG.leftBadge;
@@ -3705,16 +3644,32 @@
         renderRoleSettings();
         updateUI();
 
+        // Проверка подключения к серверу
+        async function checkServer() {
+            try {
+                const response = await fetch(`${SERVER_URL}/`);
+                if (response.ok) {
+                    console.log('✅ Сервер доступен');
+                    document.getElementById('syncDot').className = 'sync-dot online';
+                    document.getElementById('syncText').textContent = 'Синхронизация активна';
+                }
+            } catch(e) {
+                console.warn('⚠️ Сервер недоступен, работа в локальном режиме');
+                document.getElementById('syncDot').className = 'sync-dot offline';
+                document.getElementById('syncText').textContent = 'Офлайн режим';
+            }
+        }
+        checkServer();
+
         addLog('Система запущена', '911 Диспетчерский Центр активирован', 'success', 'Система');
         console.log('🚀 911 Диспетчерский Центр запущен');
+        console.log('🔄 Сервер:', SERVER_URL);
         console.log('👤 По умолчанию вы вошли как Гражданский');
         console.log('🔑 Пароли для ролей:');
         console.log('  👑 Администратор: Admin@911Secure#2024!');
         console.log('  📡 Диспетчер: Dispatch@911#Strong2024!');
         console.log('  👤 Пользователь: User@911#Access2024!');
         console.log('  🏠 Гражданский: Civilian@911#View2024!');
-        console.log('📋 Для входа нажмите кнопку "🔑 Войти" в правом верхнем углу');
-        console.log('📄 Для просмотра полного отчёта по вызову нажмите "📄 Отчёт" в архиве');
 
     })();
 </script>
