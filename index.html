@@ -1377,8 +1377,8 @@
         <p id="authModalDesc">Войдите для доступа к диспетчерскому центру</p>
         <div class="error-msg" id="authError">❌ Ошибка</div>
         <div class="success-msg" id="authSuccess">✅ Успешно!</div>
-        <input type="text" id="authLoginInput" placeholder="Логин" value="Mr_Crown">
-        <input type="password" id="authPasswordInput" placeholder="Пароль" value="7465Kce1">
+        <input type="text" id="authLoginInput" placeholder="Логин">
+        <input type="password" id="authPasswordInput" placeholder="Пароль">
         <div style="display: flex; gap: 12px; margin-bottom: 12px;">
             <button class="btn btn-primary" id="authLoginBtn" style="flex:1;">Войти</button>
             <button class="btn btn-success" id="authRegisterBtn" style="flex:1;">Зарегистрироваться</button>
@@ -1389,7 +1389,7 @@
         <div style="margin-top: 12px; text-align: center; color: #475569; font-size: 13px;">
             <span id="authSwitchText">Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрируйтесь</a></span>
         </div>
-        <div style="margin-top: 12px; padding: 10px; background: #0a0f17; border-radius: 12px; border: 1px solid #1a2636; font-size: 12px; color: #475569; text-align: center;">
+        <div style="margin-top: 12px; padding: 12px; background: #0f172a; border-radius: 12px; border: 1px solid #1a2636; font-size: 13px; color: #94a3b8; text-align: center;">
             <strong style="color: #60a5fa;">👑 Администратор:</strong> Mr_Crown / 7465Kce1
         </div>
     </div>
@@ -1548,7 +1548,7 @@
         };
 
         // ============================================
-        // 4. ПОЛЬЗОВАТЕЛИ
+        // 4. ПОЛЬЗОВАТЕЛИ - ГЛАВНОЕ
         // ============================================
         let users = [];
         let currentUser = null;
@@ -1597,52 +1597,69 @@
         }
 
         // ============================================
-        // 7. ПОЛЬЗОВАТЕЛИ - ОСНОВНАЯ ФУНКЦИЯ
+        // 7. ПОЛЬЗОВАТЕЛИ - ОСНОВНАЯ ЛОГИКА
         // ============================================
         function loadUsers() {
+            // Сначала проверяем localStorage
             const saved = localStorage.getItem('911_users');
             if (saved) {
                 try {
                     users = JSON.parse(saved);
+                    console.log('✅ Пользователи загружены из localStorage:', users);
                     return true;
-                } catch(e) {}
+                } catch(e) {
+                    console.error('❌ Ошибка загрузки пользователей:', e);
+                }
             }
-            // Все пользователи по умолчанию
+            
+            // Если не загрузились - создаём по умолчанию
+            console.log('📝 Создаём пользователей по умолчанию');
             users = [
-                { login: 'admin', password: 'admin123', role: 'admin' },
                 { login: 'Mr_Crown', password: '7465Kce1', role: 'admin' },
+                { login: 'admin', password: 'admin123', role: 'admin' },
                 { login: 'dispatcher', password: '123456', role: 'dispatcher' },
                 { login: 'user', password: '123456', role: 'user' },
                 { login: 'civilian', password: '123456', role: 'civilian' },
             ];
             saveUsers();
+            console.log('✅ Пользователи созданы:', users);
             return false;
         }
 
         function saveUsers() {
             localStorage.setItem('911_users', JSON.stringify(users));
+            console.log('💾 Пользователи сохранены');
         }
 
         function findUser(login) {
-            return users.find(u => u.login.toLowerCase() === login.toLowerCase());
+            if (!login) return null;
+            const found = users.find(u => u.login.toLowerCase() === login.toLowerCase());
+            console.log('🔍 Поиск пользователя:', login, 'Найден:', found);
+            return found;
         }
 
-        // ГЛАВНАЯ ФУНКЦИЯ ВХОДА
+        // ГЛАВНАЯ ФУНКЦИЯ ВХОДА - ИСПРАВЛЕНА
         function loginUser(login, password) {
-            console.log('Попытка входа:', login);
+            console.log('🔄 Попытка входа:', login);
+            
+            // Проверяем, есть ли пользователи
+            if (users.length === 0) {
+                console.log('⚠️ Пользователи не загружены, загружаем...');
+                loadUsers();
+            }
             
             const user = findUser(login);
             if (!user) {
-                console.log('Пользователь не найден');
+                console.log('❌ Пользователь не найден');
                 return { success: false, message: '❌ Пользователь не найден' };
             }
             
-            console.log('Найден пользователь:', user.login, 'Роль:', user.role);
-            console.log('Введённый пароль:', password);
-            console.log('Правильный пароль:', user.password);
+            console.log('👤 Найден пользователь:', user.login, 'Роль:', user.role);
+            console.log('🔑 Введённый пароль:', password);
+            console.log('🔑 Правильный пароль:', user.password);
             
             if (user.password !== password) {
-                console.log('Пароль не совпадает');
+                console.log('❌ Пароль не совпадает');
                 return { success: false, message: '❌ Неверный пароль' };
             }
             
@@ -1650,7 +1667,7 @@
             isAdmin = user.role === 'admin';
             isDispatcher = user.role === 'admin' || user.role === 'dispatcher';
             
-            console.log('Вход выполнен! Роль:', user.role);
+            console.log('✅ Вход выполнен! Роль:', user.role);
             
             updateUI();
             addLog('Вход в систему', `Пользователь ${login} вошёл`, 'success', login);
@@ -1680,6 +1697,7 @@
             isAdmin = false;
             isDispatcher = false;
             updateUI();
+            // Показываем модалку входа
             showAuthModal('login');
             document.querySelector('[data-tab="main"]').click();
         }
@@ -1792,7 +1810,6 @@
             return true;
         }
 
-        // ===== ФУНКЦИЯ РЕНДЕРИНГА ВЫЗОВОВ =====
         function renderCalls() {
             if (calls.length === 0) {
                 callListEl.innerHTML = `<div class="empty-state">📭 Нет активных вызовов</div>`;
@@ -2006,7 +2023,7 @@
         };
 
         // ============================================
-        // 10. ЮНИТЫ (СОКРАЩЕННО)
+        // 10. ЮНИТЫ
         // ============================================
         function addUnit(name) {
             if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'dispatcher')) {
@@ -2931,12 +2948,6 @@
             authLoginInput.value = '';
             authPasswordInput.value = '';
             
-            // Предзаполняем для удобства
-            if (mode === 'login') {
-                authLoginInput.value = 'Mr_Crown';
-                authPasswordInput.value = '7465Kce1';
-            }
-            
             if (isLoginMode) {
                 authModalTitle.textContent = '🔐 Вход в систему';
                 authModalDesc.textContent = 'Войдите для доступа к диспетчерскому центру';
@@ -2971,6 +2982,8 @@
         function handleAuthLogin() {
             const login = authLoginInput.value.trim();
             const password = authPasswordInput.value.trim();
+            
+            console.log('🔐 Обработка входа:', login);
             
             if (!login || !password) {
                 authError.textContent = '❌ Заполните все поля';
@@ -3401,10 +3414,13 @@
         // Загружаем все настройки
         loadConfig();
         loadTitleConfig();
-        loadUsers();
         loadLogs();
         applySystemSettings();
         applyTitleConfig();
+
+        // ЗАГРУЖАЕМ ПОЛЬЗОВАТЕЛЕЙ (ОБЯЗАТЕЛЬНО)
+        loadUsers();
+        console.log('📋 Пользователи загружены:', users);
 
         // Устанавливаем гражданского по умолчанию
         const defaultUser = findUser('civilian');
@@ -3412,6 +3428,9 @@
             currentUser = defaultUser;
             isAdmin = false;
             isDispatcher = false;
+            console.log('👤 Установлен пользователь по умолчанию:', currentUser.login);
+        } else {
+            console.warn('⚠️ Пользователь "civilian" не найден!');
         }
 
         // Загружаем данные
