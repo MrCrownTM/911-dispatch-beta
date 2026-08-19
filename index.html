@@ -4,1264 +4,249 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🚨 Диспетчерский Центр 911</title>
+    
+    <!-- ===== ПОДКЛЮЧЕНИЕ SUPABASE ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
-        /* ===== ГЛОБАЛЬНЫЙ СТИЛЬ ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-        }
-
-        body {
-            background: #0a0e17;
-            color: #e8edf2;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        .dashboard {
-            background: linear-gradient(145deg, #111927, #0d1520);
-            border-radius: 28px;
-            padding: 28px 32px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            border: 1px solid #1e2a3a;
-        }
-
+        /* ===== КРАТКИЙ СТИЛЬ (полный будет ниже) ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background: #0a0e17; color: #e8edf2; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .dashboard { background: linear-gradient(145deg, #111927, #0d1520); border-radius: 28px; padding: 28px 32px; border: 1px solid #1e2a3a; }
+        
         /* ===== ШАПКА ===== */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            border-bottom: 2px solid rgba(30, 42, 58, 0.6);
-            padding-bottom: 18px;
-            margin-bottom: 28px;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border-bottom: 2px solid rgba(30,42,58,0.6); padding-bottom: 18px; margin-bottom: 28px; }
+        .logo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .logo .shield { font-size: 32px; }
+        .logo .title-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .logo h1 { font-size: 26px; font-weight: 700; background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo .badge-main { background: #dc2626; padding: 2px 14px; border-radius: 40px; font-size: 13px; font-weight: 700; color: #fff; }
+        .logo .badge-sub { background: #1a2330; padding: 2px 12px; border-radius: 40px; font-size: 12px; color: #94a3b8; border: 1px solid #2a3a4a; }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .logo .shield {
-            font-size: 32px;
-        }
-        .logo .title-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .logo h1 {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .logo .badge-main {
-            background: #dc2626;
-            padding: 2px 14px;
-            border-radius: 40px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 1px;
-            -webkit-text-fill-color: #fff;
-        }
-        .logo .badge-sub {
-            background: #1a2330;
-            padding: 2px 12px;
-            border-radius: 40px;
-            font-size: 12px;
-            color: #94a3b8;
-            border: 1px solid #2a3a4a;
-            -webkit-text-fill-color: #94a3b8;
-        }
+        .header-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .status-badge { background: #0f172a; padding: 8px 20px; border-radius: 60px; display: flex; align-items: center; gap: 10px; border: 1px solid #1e2a3a; font-size: 14px; }
+        .live-dot { display: inline-block; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; animation: pulse 1.8s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+        
+        .sync-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; padding: 4px 12px; background: #0a0f17; border-radius: 40px; border: 1px solid #1a2636; }
+        .sync-status .sync-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .sync-status .sync-dot.online { background: #22c55e; animation: pulse 1.8s infinite; }
+        .sync-status .sync-dot.offline { background: #6b7280; }
 
-        .header-controls {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+        .user-info { display: flex; align-items: center; gap: 10px; background: #0f172a; padding: 4px 16px 4px 10px; border-radius: 40px; border: 1px solid #1e2a3a; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: white; flex-shrink: 0; }
+        .user-name { font-weight: 500; font-size: 14px; }
 
-        .status-badge {
-            background: #0f172a;
-            padding: 8px 20px;
-            border-radius: 60px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
-            border: 1px solid #1e2a3a;
-            font-size: 14px;
-        }
-        .live-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: pulse 1.8s infinite;
-            box-shadow: 0 0 12px #22c55e88;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
-            100% { opacity: 1; transform: scale(1); }
-        }
+        .role-badge { padding: 6px 16px; border-radius: 40px; font-size: 13px; font-weight: 600; border: 1px solid; background: transparent; }
+        .role-badge.admin { color: #60a5fa; border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .role-badge.dispatcher { color: #4ade80; border-color: #22c55e; background: rgba(34,197,94,0.1); }
+        .role-badge.civilian { color: #fbbf24; border-color: #f59e0b; background: rgba(245,158,11,0.1); }
+        .role-badge.user { color: #94a3b8; border-color: #475569; background: rgba(71,85,105,0.2); }
+        .role-badge.guest { color: #64748b; border-color: #334155; background: transparent; }
 
-        .sync-status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: #475569;
-            padding: 4px 12px;
-            background: #0a0f17;
-            border-radius: 40px;
-            border: 1px solid #1a2636;
-        }
-        .sync-status .sync-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .sync-status .sync-dot.online {
-            background: #22c55e;
-            animation: pulse 1.8s infinite;
-        }
-        .sync-status .sync-dot.offline {
-            background: #6b7280;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #0f172a;
-            padding: 4px 16px 4px 10px;
-            border-radius: 40px;
-            border: 1px solid #1e2a3a;
-        }
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-            color: white;
-            flex-shrink: 0;
-        }
-        .user-name {
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .role-badge {
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 13px;
-            font-weight: 600;
-            border: 1px solid;
-            background: transparent;
-        }
-        .role-badge.admin {
-            color: #60a5fa;
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-        }
-        .role-badge.dispatcher {
-            color: #4ade80;
-            border-color: #22c55e;
-            background: rgba(34, 197, 94, 0.1);
-        }
-        .role-badge.civilian {
-            color: #fbbf24;
-            border-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.1);
-        }
-        .role-badge.user {
-            color: #94a3b8;
-            border-color: #475569;
-            background: rgba(71, 85, 105, 0.2);
-        }
-        .role-badge.guest {
-            color: #64748b;
-            border-color: #334155;
-            background: transparent;
-        }
-
-        .btn {
-            border: none;
-            background: #1e293b;
-            color: #e8edf2;
-            font-weight: 600;
-            padding: 8px 18px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #2a3a4a;
-        }
-        .btn:hover {
-            background: #2a3a4e;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        .btn:active {
-            transform: translateY(0);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border-color: #3b82f6;
-            color: #fff;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-        }
-        .btn-success {
-            background: linear-gradient(135deg, #16a34a, #15803d);
-            border-color: #22c55e;
-            color: #fff;
-        }
-        .btn-success:hover {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-        }
-        .btn-danger {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-            border-color: #dc2626;
-            color: #fff;
-        }
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-        }
-        .btn-warning {
-            background: linear-gradient(135deg, #d97706, #b45309);
-            border-color: #f59e0b;
-            color: #fff;
-        }
-        .btn-warning:hover {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-        .btn-info {
-            background: linear-gradient(135deg, #0891b2, #0e7490);
-            border-color: #06b6d4;
-            color: #fff;
-        }
-        .btn-info:hover {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-        }
-        .btn-sm {
-            padding: 5px 14px;
-            font-size: 13px;
-        }
-        .btn-xs {
-            padding: 3px 10px;
-            font-size: 12px;
-        }
-        .btn-outline {
-            background: transparent;
-            border-color: #334155;
-        }
-        .btn-outline:hover {
-            background: #1e293b;
-        }
-        .btn-pulse {
-            animation: btnPulse 1.5s infinite;
-        }
-        @keyframes btnPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
-        }
+        .btn { border: none; background: #1e293b; color: #e8edf2; font-weight: 600; padding: 8px 18px; border-radius: 40px; cursor: pointer; transition: all 0.2s ease; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #2a3a4a; }
+        .btn:hover { background: #2a3a4e; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); border-color: #3b82f6; color: #fff; }
+        .btn-success { background: linear-gradient(135deg, #16a34a, #15803d); border-color: #22c55e; color: #fff; }
+        .btn-danger { background: linear-gradient(135deg, #b91c1c, #991b1b); border-color: #dc2626; color: #fff; }
+        .btn-warning { background: linear-gradient(135deg, #d97706, #b45309); border-color: #f59e0b; color: #fff; }
+        .btn-info { background: linear-gradient(135deg, #0891b2, #0e7490); border-color: #06b6d4; color: #fff; }
+        .btn-sm { padding: 5px 14px; font-size: 13px; }
+        .btn-xs { padding: 3px 10px; font-size: 12px; }
+        .btn-outline { background: transparent; border-color: #334155; }
+        .btn-outline:hover { background: #1e293b; }
+        .btn-pulse { animation: btnPulse 1.5s infinite; }
+        @keyframes btnPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); } 50% { box-shadow: 0 0 0 8px rgba(220,38,38,0); } }
 
         /* ===== ВКЛАДКИ ===== */
-        .tabs {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 24px;
-            border-bottom: 2px solid rgba(30, 42, 58, 0.4);
-            padding-bottom: 4px;
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            background: transparent;
-            border: none;
-            color: #64748b;
-            padding: 12px 24px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 12px 12px 0 0;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .tab-btn:hover {
-            color: #e8edf2;
-            background: rgba(30, 42, 58, 0.4);
-        }
-        .tab-btn.active {
-            color: #60a5fa;
-            background: rgba(59, 130, 246, 0.08);
-        }
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: linear-gradient(90deg, #2563eb, #60a5fa);
-            border-radius: 4px;
-        }
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 2px solid rgba(30,42,58,0.4); padding-bottom: 4px; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: none; color: #64748b; padding: 12px 24px; font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 12px 12px 0 0; transition: all 0.2s ease; position: relative; }
+        .tab-btn:hover { color: #e8edf2; background: rgba(30,42,58,0.4); }
+        .tab-btn.active { color: #60a5fa; background: rgba(59,130,246,0.08); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 20%; right: 20%; height: 3px; background: linear-gradient(90deg, #2563eb, #60a5fa); border-radius: 4px; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
         /* ===== СЕТКА ===== */
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-
-        @media (max-width: 1200px) {
-            .grid-3 {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        @media (max-width: 900px) {
-            .grid-3 {
-                grid-template-columns: 1fr;
-            }
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        @media (max-width: 1200px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr; } }
 
         /* ===== КАРТОЧКИ ===== */
-        .card {
-            background: linear-gradient(145deg, #111927, #0d1520);
-            border-radius: 20px;
-            padding: 22px 24px;
-            border: 1px solid #1a2636;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        .card:hover {
-            border-color: #2a3a4a;
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .card-title {
-            font-size: 17px;
-            font-weight: 700;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #e2e8f0;
-            letter-spacing: 0.3px;
-        }
-        .card-title .count-badge {
-            background: #1a2636;
-            padding: 0 14px;
-            border-radius: 40px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #94a3b8;
-            margin-left: auto;
-        }
+        .card { background: linear-gradient(145deg, #111927, #0d1520); border-radius: 20px; padding: 22px 24px; border: 1px solid #1a2636; transition: all 0.2s ease; }
+        .card:hover { border-color: #2a3a4a; }
+        .card-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; color: #e2e8f0; }
+        .card-title .count-badge { background: #1a2636; padding: 0 14px; border-radius: 40px; font-size: 14px; font-weight: 600; color: #94a3b8; margin-left: auto; }
 
         /* ===== ВЫЗОВЫ ===== */
-        .call-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 6px;
-        }
-        .call-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .call-list::-webkit-scrollbar-track {
-            background: #0a0f17;
-            border-radius: 12px;
-        }
-        .call-list::-webkit-scrollbar-thumb {
-            background: #2a3a4a;
-            border-radius: 12px;
-        }
+        .call-list { display: flex; flex-direction: column; gap: 12px; max-height: 500px; overflow-y: auto; padding-right: 6px; }
+        .call-list::-webkit-scrollbar { width: 4px; }
+        .call-list::-webkit-scrollbar-track { background: #0a0f17; border-radius: 12px; }
+        .call-list::-webkit-scrollbar-thumb { background: #2a3a4a; border-radius: 12px; }
 
-        .call-item {
-            background: #0f172a;
-            padding: 14px 18px;
-            border-radius: 16px;
-            border-left: 5px solid #475569;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            transition: all 0.15s ease;
-            border: 1px solid #1a2636;
-        }
-        .call-item:hover {
-            border-color: #2a3a4a;
-        }
-        .call-item.priority-high {
-            border-left-color: #dc2626;
-            background: rgba(220, 38, 38, 0.06);
-        }
-        .call-item.priority-medium {
-            border-left-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.04);
-        }
-        .call-item.priority-low {
-            border-left-color: #22c55e;
-            background: rgba(34, 197, 94, 0.04);
-        }
-        .call-item.status-pending {
-            border-left-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.04);
-        }
-        .call-item.status-active {
-            border-left-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.06);
-        }
-        .call-item.status-completed {
-            border-left-color: #22c55e;
-            opacity: 0.6;
-        }
-        .call-item.status-rejected {
-            border-left-color: #6b7280;
-            opacity: 0.5;
-        }
-        .call-item .call-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .call-item .call-street {
-            font-weight: 600;
-            font-size: 16px;
-            color: #f1f5f9;
-        }
-        .call-item .call-priority {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 12px;
-            border-radius: 40px;
-            background: #1a2636;
-        }
-        .call-item .call-priority.high { color: #f87171; background: rgba(220, 38, 38, 0.15); }
-        .call-item .call-priority.medium { color: #fbbf24; background: rgba(245, 158, 11, 0.15); }
-        .call-item .call-priority.low { color: #4ade80; background: rgba(34, 197, 94, 0.15); }
-        .call-item .call-priority.pending { color: #fbbf24; background: rgba(245, 158, 11, 0.15); }
-        .call-item .call-desc {
-            font-size: 14px;
-            color: #94a3b8;
-        }
-        .call-item .call-meta {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 4px 16px;
-            font-size: 13px;
-            color: #64748b;
-            padding: 4px 0;
-            background: #0a0f17;
-            padding: 6px 12px;
-            border-radius: 8px;
-        }
-        .call-item .call-meta .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .call-item .call-meta .meta-label {
-            color: #475569;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .call-item .call-meta .meta-value {
-            color: #e2e8f0;
-            font-weight: 500;
-        }
-        .call-item .call-status {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 14px;
-            border-radius: 40px;
-            display: inline-block;
-        }
-        .call-item .call-status.pending {
-            color: #fbbf24;
-            background: rgba(245, 158, 11, 0.15);
-        }
-        .call-item .call-status.active {
-            color: #60a5fa;
-            background: rgba(59, 130, 246, 0.15);
-        }
-        .call-item .call-status.completed {
-            color: #4ade80;
-            background: rgba(34, 197, 94, 0.15);
-        }
-        .call-item .call-status.rejected {
-            color: #94a3b8;
-            background: rgba(71, 85, 105, 0.15);
-        }
-        .call-item .call-actions {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-top: 4px;
-        }
-        .call-item .call-comment {
-            font-size: 13px;
-            color: #94a3b8;
-            background: #0a0f17;
-            padding: 6px 12px;
-            border-radius: 8px;
-            border-left: 3px solid #3b82f6;
-            margin-top: 4px;
-        }
+        .call-item { background: #0f172a; padding: 14px 18px; border-radius: 16px; border-left: 5px solid #475569; display: flex; flex-direction: column; gap: 6px; transition: all 0.15s ease; border: 1px solid #1a2636; }
+        .call-item:hover { border-color: #2a3a4a; }
+        .call-item.priority-high { border-left-color: #dc2626; background: rgba(220,38,38,0.06); }
+        .call-item.priority-medium { border-left-color: #f59e0b; background: rgba(245,158,11,0.04); }
+        .call-item.priority-low { border-left-color: #22c55e; background: rgba(34,197,94,0.04); }
+        .call-item.status-pending { border-left-color: #f59e0b; background: rgba(245,158,11,0.04); }
+        .call-item.status-active { border-left-color: #3b82f6; background: rgba(59,130,246,0.06); }
+        .call-item.status-completed { border-left-color: #22c55e; opacity: 0.6; }
+        .call-item.status-rejected { border-left-color: #6b7280; opacity: 0.5; }
+        .call-item .call-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .call-item .call-street { font-weight: 600; font-size: 16px; color: #f1f5f9; }
+        .call-item .call-priority { font-size: 12px; font-weight: 600; padding: 2px 12px; border-radius: 40px; background: #1a2636; }
+        .call-item .call-priority.high { color: #f87171; background: rgba(220,38,38,0.15); }
+        .call-item .call-priority.medium { color: #fbbf24; background: rgba(245,158,11,0.15); }
+        .call-item .call-priority.low { color: #4ade80; background: rgba(34,197,94,0.15); }
+        .call-item .call-priority.pending { color: #fbbf24; background: rgba(245,158,11,0.15); }
+        .call-item .call-desc { font-size: 14px; color: #94a3b8; }
+        .call-item .call-meta { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 16px; font-size: 13px; color: #64748b; padding: 4px 0; background: #0a0f17; padding: 6px 12px; border-radius: 8px; }
+        .call-item .call-status { font-size: 12px; font-weight: 600; padding: 2px 14px; border-radius: 40px; display: inline-block; }
+        .call-item .call-status.pending { color: #fbbf24; background: rgba(245,158,11,0.15); }
+        .call-item .call-status.active { color: #60a5fa; background: rgba(59,130,246,0.15); }
+        .call-item .call-status.completed { color: #4ade80; background: rgba(34,197,94,0.15); }
+        .call-item .call-status.rejected { color: #94a3b8; background: rgba(71,85,105,0.15); }
+        .call-item .call-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+        .call-item .call-comment { font-size: 13px; color: #94a3b8; background: #0a0f17; padding: 6px 12px; border-radius: 8px; border-left: 3px solid #3b82f6; margin-top: 4px; }
 
-        .call-item .call-info-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px 12px;
-            background: #0a0f17;
-            padding: 8px 12px;
-            border-radius: 8px;
-            margin-top: 4px;
-        }
-        .call-item .call-info-grid .info-item {
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-        }
-        .call-item .call-info-grid .info-item .info-label {
-            color: #475569;
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .call-item .call-info-grid .info-item .info-value {
-            color: #e2e8f0;
-            font-weight: 500;
-            font-size: 13px;
-        }
+        .call-item .call-info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 12px; background: #0a0f17; padding: 8px 12px; border-radius: 8px; margin-top: 4px; }
+        .call-item .call-info-grid .info-item { font-size: 12px; display: flex; flex-direction: column; }
+        .call-item .call-info-grid .info-item .info-label { color: #475569; font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .call-item .call-info-grid .info-item .info-value { color: #e2e8f0; font-weight: 500; font-size: 13px; }
 
         /* ===== ЮНИТЫ ===== */
-        .unit-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 350px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        .unit-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .unit-list::-webkit-scrollbar-thumb {
-            background: #2a3a4a;
-            border-radius: 12px;
-        }
-
-        .unit-item {
-            background: #0f172a;
-            padding: 12px 16px;
-            border-radius: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #1a2636;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .unit-item:hover {
-            border-color: #2a3a4a;
-        }
-        .unit-item .unit-name {
-            font-weight: 600;
-            color: #60a5fa;
-            font-size: 15px;
-        }
-        .unit-item .unit-status {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 14px;
-            border-radius: 40px;
-        }
-        .unit-item .unit-status.available {
-            color: #4ade80;
-            background: rgba(34, 197, 94, 0.15);
-        }
-        .unit-item .unit-status.busy {
-            color: #fbbf24;
-            background: rgba(245, 158, 11, 0.15);
-        }
-        .unit-item .unit-status.en-route {
-            color: #60a5fa;
-            background: rgba(59, 130, 246, 0.15);
-        }
-        .unit-item .unit-status.briefing {
-            color: #a78bfa;
-            background: rgba(139, 92, 246, 0.15);
-        }
-        .unit-item .unit-status.waiting {
-            color: #f472b6;
-            background: rgba(236, 72, 153, 0.15);
-        }
-        .unit-item .unit-status.helping {
-            color: #34d399;
-            background: rgba(52, 211, 153, 0.15);
-        }
-        .unit-item .unit-status.offline {
-            color: #94a3b8;
-            background: rgba(71, 85, 105, 0.15);
-        }
-        .unit-item .unit-call {
-            font-size: 13px;
-            color: #94a3b8;
-        }
-        .unit-item .unit-status-select {
-            background: #0a0f17;
-            border: 1px solid #1a2636;
-            border-radius: 40px;
-            padding: 4px 12px;
-            color: #e8edf2;
-            font-size: 12px;
-            outline: none;
-            cursor: pointer;
-        }
-        .unit-item .unit-status-select:focus {
-            border-color: #3b82f6;
-        }
+        .unit-list { display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; padding-right: 4px; }
+        .unit-list::-webkit-scrollbar { width: 4px; }
+        .unit-list::-webkit-scrollbar-thumb { background: #2a3a4a; border-radius: 12px; }
+        .unit-item { background: #0f172a; padding: 12px 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1a2636; flex-wrap: wrap; gap: 8px; }
+        .unit-item:hover { border-color: #2a3a4a; }
+        .unit-item .unit-name { font-weight: 600; color: #60a5fa; font-size: 15px; }
+        .unit-item .unit-status { font-size: 12px; font-weight: 600; padding: 2px 14px; border-radius: 40px; }
+        .unit-item .unit-status.available { color: #4ade80; background: rgba(34,197,94,0.15); }
+        .unit-item .unit-status.busy { color: #fbbf24; background: rgba(245,158,11,0.15); }
+        .unit-item .unit-status.en-route { color: #60a5fa; background: rgba(59,130,246,0.15); }
+        .unit-item .unit-status.briefing { color: #a78bfa; background: rgba(139,92,246,0.15); }
+        .unit-item .unit-status.waiting { color: #f472b6; background: rgba(236,72,153,0.15); }
+        .unit-item .unit-status.helping { color: #34d399; background: rgba(52,211,153,0.15); }
+        .unit-item .unit-status.offline { color: #94a3b8; background: rgba(71,85,105,0.15); }
+        .unit-item .unit-call { font-size: 13px; color: #94a3b8; }
+        .unit-item .unit-status-select { background: #0a0f17; border: 1px solid #1a2636; border-radius: 40px; padding: 4px 12px; color: #e8edf2; font-size: 12px; outline: none; cursor: pointer; }
 
         /* ===== ФОРМЫ ===== */
-        .form-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .form-row input, .form-row select, .form-row textarea {
-            flex: 1 1 140px;
-            background: #0a0f17;
-            border: 1px solid #1a2636;
-            border-radius: 40px;
-            padding: 10px 16px;
-            color: #e8edf2;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.15s ease;
-        }
-        .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-        .form-row textarea {
-            border-radius: 16px;
-            resize: vertical;
-            min-height: 60px;
-            flex: 1 1 100%;
-        }
-        .form-row input::placeholder, .form-row textarea::placeholder {
-            color: #475569;
-        }
+        .form-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .form-row input, .form-row select, .form-row textarea { flex: 1 1 140px; background: #0a0f17; border: 1px solid #1a2636; border-radius: 40px; padding: 10px 16px; color: #e8edf2; font-size: 14px; outline: none; transition: all 0.15s ease; }
+        .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        .form-row textarea { border-radius: 16px; resize: vertical; min-height: 60px; flex: 1 1 100%; }
 
         /* ===== СТАТИСТИКА ===== */
-        .stats {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid #1a2636;
-        }
-        .stat-item {
-            background: #0a0f17;
-            padding: 6px 18px;
-            border-radius: 40px;
-            font-size: 13px;
-            border: 1px solid #1a2636;
-        }
-        .stat-item strong {
-            color: #facc15;
-            font-size: 17px;
-        }
-        .stat-item .stat-value {
-            color: #60a5fa;
-        }
+        .stats { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 1px solid #1a2636; }
+        .stat-item { background: #0a0f17; padding: 6px 18px; border-radius: 40px; font-size: 13px; border: 1px solid #1a2636; }
+        .stat-item strong { color: #facc15; font-size: 17px; }
+        .stat-item .stat-value { color: #60a5fa; }
 
         /* ===== АРХИВ ===== */
-        .archive-controls {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-            align-items: center;
-        }
-        .archive-controls input {
-            flex: 1;
-            min-width: 180px;
-            background: #0a0f17;
-            border: 1px solid #1a2636;
-            border-radius: 40px;
-            padding: 10px 18px;
-            color: #e8edf2;
-            font-size: 14px;
-            outline: none;
-        }
-        .archive-controls input:focus {
-            border-color: #3b82f6;
-        }
-        .archive-controls select {
-            background: #0a0f17;
-            border: 1px solid #1a2636;
-            border-radius: 40px;
-            padding: 10px 18px;
-            color: #e8edf2;
-            font-size: 14px;
-            outline: none;
-            cursor: pointer;
-        }
+        .archive-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+        .archive-controls input { flex: 1; min-width: 180px; background: #0a0f17; border: 1px solid #1a2636; border-radius: 40px; padding: 10px 18px; color: #e8edf2; font-size: 14px; outline: none; }
+        .archive-controls input:focus { border-color: #3b82f6; }
+        .archive-controls select { background: #0a0f17; border: 1px solid #1a2636; border-radius: 40px; padding: 10px 18px; color: #e8edf2; font-size: 14px; outline: none; cursor: pointer; }
 
-        .archive-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 450px;
-            overflow-y: auto;
-            padding-right: 6px;
-        }
-        .archive-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .archive-list::-webkit-scrollbar-thumb {
-            background: #2a3a4a;
-            border-radius: 12px;
-        }
+        .archive-list { display: flex; flex-direction: column; gap: 10px; max-height: 450px; overflow-y: auto; padding-right: 6px; }
+        .archive-list::-webkit-scrollbar { width: 4px; }
+        .archive-list::-webkit-scrollbar-track { background: #0a0f17; border-radius: 12px; }
+        .archive-list::-webkit-scrollbar-thumb { background: #2a3a4a; border-radius: 12px; }
 
-        .archive-item {
-            background: #0f172a;
-            padding: 14px 18px;
-            border-radius: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            border-left: 4px solid #475569;
-            border: 1px solid #1a2636;
-        }
-        .archive-item:hover {
-            border-color: #2a3a4a;
-        }
-        .archive-item.status-resolved {
-            border-left-color: #22c55e;
-        }
-        .archive-item.status-rejected {
-            border-left-color: #6b7280;
-        }
-        .archive-item .archive-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .archive-item .archive-street {
-            font-weight: 600;
-            color: #f1f5f9;
-        }
-        .archive-item .archive-meta {
-            font-size: 13px;
-            color: #94a3b8;
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-        .archive-item .archive-status {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 14px;
-            border-radius: 40px;
-        }
-        .archive-item .archive-status.resolved {
-            color: #4ade80;
-            background: rgba(34, 197, 94, 0.15);
-        }
-        .archive-item .archive-status.rejected {
-            color: #94a3b8;
-            background: rgba(71, 85, 105, 0.15);
-        }
+        .archive-item { background: #0f172a; padding: 14px 18px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-left: 4px solid #475569; border: 1px solid #1a2636; }
+        .archive-item:hover { border-color: #2a3a4a; }
+        .archive-item.status-resolved { border-left-color: #22c55e; }
+        .archive-item.status-rejected { border-left-color: #6b7280; }
+        .archive-item .archive-info { display: flex; flex-direction: column; gap: 2px; }
+        .archive-item .archive-street { font-weight: 600; color: #f1f5f9; }
+        .archive-item .archive-meta { font-size: 13px; color: #94a3b8; display: flex; gap: 16px; flex-wrap: wrap; }
+        .archive-item .archive-status { font-size: 12px; font-weight: 600; padding: 2px 14px; border-radius: 40px; }
+        .archive-item .archive-status.resolved { color: #4ade80; background: rgba(34,197,94,0.15); }
+        .archive-item .archive-status.rejected { color: #94a3b8; background: rgba(71,85,105,0.15); }
 
-        .empty-state {
-            color: #475569;
-            text-align: center;
-            padding: 32px 0;
-            font-style: italic;
-            font-size: 15px;
-        }
+        .empty-state { color: #475569; text-align: center; padding: 32px 0; font-style: italic; font-size: 15px; }
 
         /* ===== МОДАЛЬНЫЕ ОКНА ===== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        .modal {
-            background: linear-gradient(145deg, #111927, #0d1520);
-            border-radius: 28px;
-            padding: 36px 40px;
-            max-width: 550px;
-            width: 92%;
-            border: 1px solid #1a2636;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal::-webkit-scrollbar {
-            width: 4px;
-        }
-        .modal::-webkit-scrollbar-thumb {
-            background: #2a3a4a;
-            border-radius: 12px;
-        }
-        .modal h2 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: #f1f5f9;
-        }
-        .modal p {
-            color: #94a3b8;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .modal input, .modal select, .modal textarea {
-            width: 100%;
-            background: #0a0f17;
-            border: 1px solid #1a2636;
-            border-radius: 14px;
-            padding: 12px 16px;
-            color: #e8edf2;
-            font-size: 15px;
-            outline: none;
-            margin-bottom: 12px;
-            transition: all 0.15s ease;
-        }
-        .modal input:focus, .modal select:focus, .modal textarea:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-        .modal textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        .modal .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .modal .modal-actions .btn {
-            flex: 1;
-            justify-content: center;
-        }
-        .modal .error-msg {
-            color: #ef4444;
-            font-size: 14px;
-            margin-bottom: 12px;
-            display: none;
-        }
-        .modal .error-msg.show {
-            display: block;
-        }
-        .modal .success-msg {
-            color: #4ade80;
-            font-size: 14px;
-            margin-bottom: 12px;
-            display: none;
-        }
-        .modal .success-msg.show {
-            display: block;
-        }
-
-        .badge-count {
-            background: #1a2636;
-            padding: 0 14px;
-            border-radius: 40px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #94a3b8;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: linear-gradient(145deg, #111927, #0d1520); border-radius: 28px; padding: 36px 40px; max-width: 550px; width: 92%; border: 1px solid #1a2636; box-shadow: 0 40px 80px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
+        .modal h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: #f1f5f9; }
+        .modal p { color: #94a3b8; margin-bottom: 20px; font-size: 14px; }
+        .modal input, .modal select, .modal textarea { width: 100%; background: #0a0f17; border: 1px solid #1a2636; border-radius: 14px; padding: 12px 16px; color: #e8edf2; font-size: 15px; outline: none; margin-bottom: 12px; }
+        .modal input:focus, .modal select:focus, .modal textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        .modal textarea { resize: vertical; min-height: 80px; }
+        .modal .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
+        .modal .modal-actions .btn { flex: 1; justify-content: center; }
+        .modal .error-msg { color: #ef4444; font-size: 14px; margin-bottom: 12px; display: none; }
+        .modal .error-msg.show { display: block; }
+        .modal .success-msg { color: #4ade80; font-size: 14px; margin-bottom: 12px; display: none; }
+        .modal .success-msg.show { display: block; }
 
         /* ===== АДМИН ПАНЕЛЬ ===== */
-        .admin-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        @media (max-width: 700px) {
-            .admin-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 700px) { .admin-grid { grid-template-columns: 1fr; } }
+        .admin-field { display: flex; flex-direction: column; gap: 6px; }
+        .admin-field label { font-size: 14px; color: #94a3b8; font-weight: 500; }
+        .admin-field input, .admin-field select { background: #0a0f17; border: 1px solid #1a2636; border-radius: 12px; padding: 10px 16px; color: #e8edf2; font-size: 14px; outline: none; }
+        .admin-field input:focus, .admin-field select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        .admin-field .hint { font-size: 12px; color: #475569; }
 
-        .admin-field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .admin-field label {
-            font-size: 14px;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-        .admin-field input, .admin-field select {
-            background: #0a0f17;
-            border: 1px solid #1a2636;
-            border-radius: 12px;
-            padding: 10px 16px;
-            color: #e8edf2;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.15s ease;
-        }
-        .admin-field input:focus, .admin-field select:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-        .admin-field .hint {
-            font-size: 12px;
-            color: #475569;
-        }
+        .role-perm-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #1a2636; flex-wrap: wrap; gap: 8px; }
+        .role-perm-row:last-child { border-bottom: none; }
+        .role-perm-row .role-name { font-weight: 600; color: #e2e8f0; min-width: 120px; font-size: 14px; }
+        .role-perm-row .role-perms { display: flex; gap: 12px; flex-wrap: wrap; }
+        .role-perm-row .role-perms label { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+        .role-perm-row .role-perms input[type="checkbox"] { width: 14px; height: 14px; accent-color: #3b82f6; cursor: pointer; }
+        .role-perm-row .role-password { display: flex; gap: 6px; align-items: center; }
+        .role-perm-row .role-password input { background: #0a0f17; border: 1px solid #1a2636; border-radius: 40px; padding: 4px 12px; color: #e8edf2; font-size: 12px; width: 130px; outline: none; }
+        .role-perm-row .role-password input:focus { border-color: #3b82f6; }
+        .role-perm-row .role-password .btn { padding: 4px 12px; font-size: 12px; }
 
-        /* ===== НАСТРОЙКА РОЛЕЙ ===== */
-        .role-perm-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            border-bottom: 1px solid #1a2636;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .role-perm-row:last-child {
-            border-bottom: none;
-        }
-        .role-perm-row .role-name {
-            font-weight: 600;
-            color: #e2e8f0;
-            min-width: 120px;
-            font-size: 14px;
-        }
-        .role-perm-row .role-perms {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .role-perm-row .role-perms label {
-            font-size: 12px;
-            color: #94a3b8;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-        }
-        .role-perm-row .role-perms input[type="checkbox"] {
-            width: 14px;
-            height: 14px;
-            accent-color: #3b82f6;
-            cursor: pointer;
-        }
-        .role-perm-row .role-password {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-        .role-perm-row .role-password input {
-            background: #0a0f17;
-            border: 1px solid #1a2636;
-            border-radius: 40px;
-            padding: 4px 12px;
-            color: #e8edf2;
-            font-size: 12px;
-            width: 130px;
-            outline: none;
-        }
-        .role-perm-row .role-password input:focus {
-            border-color: #3b82f6;
-        }
-        .role-perm-row .role-password .btn {
-            padding: 4px 12px;
-            font-size: 12px;
-        }
-
-        /* ===== ЛОГИ ===== */
-        .log-list {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        .log-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .log-list::-webkit-scrollbar-thumb {
-            background: #2a3a4a;
-            border-radius: 12px;
-        }
-        .log-item {
-            background: #0a0f17;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            border-left: 3px solid #475569;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .log-item .log-time {
-            color: #475569;
-            font-size: 12px;
-            min-width: 80px;
-        }
-        .log-item .log-user {
-            color: #60a5fa;
-            font-weight: 500;
-        }
-        .log-item .log-action {
-            color: #e2e8f0;
-        }
-        .log-item .log-detail {
-            color: #94a3b8;
-            font-size: 12px;
-        }
-        .log-item .log-sync {
-            color: #a78bfa;
-            font-size: 11px;
-            background: rgba(139, 92, 246, 0.1);
-            padding: 1px 10px;
-            border-radius: 40px;
-        }
+        .log-list { display: flex; flex-direction: column; gap: 4px; max-height: 400px; overflow-y: auto; padding-right: 4px; }
+        .log-list::-webkit-scrollbar { width: 4px; }
+        .log-list::-webkit-scrollbar-thumb { background: #2a3a4a; border-radius: 12px; }
+        .log-item { background: #0a0f17; padding: 6px 12px; border-radius: 8px; font-size: 13px; border-left: 3px solid #475569; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .log-item .log-time { color: #475569; font-size: 12px; min-width: 80px; }
+        .log-item .log-user { color: #60a5fa; font-weight: 500; }
+        .log-item .log-action { color: #e2e8f0; }
+        .log-item .log-detail { color: #94a3b8; font-size: 12px; }
         .log-item.type-info { border-left-color: #3b82f6; }
         .log-item.type-success { border-left-color: #22c55e; }
         .log-item.type-warning { border-left-color: #f59e0b; }
         .log-item.type-danger { border-left-color: #dc2626; }
-        .log-item.type-sync { border-left-color: #8b5cf6; }
 
-        .settings-group {
-            background: #0a0f17;
-            border-radius: 14px;
-            padding: 16px 20px;
-            border: 1px solid #1a2636;
-            margin-bottom: 16px;
-        }
-        .settings-group .setting-row {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            padding: 6px 0;
-        }
-        .settings-group .setting-row label {
-            min-width: 140px;
-            color: #94a3b8;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .settings-group .setting-row input, 
-        .settings-group .setting-row select {
-            flex: 1;
-            min-width: 200px;
-            background: #0f172a;
-            border: 1px solid #1a2636;
-            border-radius: 12px;
-            padding: 8px 14px;
-            color: #e8edf2;
-            font-size: 14px;
-            outline: none;
-        }
-        .settings-group .setting-row input:focus,
-        .settings-group .setting-row select:focus {
-            border-color: #3b82f6;
-        }
-        .settings-group .setting-row .hint {
-            color: #475569;
-            font-size: 12px;
-        }
+        .settings-group { background: #0a0f17; border-radius: 14px; padding: 16px 20px; border: 1px solid #1a2636; margin-bottom: 16px; }
+        .settings-group .setting-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 6px 0; }
+        .settings-group .setting-row label { min-width: 140px; color: #94a3b8; font-size: 14px; font-weight: 500; }
+        .settings-group .setting-row input, .settings-group .setting-row select { flex: 1; min-width: 200px; background: #0f172a; border: 1px solid #1a2636; border-radius: 12px; padding: 8px 14px; color: #e8edf2; font-size: 14px; outline: none; }
+        .settings-group .setting-row input:focus, .settings-group .setting-row select:focus { border-color: #3b82f6; }
+        .settings-group .setting-row .hint { color: #475569; font-size: 12px; }
 
-        .admin-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
+        .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
 
-        /* ===== СТАТУС БАР ВНИЗУ ===== */
-        .footer-bar {
-            margin-top: 24px;
-            padding-top: 16px;
-            border-top: 1px solid #1a2636;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            font-size: 13px;
-            color: #475569;
-        }
-        .footer-bar .footer-right {
-            display: flex;
-            gap: 20px;
-        }
+        .footer-bar { margin-top: 24px; padding-top: 16px; border-top: 1px solid #1a2636; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #475569; }
+        .footer-bar .footer-right { display: flex; gap: 20px; }
 
-        .unit-status-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-        .unit-status-dot.available { background: #22c55e; }
-        .unit-status-dot.busy { background: #f59e0b; }
-        .unit-status-dot.en-route { background: #3b82f6; }
-        .unit-status-dot.briefing { background: #8b5cf6; }
-        .unit-status-dot.waiting { background: #ec4899; }
-        .unit-status-dot.helping { background: #34d399; }
-        .unit-status-dot.offline { background: #6b7280; }
+        .role-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+        .role-select-card { background: #0f172a; border: 2px solid #1a2636; border-radius: 16px; padding: 16px 20px; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .role-select-card:hover { border-color: #3b82f6; background: #1a2636; transform: scale(1.02); }
+        .role-select-card.selected { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .role-select-card .role-icon { font-size: 32px; display: block; margin-bottom: 4px; }
+        .role-select-card .role-name { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+        .role-select-card .role-desc { font-size: 12px; color: #64748b; }
 
-        /* ===== СТИЛИ ДЛЯ ВХОДА ПО РОЛЯМ ===== */
-        .role-select-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin: 16px 0;
-        }
-        .role-select-card {
-            background: #0f172a;
-            border: 2px solid #1a2636;
-            border-radius: 16px;
-            padding: 16px 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-        .role-select-card:hover {
-            border-color: #3b82f6;
-            background: #1a2636;
-            transform: scale(1.02);
-        }
-        .role-select-card.selected {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-        }
-        .role-select-card .role-icon {
-            font-size: 32px;
-            display: block;
-            margin-bottom: 4px;
-        }
-        .role-select-card .role-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: #e2e8f0;
-        }
-        .role-select-card .role-desc {
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        /* Уведомление о синхронизации */
-        .sync-notification {
-            position: fixed;
-            bottom: 80px;
-            right: 30px;
-            background: linear-gradient(145deg, #111927, #0d1520);
-            border: 1px solid #1a2636;
-            border-radius: 16px;
-            padding: 12px 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-            z-index: 999;
-            display: none;
-            max-width: 350px;
-            animation: slideUp 0.3s ease;
-        }
-        .sync-notification.show {
-            display: block;
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .sync-notification .sync-title {
-            color: #60a5fa;
-            font-weight: 600;
-            font-size: 13px;
-        }
-        .sync-notification .sync-msg {
-            color: #94a3b8;
-            font-size: 13px;
-        }
-        .sync-notification .sync-close {
-            background: none;
-            border: none;
-            color: #475569;
-            cursor: pointer;
-            font-size: 16px;
-            float: right;
-        }
-        .sync-notification .sync-close:hover {
-            color: #e8edf2;
-        }
+        .sync-notification { position: fixed; bottom: 80px; right: 30px; background: linear-gradient(145deg, #111927, #0d1520); border: 1px solid #1a2636; border-radius: 16px; padding: 12px 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 999; display: none; max-width: 350px; animation: slideUp 0.3s ease; }
+        .sync-notification.show { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .sync-notification .sync-title { color: #60a5fa; font-weight: 600; font-size: 13px; }
+        .sync-notification .sync-msg { color: #94a3b8; font-size: 13px; }
+        .sync-notification .sync-close { background: none; border: none; color: #475569; cursor: pointer; font-size: 16px; float: right; }
+        .sync-notification .sync-close:hover { color: #e8edf2; }
     </style>
 </head>
 <body>
@@ -1306,7 +291,6 @@
         <!-- ===== ВКЛАДКА 1: ОСНОВНАЯ ===== -->
         <div class="tab-content active" id="tab-main">
             <div class="grid-3">
-                <!-- ВЫЗОВЫ -->
                 <div class="card" style="grid-column: span 2;">
                     <div class="card-title">
                         <span>📞</span> Активные вызовы
@@ -1332,7 +316,6 @@
                     </div>
                 </div>
 
-                <!-- ЮНИТЫ -->
                 <div class="card">
                     <div class="card-title">
                         <span>🚔</span> Активные юниты
@@ -1386,39 +369,32 @@
                     <span class="count-badge" id="adminRoleBadge">🔐 Админ</span>
                 </div>
 
-                <!-- ===== УПРАВЛЕНИЕ РОЛЯМИ ===== -->
+                <!-- УПРАВЛЕНИЕ РОЛЯМИ -->
                 <div style="margin-bottom: 24px;">
                     <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">👑 Управление ролями и правами</h3>
-                    <div class="settings-group" id="roleSettingsContainer">
-                        <!-- JS заполнит -->
-                    </div>
+                    <div class="settings-group" id="roleSettingsContainer"></div>
                     <div class="admin-actions">
-                        <button class="btn btn-success btn-sm" id="saveRoleSettingsBtn">💾 Сохранить настройки</button>
+                        <button class="btn btn-success btn-sm" id="saveRoleSettingsBtn">💾 Сохранить</button>
                         <button class="btn btn-warning btn-sm" id="resetRoleSettingsBtn">↩️ Сбросить</button>
                     </div>
                 </div>
 
                 <hr style="border-color: #1a2636; margin: 20px 0;">
 
-                <!-- ===== ЛОГИ САЙТА ===== -->
+                <!-- ЛОГИ -->
                 <div style="margin-bottom: 24px;">
                     <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">📋 Логи системы</h3>
-                    <div class="log-list" id="logList">
-                        <div class="log-item type-info">
-                            <span class="log-time">[--:--:--]</span>
-                            <span class="log-action">Система запущена</span>
-                        </div>
-                    </div>
+                    <div class="log-list" id="logList"></div>
                     <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-sm btn-outline" id="clearLogsBtn">🗑 Очистить логи</button>
-                        <button class="btn btn-sm btn-outline" id="exportLogsBtn">📥 Экспорт логов (TXT)</button>
-                        <button class="btn btn-sm btn-outline" id="exportLogsJsonBtn">📥 Экспорт логов (JSON)</button>
+                        <button class="btn btn-sm btn-outline" id="clearLogsBtn">🗑 Очистить</button>
+                        <button class="btn btn-sm btn-outline" id="exportLogsBtn">📥 Экспорт TXT</button>
+                        <button class="btn btn-sm btn-outline" id="exportLogsJsonBtn">📥 Экспорт JSON</button>
                     </div>
                 </div>
 
                 <hr style="border-color: #1a2636; margin: 20px 0;">
 
-                <!-- ===== НАСТРОЙКА НАЗВАНИЯ ===== -->
+                <!-- НАСТРОЙКА НАЗВАНИЯ -->
                 <div style="margin-bottom: 24px;">
                     <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">🏷️ Настройка названия</h3>
                     <div class="settings-group">
@@ -1434,7 +410,7 @@
                         </div>
                         <div class="setting-row">
                             <label>Приписка справа</label>
-                            <input type="text" id="subBadgeSetting" placeholder="Например: v3.0, Beta, Проект" maxlength="15">
+                            <input type="text" id="subBadgeSetting" placeholder="Например: v3.0, Beta" maxlength="15">
                             <button class="btn btn-sm btn-primary" id="changeSubBadgeBtn">Изменить</button>
                         </div>
                     </div>
@@ -1442,14 +418,14 @@
 
                 <hr style="border-color: #1a2636; margin: 20px 0;">
 
-                <!-- ===== НАСТРОЙКИ ТЕМЫ ===== -->
+                <!-- ТЕМА -->
                 <div style="margin-bottom: 24px;">
                     <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">🎨 Внешний вид</h3>
                     <div class="settings-group">
                         <div class="setting-row">
                             <label>Цветовая схема</label>
                             <select id="themeSelector">
-                                <option value="dark">Тёмная (официальная)</option>
+                                <option value="dark">Тёмная</option>
                                 <option value="light">Светлая</option>
                                 <option value="blue">Синяя</option>
                                 <option value="red">Красная</option>
@@ -1461,7 +437,7 @@
 
                 <hr style="border-color: #1a2636; margin: 20px 0;">
 
-                <!-- ===== УПРАВЛЕНИЕ ДАННЫМИ ===== -->
+                <!-- ДАННЫЕ -->
                 <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">📊 Управление данными</h3>
                 <div class="admin-grid">
                     <div class="admin-field">
@@ -1478,15 +454,14 @@
                     </div>
                     <div class="admin-field">
                         <label>Экспорт / Импорт</label>
-                        <button class="btn btn-sm btn-outline" id="exportAllBtn" style="width:100%; margin-top:6px;">📥 Экспорт всех данных (JSON)</button>
+                        <button class="btn btn-sm btn-outline" id="exportAllBtn" style="width:100%; margin-top:6px;">📥 Экспорт JSON</button>
                         <div style="display: flex; gap: 8px; margin-top: 6px;">
                             <input type="file" id="importFileInput" accept=".json" style="flex:1; background:#0a0f17; border:1px solid #1a2636; border-radius:12px; padding:8px; color:#e8edf2;">
                             <button class="btn btn-sm btn-success" id="importBtn">📤 Импорт</button>
                         </div>
-                        <span class="hint">Импорт заменит все текущие данные</span>
+                        <span class="hint">Импорт заменит все данные</span>
                     </div>
                 </div>
-
                 <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
                     <button class="btn btn-danger" id="resetAllDataBtn">⚠️ Сбросить всё</button>
                     <button class="btn btn-sm btn-outline" id="refreshAdminBtn">🔄 Обновить</button>
@@ -1512,11 +487,9 @@
         <p id="authModalDesc">Выберите роль и введите пароль</p>
         <div class="error-msg" id="authError">❌ Ошибка</div>
         <div class="success-msg" id="authSuccess">✅ Успешно!</div>
-        
         <div style="margin-bottom: 12px;">
-            <input type="password" id="authPasswordInput" placeholder="Введите пароль для выбранной роли" style="width:100%;">
+            <input type="password" id="authPasswordInput" placeholder="Введите пароль" style="width:100%;">
         </div>
-        
         <div class="role-select-grid" id="roleSelectGrid">
             <div class="role-select-card" data-role="admin" onclick="window.selectRole('admin')">
                 <span class="role-icon">👑</span>
@@ -1539,7 +512,6 @@
                 <div class="role-desc">Только просмотр</div>
             </div>
         </div>
-        
         <div class="modal-actions">
             <button class="btn btn-primary" id="authLoginBtn" style="flex:1;">✅ Войти</button>
             <button class="btn btn-outline" id="authCancelBtn" style="flex:0.5;">Отмена</button>
@@ -1590,7 +562,7 @@
     </div>
 </div>
 
-<!-- ===== УВЕДОМЛЕНИЕ О СИНХРОНИЗАЦИИ ===== -->
+<!-- ===== УВЕДОМЛЕНИЕ ===== -->
 <div class="sync-notification" id="syncNotification">
     <button class="sync-close" onclick="document.getElementById('syncNotification').classList.remove('show')">✕</button>
     <div class="sync-title">🔄 Синхронизация</div>
@@ -1602,30 +574,19 @@
         "use strict";
 
         // ============================================
-        // 1. НАСТРОЙКИ СЕРВЕРА
+        // 1. НАСТРОЙКИ SUPABASE (ЗАМЕНИТЕ НА СВОИ!)
         // ============================================
-        // ⚠️ ИЗМЕНИТЕ ЭТУ СТРОКУ НА ВАШ URL СЕРВЕРА!
-        const SERVER_URL = 'https://91-dispatch-beta.onrender.com';
+        // ⚠️ ВСТАВЬТЕ ВАШИ ДАННЫЕ ИЗ SUPABASE:
+        const SUPABASE_URL = 'https://wfbmfkezsbujikmjpyyf.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmYm1ma2V6c2J1amlrbWpwdnlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMzcwMzcsImV4cCI6MjEwMjcxMzAzN30.Q13o3ttNAKrkIpik6GxOEOQ-mchzkwdJDldlSCnDGqI'; // ЗАМЕНИТЕ НА ВАШ КЛЮЧ!
         // ============================================
 
-        console.log('🔄 Подключение к серверу:', SERVER_URL);
+        // Инициализация
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase подключён');
 
         // ============================================
-        // 2. НАСТРОЙКИ
-        // ============================================
-        let TITLE_CONFIG = {
-            main: '911 Диспетчерский Центр',
-            leftBadge: 'ДС',
-            rightBadge: 'v3.0'
-        };
-
-        let CONFIG = {
-            SYSTEM_NAME: '911 Диспетчерский Центр',
-            THEME: 'dark'
-        };
-
-        // ============================================
-        // 3. РОЛИ И ПАРОЛИ
+        // 2. РОЛИ И ПАРОЛИ
         // ============================================
         const DEFAULT_ROLES = {
             admin: {
@@ -1723,62 +684,6 @@
         };
 
         let ROLES_CONFIG = {};
-
-        function loadRolesConfig() {
-            const saved = localStorage.getItem('911_roles_config');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    for (const [key, value] of Object.entries(DEFAULT_ROLES)) {
-                        if (!parsed[key]) {
-                            parsed[key] = JSON.parse(JSON.stringify(value));
-                        }
-                    }
-                    ROLES_CONFIG = parsed;
-                    return true;
-                } catch(e) {}
-            }
-            ROLES_CONFIG = JSON.parse(JSON.stringify(DEFAULT_ROLES));
-            saveRolesConfig();
-            return false;
-        }
-
-        function saveRolesConfig() {
-            localStorage.setItem('911_roles_config', JSON.stringify(ROLES_CONFIG));
-            // Отправляем на сервер
-            saveToServer('roles', ROLES_CONFIG);
-        }
-
-        // ============================================
-        // 4. РАБОТА С СЕРВЕРОМ
-        // ============================================
-        async function saveToServer(section, data) {
-            try {
-                await fetch(`${SERVER_URL}/api/section/${section}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-            } catch(e) {
-                console.error('❌ Ошибка сохранения на сервер:', e);
-            }
-        }
-
-        async function loadFromServer(section) {
-            try {
-                const response = await fetch(`${SERVER_URL}/api/section/${section}`);
-                if (response.ok) {
-                    return await response.json();
-                }
-            } catch(e) {
-                console.error('❌ Ошибка загрузки с сервера:', e);
-            }
-            return null;
-        }
-
-        // ============================================
-        // 5. СОСТОЯНИЕ
-        // ============================================
         let currentRole = 'civilian';
         let isAdmin = false;
         let isDispatcher = false;
@@ -1789,109 +694,254 @@
         let archive = [];
         let systemLogs = [];
         let callHistory = {};
+        let lastSyncTimestamp = null;
 
         // ============================================
-        // 6. ВСПОМОГАТЕЛЬНЫЕ
+        // 3. DOM ЭЛЕМЕНТЫ
         // ============================================
-        function getTime() {
-            const d = new Date();
-            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-        }
+        const callListEl = document.getElementById('callList');
+        const unitListEl = document.getElementById('unitList');
+        const archiveListEl = document.getElementById('archiveList');
+        const callCounter = document.getElementById('callCounter');
+        const unitCounter = document.getElementById('unitCounter');
+        const archiveCounter = document.getElementById('archiveCounter');
+        const statActiveCalls = document.getElementById('statActiveCalls');
+        const statBusyUnits = document.getElementById('statBusyUnits');
+        const statArchive = document.getElementById('statArchive');
+        const archiveTotal = document.getElementById('archiveTotal');
+        const roleBadge = document.getElementById('roleBadge');
+        const adminTabBtn = document.getElementById('adminTabBtn');
+        const adminRoleBadge = document.getElementById('adminRoleBadge');
+        const userInfo = document.getElementById('userInfo');
+        const userAvatar = document.getElementById('userAvatar');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const authToggleBtn = document.getElementById('authToggleBtn');
+        const systemTitle = document.getElementById('systemTitle');
+        const onlineUsersDisplay = document.getElementById('onlineUsersDisplay');
 
-        function getFullTime() {
-            const d = new Date();
-            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
-        }
+        const streetInput = document.getElementById('streetInput');
+        const descInput = document.getElementById('descInput');
+        const callerInput = document.getElementById('callerInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const additionalInfoInput = document.getElementById('additionalInfoInput');
+        const addCallBtn = document.getElementById('addCallBtn');
 
-        function getDateTime() {
-            const d = new Date();
-            return d.toLocaleString('ru-RU');
-        }
+        const unitNameInput = document.getElementById('unitNameInput');
+        const addUnitBtn = document.getElementById('addUnitBtn');
 
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-        }
+        const resetCallsBtn = document.getElementById('resetCallsBtn');
+        const clearAllCallsBtn = document.getElementById('clearAllCallsBtn');
 
-        function getAvatar(role) {
-            const icons = {
-                admin: '👑',
-                dispatcher: '📡',
-                user: '👤',
-                civilian: '🏠'
-            };
-            return icons[role] || '👤';
-        }
+        const archiveSearch = document.getElementById('archiveSearch');
+        const archiveFilter = document.getElementById('archiveFilter');
+        const clearArchiveBtn = document.getElementById('clearArchiveBtn');
+        const exportArchiveBtn = document.getElementById('exportArchiveBtn');
 
-        function updateClock() {
-            const d = new Date();
-            const clockEl = document.getElementById('clockDisplay');
-            if (clockEl) clockEl.textContent = d.toLocaleTimeString('ru-RU');
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        const editCallId = document.getElementById('editCallId');
+        const editCallStreet = document.getElementById('editCallStreet');
+        const editCallDesc = document.getElementById('editCallDesc');
+        const editCallPriority = document.getElementById('editCallPriority');
+        const applyEditBtn = document.getElementById('applyEditBtn');
+        const exportAllBtn = document.getElementById('exportAllBtn');
+        const importFileInput = document.getElementById('importFileInput');
+        const importBtn = document.getElementById('importBtn');
+        const resetAllDataBtn = document.getElementById('resetAllDataBtn');
+        const refreshAdminBtn = document.getElementById('refreshAdminBtn');
 
-        function hasPermission(perm) {
-            if (!currentRole) return false;
-            const roleData = ROLES_CONFIG[currentRole];
-            if (!roleData) return false;
-            return roleData.permissions[perm] === true;
-        }
+        const systemNameSetting = document.getElementById('systemNameSetting');
+        const changeSystemNameBtn = document.getElementById('changeSystemNameBtn');
+        const mainBadgeSetting = document.getElementById('mainBadgeSetting');
+        const changeMainBadgeBtn = document.getElementById('changeMainBadgeBtn');
+        const subBadgeSetting = document.getElementById('subBadgeSetting');
+        const changeSubBadgeBtn = document.getElementById('changeSubBadgeBtn');
+        const themeSelector = document.getElementById('themeSelector');
+        const applyThemeBtn = document.getElementById('applyThemeBtn');
+
+        const clearLogsBtn = document.getElementById('clearLogsBtn');
+        const exportLogsBtn = document.getElementById('exportLogsBtn');
+        const exportLogsJsonBtn = document.getElementById('exportLogsJsonBtn');
+        const saveRoleSettingsBtn = document.getElementById('saveRoleSettingsBtn');
+        const resetRoleSettingsBtn = document.getElementById('resetRoleSettingsBtn');
+
+        // Модальные окна
+        const authModal = document.getElementById('authModal');
+        const authModalTitle = document.getElementById('authModalTitle');
+        const authModalDesc = document.getElementById('authModalDesc');
+        const authLoginBtn = document.getElementById('authLoginBtn');
+        const authCancelBtn = document.getElementById('authCancelBtn');
+        const authError = document.getElementById('authError');
+        const authSuccess = document.getElementById('authSuccess');
+        const authPasswordInput = document.getElementById('authPasswordInput');
+
+        const assignModal = document.getElementById('assignModal');
+        const assignCallInfo = document.getElementById('assignCallInfo');
+        const assignUnitSelect = document.getElementById('assignUnitSelect');
+        const assignConfirmBtn = document.getElementById('assignConfirmBtn');
+        const assignCancelBtn = document.getElementById('assignCancelBtn');
+        let assignTargetCallId = null;
+
+        const commentModal = document.getElementById('commentModal');
+        const commentCallInfo = document.getElementById('commentCallInfo');
+        const commentInput = document.getElementById('commentInput');
+        const commentConfirmBtn = document.getElementById('commentConfirmBtn');
+        const commentCancelBtn = document.getElementById('commentCancelBtn');
+        let commentTargetCallId = null;
+
+        const statusModal = document.getElementById('statusModal');
+        const statusTargetInfo = document.getElementById('statusTargetInfo');
+        const statusSelect = document.getElementById('statusSelect');
+        const statusConfirmBtn = document.getElementById('statusConfirmBtn');
+        const statusCancelBtn = document.getElementById('statusCancelBtn');
+        let statusTargetType = null;
+        let statusTargetId = null;
 
         // ============================================
-        // 7. ИСТОРИЯ И ЛОГИ (С СЕРВЕРОМ)
+        // 4. РАБОТА С SUPABASE
         // ============================================
-        function addCallHistory(callId, action, detail) {
-            if (!callHistory[callId]) {
-                callHistory[callId] = [];
+        async function loadFromSupabase(table, id = 'main') {
+            try {
+                const { data, error } = await supabase
+                    .from(table)
+                    .select('data')
+                    .eq('id', id)
+                    .single();
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        // Запись не найдена
+                        return null;
+                    }
+                    throw error;
+                }
+                return data?.data || null;
+            } catch(e) {
+                console.error(`❌ Ошибка загрузки ${table}:`, e);
+                return null;
             }
-            const entry = {
-                time: getDateTime(),
-                action: action,
-                detail: detail,
-                user: currentRole || 'система'
-            };
-            callHistory[callId].push(entry);
-            saveCallHistory();
-            // Отправляем на сервер
-            fetch(`${SERVER_URL}/api/history/${callId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(entry)
-            }).catch(e => console.error('Ошибка сохранения истории:', e));
         }
 
-        function getCallHistory(callId) {
-            return callHistory[callId] || [];
+        async function saveToSupabase(table, data, id = 'main') {
+            try {
+                const { error } = await supabase
+                    .from(table)
+                    .upsert({ id, data, updated_at: new Date().toISOString() });
+                if (error) throw error;
+                return true;
+            } catch(e) {
+                console.error(`❌ Ошибка сохранения ${table}:`, e);
+                return false;
+            }
         }
 
-        function saveCallHistory() {
-            localStorage.setItem('911_call_history', JSON.stringify(callHistory));
-        }
-
-        function loadCallHistory() {
-            const saved = localStorage.getItem('911_call_history');
+        // ============================================
+        // 5. ЗАГРУЗКА/СОХРАНЕНИЕ ДАННЫХ
+        // ============================================
+        async function loadData() {
+            try {
+                // Загружаем данные из Supabase
+                const data = await loadFromSupabase('dispatch_data');
+                if (data) {
+                    calls = data.calls || [];
+                    units = data.units || [];
+                    archive = data.archive || [];
+                    systemLogs = data.logs || [];
+                    callHistory = data.history || {};
+                    lastSyncTimestamp = data.timestamp;
+                    
+                    renderCalls();
+                    renderUnits();
+                    renderArchive();
+                    renderLogs();
+                    updateCounters();
+                    console.log('✅ Данные загружены из Supabase');
+                    return true;
+                }
+            } catch(e) {
+                console.error('❌ Ошибка загрузки из Supabase:', e);
+            }
+            
+            // Если Supabase недоступен, пробуем localStorage
+            const saved = localStorage.getItem('911_data');
             if (saved) {
                 try {
-                    callHistory = JSON.parse(saved);
+                    const data = JSON.parse(saved);
+                    calls = data.calls || [];
+                    units = data.units || [];
+                    archive = data.archive || [];
+                    systemLogs = data.logs || [];
+                    callHistory = data.history || {};
+                    renderCalls();
+                    renderUnits();
+                    renderArchive();
+                    renderLogs();
+                    updateCounters();
+                    console.log('✅ Данные загружены из localStorage');
                     return true;
                 } catch(e) {}
             }
             return false;
         }
 
-        function addLog(action, detail = '', type = 'info', user = null) {
+        async function saveData() {
+            const data = {
+                calls,
+                units,
+                archive,
+                logs: systemLogs,
+                history: callHistory,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Сохраняем в localStorage (резерв)
+            localStorage.setItem('911_data', JSON.stringify(data));
+            
+            // Сохраняем в Supabase
+            await saveToSupabase('dispatch_data', data);
+            console.log('✅ Данные сохранены');
+        }
+
+        // ============================================
+        // 6. НАСТРОЙКА РОЛЕЙ
+        // ============================================
+        async function loadRolesConfig() {
+            const saved = await loadFromSupabase('roles_config');
+            if (saved) {
+                // Проверяем, что все роли есть
+                let needUpdate = false;
+                for (const [key, value] of Object.entries(DEFAULT_ROLES)) {
+                    if (!saved[key]) {
+                        saved[key] = JSON.parse(JSON.stringify(value));
+                        needUpdate = true;
+                    }
+                }
+                ROLES_CONFIG = saved;
+                if (needUpdate) {
+                    await saveRolesConfig();
+                }
+                return true;
+            }
+            
+            // Если не загрузилось, создаём дефолтные
+            ROLES_CONFIG = JSON.parse(JSON.stringify(DEFAULT_ROLES));
+            await saveRolesConfig();
+            return false;
+        }
+
+        async function saveRolesConfig() {
+            await saveToSupabase('roles_config', ROLES_CONFIG);
+            localStorage.setItem('911_roles_config', JSON.stringify(ROLES_CONFIG));
+        }
+
+        // ============================================
+        // 7. ЛОГИ
+        // ============================================
+        async function addLog(action, detail = '', type = 'info', user = null) {
             const time = new Date().toLocaleTimeString('ru-RU');
             const userName = user || (currentRole || 'Гость');
             const logEntry = { time, user: userName, action, detail, type };
             systemLogs.push(logEntry);
+            if (systemLogs.length > 1000) systemLogs = systemLogs.slice(-1000);
             renderLogs();
-            saveLogs();
-            // Отправляем на сервер
-            fetch(`${SERVER_URL}/api/log`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(logEntry)
-            }).catch(e => console.error('Ошибка сохранения лога:', e));
+            await saveData();
         }
 
         function renderLogs() {
@@ -1904,35 +954,16 @@
             }
             let html = '';
             logs.forEach(log => {
-                const syncClass = log.type === 'sync' ? 'log-sync' : '';
-                const syncLabel = log.type === 'sync' ? '🔄 Синхр.' : '';
                 html += `
                     <div class="log-item type-${log.type}">
                         <span class="log-time">[${log.time}]</span>
                         <span class="log-user">${log.user}</span>
                         <span class="log-action">${log.action}</span>
                         ${log.detail ? `<span class="log-detail">${log.detail}</span>` : ''}
-                        ${syncLabel ? `<span class="log-sync">${syncLabel}</span>` : ''}
                     </div>
                 `;
             });
             container.innerHTML = html;
-        }
-
-        function saveLogs() {
-            localStorage.setItem('911_logs', JSON.stringify(systemLogs));
-        }
-
-        function loadLogs() {
-            const saved = localStorage.getItem('911_logs');
-            if (saved) {
-                try {
-                    systemLogs = JSON.parse(saved);
-                    renderLogs();
-                    return true;
-                } catch(e) {}
-            }
-            return false;
         }
 
         // ============================================
@@ -1960,7 +991,7 @@
             isDispatcher = role === 'admin' || role === 'dispatcher';
 
             updateUI();
-            addLog('Вход в систему', `Вход как ${roleData.name} (${role})`, 'success', role);
+            addLog('Вход в систему', `Вход как ${roleData.name}`, 'success', role);
             return { success: true, role: role };
         }
 
@@ -2020,6 +1051,16 @@
             onlineUsersDisplay.textContent = `👥 Онлайн: 1`;
         }
 
+        function getAvatar(role) {
+            const icons = {
+                admin: '👑',
+                dispatcher: '📡',
+                user: '👤',
+                civilian: '🏠'
+            };
+            return icons[role] || '👤';
+        }
+
         // ============================================
         // 10. АВТОРИЗАЦИЯ
         // ============================================
@@ -2070,73 +1111,58 @@
         }
 
         // ============================================
-        // 11. ОСНОВНЫЕ ФУНКЦИИ (С СЕРВЕРОМ)
+        // 11. ВСПОМОГАТЕЛЬНЫЕ
         // ============================================
-        async function loadData() {
-            try {
-                // Загружаем с сервера
-                const serverData = await loadFromServer('data');
-                if (serverData) {
-                    calls = serverData.calls || [];
-                    units = serverData.units || [];
-                    archive = serverData.archive || [];
-                    systemLogs = serverData.logs || [];
-                    callHistory = serverData.history || {};
-                    renderCalls();
-                    renderUnits();
-                    renderArchive();
-                    renderLogs();
-                    updateCounters();
-                    console.log('✅ Данные загружены с сервера');
-                    return true;
-                }
-            } catch(e) {
-                console.error('❌ Ошибка загрузки с сервера:', e);
-            }
-            
-            // Если сервер не доступен, пробуем локальное хранилище
-            const saved = localStorage.getItem('911_data');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    calls = data.calls || [];
-                    units = data.units || [];
-                    archive = data.archive || [];
-                    systemLogs = data.logs || [];
-                    callHistory = data.history || {};
-                    renderCalls();
-                    renderUnits();
-                    renderArchive();
-                    renderLogs();
-                    updateCounters();
-                    console.log('✅ Данные загружены из localStorage');
-                    return true;
-                } catch(e) {}
-            }
-            return false;
+        function getTime() {
+            const d = new Date();
+            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
         }
 
-        async function saveData() {
-            const data = { 
-                calls, 
-                units, 
-                archive, 
-                logs: systemLogs, 
-                history: callHistory,
-                timestamp: new Date().toISOString()
-            };
-            
-            localStorage.setItem('911_data', JSON.stringify(data));
-            
-            try {
-                await saveToServer('data', data);
-                console.log('✅ Данные сохранены на сервер');
-            } catch(e) {
-                console.error('❌ Ошибка сохранения на сервер:', e);
-            }
+        function getFullTime() {
+            const d = new Date();
+            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
         }
 
-        function addCall(street, desc, caller, phone, additional) {
+        function getDateTime() {
+            const d = new Date();
+            return d.toLocaleString('ru-RU');
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        function updateClock() {
+            const d = new Date();
+            const clockEl = document.getElementById('clockDisplay');
+            if (clockEl) clockEl.textContent = d.toLocaleTimeString('ru-RU');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function hasPermission(perm) {
+            if (!currentRole) return false;
+            const roleData = ROLES_CONFIG[currentRole];
+            if (!roleData) return false;
+            return roleData.permissions[perm] === true;
+        }
+
+        function addCallHistory(callId, action, detail) {
+            if (!callHistory[callId]) {
+                callHistory[callId] = [];
+            }
+            callHistory[callId].push({
+                time: getDateTime(),
+                action: action,
+                detail: detail,
+                user: currentRole || 'система'
+            });
+        }
+
+        // ============================================
+        // 12. ОСНОВНЫЕ ФУНКЦИИ
+        // ============================================
+        async function addCall(street, desc, caller, phone, additional) {
             if (!hasPermission('createCalls')) {
                 alert('⛔ У вас нет прав на создание вызовов');
                 return false;
@@ -2163,11 +1189,10 @@
             };
             calls.push(call);
             
-            callHistory[call.id] = [];
             addCallHistory(call.id, 'Создание вызова', `Создан вызов: ${call.street} - ${call.desc}`);
             
             renderCalls();
-            saveData();
+            await saveData();
             addLog('Новый вызов', `Создан вызов: ${street} - ${desc}`, 'info', currentRole);
             return true;
         }
@@ -2264,9 +1289,9 @@
         }
 
         // ============================================
-        // 12. ОБРАБОТЧИКИ ДЕЙСТВИЙ
+        // 13. ДЕЙСТВИЯ С ВЫЗОВАМИ
         // ============================================
-        window.acceptCall = function(callId) {
+        window.acceptCall = async function(callId) {
             if (!hasPermission('changeCallStatus')) {
                 alert('⛔ У вас нет прав на принятие вызовов');
                 return;
@@ -2297,11 +1322,11 @@
             addLog('Принят вызов', `${call.street} - ${call.desc} (${selectedPriority})`, 'success', currentRole);
             
             renderCalls();
-            saveData();
+            await saveData();
             alert(`✅ Вызов принят! Приоритет: ${selectedPriority.toUpperCase()}`);
         };
 
-        window.rejectCall = function(callId) {
+        window.rejectCall = async function(callId) {
             if (!hasPermission('changeCallStatus')) {
                 alert('⛔ У вас нет прав на отклонение вызовов');
                 return;
@@ -2320,17 +1345,17 @@
             call.rejectReason = reason || 'Не указана';
             
             addCallHistory(call.id, 'Отклонение вызова', `Отклонён. Причина: ${call.rejectReason}`);
-            addToArchive(call, 'rejected');
+            await addToArchive(call, 'rejected');
             calls = calls.filter(c => c.id !== callId);
             
             renderCalls();
             renderArchive();
-            saveData();
+            await saveData();
             addLog('Отклонён вызов', `${call.street} - ${call.desc} (Причина: ${call.rejectReason})`, 'danger', currentRole);
             alert('❌ Вызов отклонён');
         };
 
-        window.completeCall = function(callId) {
+        window.completeCall = async function(callId) {
             if (!hasPermission('changeCallStatus')) {
                 alert('⛔ У вас нет прав на завершение вызовов');
                 return;
@@ -2351,18 +1376,18 @@
                 call.completedTime = getFullTime();
                 
                 addCallHistory(call.id, 'Завершение вызова', 'Вызов завершён');
-                addToArchive(call, 'resolved');
+                await addToArchive(call, 'resolved');
                 calls = calls.filter(c => c.id !== callId);
                 
                 renderCalls();
                 renderUnits();
                 renderArchive();
-                saveData();
+                await saveData();
                 addLog('Завершён вызов', `${call.street} - ${call.desc}`, 'success', currentRole);
             }
         };
 
-        window.deleteCall = function(callId) {
+        window.deleteCall = async function(callId) {
             if (!hasPermission('deleteCalls')) {
                 alert('⛔ У вас нет прав на удаление вызовов');
                 return;
@@ -2373,15 +1398,15 @@
                 addCallHistory(call.id, 'Удаление вызова', 'Вызов удалён');
                 calls = calls.filter(c => c.id !== callId);
                 renderCalls();
-                saveData();
+                await saveData();
                 addLog('Удалён вызов', `${call.street} - ${call.desc}`, 'danger', currentRole);
             }
         };
 
         // ============================================
-        // 13. ЮНИТЫ
+        // 14. ЮНИТЫ
         // ============================================
-        function addUnit(name) {
+        async function addUnit(name) {
             if (!hasPermission('createUnits')) {
                 alert('⛔ У вас нет прав на создание юнитов');
                 return false;
@@ -2400,7 +1425,7 @@
                 createdBy: currentRole || 'system'
             });
             renderUnits();
-            saveData();
+            await saveData();
             addLog('Создан юнит', `Юнит ${name.trim()} создан`, 'info', currentRole);
             return true;
         }
@@ -2470,7 +1495,7 @@
         }
 
         // ============================================
-        // 14. ОСТАЛЬНЫЕ ДЕЙСТВИЯ
+        // 15. ДЕЙСТВИЯ С ЮНИТАМИ
         // ============================================
         window.openAssignModal = function(callId) {
             if (!hasPermission('assignUnits')) {
@@ -2499,7 +1524,7 @@
             assignModal.classList.add('active');
         };
 
-        window.changeUnitStatus = function(unitId, newStatus) {
+        window.changeUnitStatus = async function(unitId, newStatus) {
             if (!hasPermission('changeUnitStatus')) {
                 alert('⛔ У вас нет прав на изменение статуса юнитов');
                 return;
@@ -2512,11 +1537,11 @@
                 unit.currentCall = null;
             }
             renderUnits();
-            saveData();
+            await saveData();
             addLog('Изменён статус юнита', `${unit.name}: ${oldStatus} → ${newStatus}`, 'info', currentRole);
         };
 
-        window.releaseUnit = function(unitId) {
+        window.releaseUnit = async function(unitId) {
             if (!hasPermission('releaseUnit')) {
                 alert('⛔ У вас нет прав на освобождение юнитов');
                 return;
@@ -2534,14 +1559,14 @@
                     if (confirm(`Освободить ${unit.name}? Вызов "${call.street}" будет отклонён и отправлен в архив.`)) {
                         call.status = 'rejected';
                         addCallHistory(call.id, 'Освобождение юнита', `Юнит ${unit.name} освобождён, вызов отклонён`);
-                        addToArchive(call, 'rejected');
+                        await addToArchive(call, 'rejected');
                         calls = calls.filter(c => c.id !== call.id);
                         unit.status = 'available';
                         unit.currentCall = null;
                         renderUnits();
                         renderCalls();
                         renderArchive();
-                        saveData();
+                        await saveData();
                         addLog('Освобождён юнит', `${unit.name} (вызов ${call.street} отклонён)`, 'warning', currentRole);
                         return;
                     }
@@ -2552,11 +1577,11 @@
             unit.status = 'available';
             unit.currentCall = null;
             renderUnits();
-            saveData();
+            await saveData();
             addLog('Освобождён юнит', `${unit.name}`, 'info', currentRole);
         };
 
-        window.setUnitBusy = function(unitId) {
+        window.setUnitBusy = async function(unitId) {
             if (!hasPermission('assignUnits')) {
                 alert('⛔ У вас нет прав на назначение юнитов');
                 return;
@@ -2596,11 +1621,11 @@
             addCallHistory(call.id, 'Назначение юнита', `Назначен юнит ${unit.name}`);
             renderUnits();
             renderCalls();
-            saveData();
+            await saveData();
             addLog('Назначен юнит', `${unit.name} → ${call.street}`, 'success', currentRole);
         };
 
-        window.deleteUnit = function(unitId) {
+        window.deleteUnit = async function(unitId) {
             if (!hasPermission('deleteCalls')) {
                 alert('⛔ У вас нет прав на удаление юнитов');
                 return;
@@ -2610,16 +1635,16 @@
             if (confirm(`Удалить юнит "${unit.name}"?`)) {
                 units = units.filter(u => u.id !== unitId);
                 renderUnits();
-                saveData();
+                await saveData();
                 addLog('Удалён юнит', `${unit.name}`, 'danger', currentRole);
             }
         };
 
         // ============================================
-        // 15. АРХИВ И ОТЧЁТЫ
+        // 16. АРХИВ
         // ============================================
-        function addToArchive(call, status) {
-            const history = getCallHistory(call.id);
+        async function addToArchive(call, status) {
+            const history = callHistory[call.id] || [];
             const archiveItem = {
                 id: call.id,
                 street: call.street,
@@ -2643,7 +1668,7 @@
             };
             archive.push(archiveItem);
             updateArchiveCounters();
-            saveData();
+            await saveData();
         }
 
         function renderArchive() {
@@ -2705,7 +1730,7 @@
         }
 
         // ============================================
-        // 16. ОТЧЁТ ПО ВЫЗОВУ
+        // 17. ОТЧЁТ ПО ВЫЗОВУ
         // ============================================
         window.showCallReport = function(callId) {
             const item = archive.find(a => a.id === callId);
@@ -2764,7 +1789,7 @@
         };
 
         // ============================================
-        // 17. ЭКСПОРТ АРХИВА
+        // 18. ЭКСПОРТ АРХИВА
         // ============================================
         function exportArchiveWithReport() {
             if (archive.length === 0) {
@@ -2834,7 +1859,7 @@
         }
 
         // ============================================
-        // 18. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
+        // 19. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
         // ============================================
         function updateCounters() {
             callCounter.textContent = calls.length;
@@ -2853,7 +1878,7 @@
         }
 
         // ============================================
-        // 19. НАСТРОЙКА РОЛЕЙ (UI)
+        // 20. НАСТРОЙКА РОЛЕЙ (UI)
         // ============================================
         function renderRoleSettings() {
             const container = document.getElementById('roleSettingsContainer');
@@ -2916,7 +1941,7 @@
             });
         }
 
-        window.updateRolePassword = function(roleKey) {
+        window.updateRolePassword = async function(roleKey) {
             if (currentRole !== 'admin') {
                 alert('⛔ Только администратор может менять пароли');
                 return;
@@ -2930,7 +1955,8 @@
             }
             if (ROLES_CONFIG[roleKey]) {
                 ROLES_CONFIG[roleKey].password = newPassword;
-                saveRolesConfig();
+                await saveRolesConfig();
+                renderRoleSettings();
                 alert(`✅ Пароль для ${ROLES_CONFIG[roleKey].name} обновлён!`);
                 addLog('Смена пароля', `Изменён пароль для роли ${roleKey}`, 'warning', currentRole);
             }
@@ -2951,8 +1977,19 @@
         }
 
         // ============================================
-        // 20. НАСТРОЙКИ СИСТЕМЫ
+        // 21. НАСТРОЙКИ СИСТЕМЫ
         // ============================================
+        let TITLE_CONFIG = {
+            main: '911 Диспетчерский Центр',
+            leftBadge: 'ДС',
+            rightBadge: 'v3.0'
+        };
+
+        let CONFIG = {
+            SYSTEM_NAME: '911 Диспетчерский Центр',
+            THEME: 'dark'
+        };
+
         function loadTitleConfig() {
             const saved = localStorage.getItem('911_title_config');
             if (saved) {
@@ -3038,7 +2075,7 @@
         }
 
         // ============================================
-        // 21. ОБРАБОТЧИКИ СОБЫТИЙ
+        // 22. ОБРАБОТЧИКИ СОБЫТИЙ
         // ============================================
 
         // Вкладки
@@ -3100,7 +2137,7 @@
         });
 
         // Сброс вызовов
-        resetCallsBtn.addEventListener('click', function() {
+        resetCallsBtn.addEventListener('click', async function() {
             if (!hasPermission('changeCallStatus')) {
                 alert('⛔ У вас нет прав на сброс вызовов');
                 return;
@@ -3143,12 +2180,12 @@
                 }
             ];
             renderCalls();
-            saveData();
+            await saveData();
             addLog('Сброс вызовов', 'Загружены тестовые вызовы', 'info', currentRole);
         });
 
         // Очистка вызовов
-        clearAllCallsBtn.addEventListener('click', function() {
+        clearAllCallsBtn.addEventListener('click', async function() {
             if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут очищать все вызовы');
                 return;
@@ -3160,13 +2197,13 @@
                 });
                 calls = [];
                 renderCalls();
-                saveData();
+                await saveData();
                 addLog('Очистка вызовов', 'Все активные вызовы удалены', 'danger', currentRole);
             }
         });
 
         // Очистка архива
-        clearArchiveBtn.addEventListener('click', function() {
+        clearArchiveBtn.addEventListener('click', async function() {
             if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут очищать архив');
                 return;
@@ -3176,7 +2213,7 @@
                 archive = [];
                 renderArchive();
                 updateArchiveCounters();
-                saveData();
+                await saveData();
                 addLog('Очистка архива', 'Все записи архива удалены', 'danger', currentRole);
             }
         });
@@ -3199,7 +2236,7 @@
         archiveFilter.addEventListener('change', renderArchive);
 
         // Админ действия
-        applyEditBtn.addEventListener('click', function() {
+        applyEditBtn.addEventListener('click', async function() {
             if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут редактировать вызовы');
                 return;
@@ -3224,7 +2261,7 @@
             
             addCallHistory(calls[id].id, 'Редактирование вызова', `Изменён адрес: ${oldStreet} → ${street}, описание: ${oldDesc} → ${desc}`);
             renderCalls();
-            saveData();
+            await saveData();
             addLog('Редактирование вызова', `Вызов #${id} изменён`, 'warning', currentRole);
             alert('✅ Вызов обновлён');
         });
@@ -3264,7 +2301,7 @@
             if (importFileInput.files.length > 0) {
                 const file = importFileInput.files[0];
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     try {
                         const data = JSON.parse(e.target.result);
                         if (data.calls && data.units && data.archive) {
@@ -3283,21 +2320,19 @@
                                 if (data.logs) {
                                     systemLogs = data.logs;
                                     renderLogs();
-                                    saveLogs();
                                 }
                                 if (data.roles) {
                                     ROLES_CONFIG = data.roles;
-                                    saveRolesConfig();
+                                    await saveRolesConfig();
                                     renderRoleSettings();
                                 }
                                 if (data.history) {
                                     callHistory = data.history;
-                                    saveCallHistory();
                                 }
                                 renderCalls();
                                 renderUnits();
                                 renderArchive();
-                                saveData();
+                                await saveData();
                                 addLog('Импорт данных', 'Данные импортированы', 'success', currentRole);
                                 alert('✅ Импорт успешен!');
                             }
@@ -3314,7 +2349,7 @@
             }
         });
 
-        resetAllDataBtn.addEventListener('click', function() {
+        resetAllDataBtn.addEventListener('click', async function() {
             if (currentRole !== 'admin') {
                 alert('⛔ Только администраторы могут сбрасывать данные');
                 return;
@@ -3329,9 +2364,7 @@
                 renderUnits();
                 renderArchive();
                 renderLogs();
-                saveData();
-                saveLogs();
-                saveCallHistory();
+                await saveData();
                 addLog('Сброс данных', 'Все данные сброшены', 'danger', currentRole);
                 alert('✅ Данные сброшены');
             }
@@ -3419,7 +2452,6 @@
             if (confirm('Очистить все логи?')) {
                 systemLogs = [];
                 renderLogs();
-                saveLogs();
                 addLog('Очистка логов', 'Все логи очищены', 'danger', currentRole);
             }
         });
@@ -3478,20 +2510,22 @@
         });
 
         // Настройки ролей
-        saveRoleSettingsBtn.addEventListener('click', function() {
+        saveRoleSettingsBtn.addEventListener('click', async function() {
             if (currentRole !== 'admin') {
                 alert('⛔ Только администратор может управлять ролями');
                 return;
             }
-            saveRolesConfig();
+            await saveRolesConfig();
             addLog('Сохранение ролей', 'Настройки ролей сохранены', 'info', currentRole);
             alert('✅ Настройки ролей сохранены!');
         });
 
-        resetRoleSettingsBtn.addEventListener('click', resetRoleSettings);
+        resetRoleSettingsBtn.addEventListener('click', function() {
+            resetRoleSettings();
+        });
 
         // Модальные окна
-        assignConfirmBtn.addEventListener('click', function() {
+        assignConfirmBtn.addEventListener('click', async function() {
             const unitId = assignUnitSelect.value;
             if (!unitId) {
                 alert('Выберите юнит');
@@ -3528,7 +2562,7 @@
             assignModal.classList.remove('active');
             renderCalls();
             renderUnits();
-            saveData();
+            await saveData();
             addLog('Назначение юнита', `${unit.name} → ${call.street}`, 'success', currentRole);
         });
 
@@ -3540,13 +2574,21 @@
             if (e.target === this) this.classList.remove('active');
         });
 
-        commentConfirmBtn.addEventListener('click', function() {
+        commentConfirmBtn.addEventListener('click', async function() {
             const text = commentInput.value.trim();
             if (!text) {
                 alert('Введите комментарий');
                 return;
             }
-            addComment(commentTargetCallId, text);
+            const call = calls.find(c => c.id === commentTargetCallId);
+            if (!call) return;
+            call.comment = text;
+            call.commentBy = currentRole || 'system';
+            call.commentTime = getFullTime();
+            addCallHistory(call.id, 'Добавлен комментарий', text);
+            renderCalls();
+            await saveData();
+            addLog('Добавлен комментарий', `К вызову ${call.street}: ${text}`, 'info', currentRole);
             commentModal.classList.remove('active');
         });
 
@@ -3558,7 +2600,7 @@
             if (e.target === this) this.classList.remove('active');
         });
 
-        statusConfirmBtn.addEventListener('click', function() {
+        statusConfirmBtn.addEventListener('click', async function() {
             const newStatus = statusSelect.value;
             if (statusTargetType === 'call') {
                 const call = calls.find(c => c.id === statusTargetId);
@@ -3576,11 +2618,11 @@
                             unit.currentCall = null;
                         }
                     }
-                    addToArchive(call, 'resolved');
+                    await addToArchive(call, 'resolved');
                     calls = calls.filter(c => c.id !== statusTargetId);
                     addLog('Завершение вызова', `${call.street} (статус: ${oldStatus} → ${newStatus})`, 'success', currentRole);
                 } else if (newStatus === 'rejected') {
-                    addToArchive(call, 'rejected');
+                    await addToArchive(call, 'rejected');
                     calls = calls.filter(c => c.id !== statusTargetId);
                     addLog('Отклонение вызова', `${call.street} (статус: ${oldStatus} → ${newStatus})`, 'danger', currentRole);
                 } else {
@@ -3590,7 +2632,7 @@
                 renderCalls();
                 renderArchive();
                 renderUnits();
-                saveData();
+                await saveData();
             }
             statusModal.classList.remove('active');
         });
@@ -3612,64 +2654,57 @@
         unitNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addUnitBtn.click(); });
 
         // ============================================
-        // 22. ЗАПУСК
+        // 23. ЗАПУСК
         // ============================================
         
-        loadConfig();
-        loadTitleConfig();
-        loadRolesConfig();
-        loadLogs();
-        loadCallHistory();
-        applySystemSettings();
-        applyTitleConfig();
+        async function init() {
+            loadConfig();
+            loadTitleConfig();
+            await loadRolesConfig();
+            applySystemSettings();
+            applyTitleConfig();
 
-        currentRole = 'civilian';
-        isAdmin = false;
-        isDispatcher = false;
+            currentRole = 'civilian';
+            isAdmin = false;
+            isDispatcher = false;
 
-        // Загружаем данные с сервера или локально
-        (async function init() {
-            const loaded = await loadData();
-            if (!loaded) {
-                // Если данных нет, создаём тестовые
-                loadTestData();
-            }
-        })();
+            await loadData();
 
-        if (themeSelector) themeSelector.value = CONFIG.THEME || 'dark';
-        if (systemNameSetting) systemNameSetting.value = TITLE_CONFIG.main;
-        if (mainBadgeSetting) mainBadgeSetting.value = TITLE_CONFIG.leftBadge;
-        if (subBadgeSetting) subBadgeSetting.value = TITLE_CONFIG.rightBadge;
+            if (themeSelector) themeSelector.value = CONFIG.THEME || 'dark';
+            if (systemNameSetting) systemNameSetting.value = TITLE_CONFIG.main;
+            if (mainBadgeSetting) mainBadgeSetting.value = TITLE_CONFIG.leftBadge;
+            if (subBadgeSetting) subBadgeSetting.value = TITLE_CONFIG.rightBadge;
 
-        renderRoleSettings();
-        updateUI();
+            renderRoleSettings();
+            updateUI();
 
-        // Проверка подключения к серверу
-        async function checkServer() {
+            // Проверка подключения к Supabase
             try {
-                const response = await fetch(`${SERVER_URL}/`);
-                if (response.ok) {
-                    console.log('✅ Сервер доступен');
+                const { data, error } = await supabase.from('dispatch_data').select('id').limit(1);
+                if (!error) {
                     document.getElementById('syncDot').className = 'sync-dot online';
-                    document.getElementById('syncText').textContent = 'Синхронизация активна';
+                    document.getElementById('syncText').textContent = 'Supabase синхронизация';
+                    console.log('✅ Supabase подключён');
                 }
             } catch(e) {
-                console.warn('⚠️ Сервер недоступен, работа в локальном режиме');
+                console.warn('⚠️ Supabase недоступен, работа в локальном режиме');
                 document.getElementById('syncDot').className = 'sync-dot offline';
                 document.getElementById('syncText').textContent = 'Офлайн режим';
             }
-        }
-        checkServer();
 
-        addLog('Система запущена', '911 Диспетчерский Центр активирован', 'success', 'Система');
-        console.log('🚀 911 Диспетчерский Центр запущен');
-        console.log('🔄 Сервер:', SERVER_URL);
-        console.log('👤 По умолчанию вы вошли как Гражданский');
-        console.log('🔑 Пароли для ролей:');
-        console.log('  👑 Администратор: Admin@911Secure#2024!');
-        console.log('  📡 Диспетчер: Dispatch@911#Strong2024!');
-        console.log('  👤 Пользователь: User@911#Access2024!');
-        console.log('  🏠 Гражданский: Civilian@911#View2024!');
+            addLog('Система запущена', '911 Диспетчерский Центр активирован', 'success', 'Система');
+            console.log('🚀 911 Диспетчерский Центр запущен');
+            console.log('🔗 Supabase URL:', SUPABASE_URL);
+            console.log('👤 По умолчанию вы вошли как Гражданский');
+            console.log('🔑 Пароли для ролей:');
+            console.log('  👑 Администратор: Admin@911Secure#2024!');
+            console.log('  📡 Диспетчер: Dispatch@911#Strong2024!');
+            console.log('  👤 Пользователь: User@911#Access2024!');
+            console.log('  🏠 Гражданский: Civilian@911#View2024!');
+        }
+
+        // Запускаем
+        init();
 
     })();
 </script>
