@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 Диспетчер 911 | RP Проект</title>
+    <title>🚨 Диспетчерский Центр 911</title>
     <style>
-        /* ----- ГЛОБАЛЬНЫЙ СТИЛЬ ----- */
+        /* ===== ГЛОБАЛЬНЫЙ СТИЛЬ ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
         }
 
         body {
-            background: #0b0e14;
+            background: #0a0e17;
             color: #e8edf2;
             min-height: 100vh;
             padding: 20px;
@@ -26,38 +26,59 @@
         }
 
         .dashboard {
-            background: #141a22;
-            border-radius: 32px;
+            background: linear-gradient(145deg, #111927, #0d1520);
+            border-radius: 28px;
             padding: 28px 32px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
-            border: 1px solid #2c3540;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid #1e2a3a;
         }
 
-        /* ----- ШАПКА ----- */
+        /* ===== ШАПКА ===== */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 16px;
-            border-bottom: 2px solid #1f2937;
+            border-bottom: 2px solid rgba(30, 42, 58, 0.6);
             padding-bottom: 18px;
             margin-bottom: 28px;
         }
 
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .logo .shield {
+            font-size: 32px;
+        }
         .logo h1 {
             font-size: 26px;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .logo span {
-            color: #ef4444;
-            background: #2c1a1a;
+        .logo .badge {
+            background: #dc2626;
             padding: 2px 14px;
             border-radius: 40px;
-            font-size: 18px;
-            margin-left: 10px;
-            border: 1px solid #7f1d1d;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+            -webkit-text-fill-color: #fff;
+        }
+        .logo .version {
+            font-size: 12px;
+            color: #64748b;
+            background: #1a2330;
+            padding: 2px 12px;
+            border-radius: 40px;
+            border: 1px solid #2a3a4a;
+            -webkit-text-fill-color: #64748b;
         }
 
         .header-controls {
@@ -68,19 +89,20 @@
         }
 
         .status-badge {
-            background: #1e2a3a;
-            padding: 10px 22px;
+            background: #0f172a;
+            padding: 8px 20px;
             border-radius: 60px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             font-weight: 500;
-            border: 1px solid #334155;
+            border: 1px solid #1e2a3a;
+            font-size: 14px;
         }
         .live-dot {
             display: inline-block;
-            width: 14px;
-            height: 14px;
+            width: 10px;
+            height: 10px;
             background: #22c55e;
             border-radius: 50%;
             animation: pulse 1.8s infinite;
@@ -92,43 +114,20 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
-        .role-badge {
-            background: #1f2937;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 13px;
-            border: 1px solid #374151;
-        }
-        .role-badge.admin {
-            background: #1e2a4a;
-            border-color: #3b82f6;
-            color: #60a5fa;
-        }
-        .role-badge.dispatcher {
-            background: #1a2a1a;
-            border-color: #22c55e;
-            color: #4ade80;
-        }
-        .role-badge.user {
-            background: #1f2937;
-            border-color: #374151;
-            color: #9ca3af;
-        }
-
         .user-info {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: #0f171f;
-            padding: 4px 16px 4px 12px;
+            background: #0f172a;
+            padding: 4px 16px 4px 10px;
             border-radius: 40px;
-            border: 1px solid #25303e;
+            border: 1px solid #1e2a3a;
         }
         .user-avatar {
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: #2563eb;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -136,44 +135,161 @@
             font-size: 14px;
             color: white;
         }
+        .user-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
 
-        /* ----- ВКЛАДКИ ----- */
+        .role-badge {
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid;
+            background: transparent;
+        }
+        .role-badge.admin {
+            color: #60a5fa;
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .role-badge.dispatcher {
+            color: #4ade80;
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+        .role-badge.civilian {
+            color: #fbbf24;
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        .role-badge.user {
+            color: #94a3b8;
+            border-color: #475569;
+            background: rgba(71, 85, 105, 0.2);
+        }
+        .role-badge.guest {
+            color: #64748b;
+            border-color: #334155;
+            background: transparent;
+        }
+
+        .btn {
+            border: none;
+            background: #1e293b;
+            color: #e8edf2;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #2a3a4a;
+        }
+        .btn:hover {
+            background: #2a3a4e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-color: #3b82f6;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border-color: #22c55e;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+            border-color: #dc2626;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            border-color: #f59e0b;
+            color: #fff;
+        }
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        .btn-info {
+            background: linear-gradient(135deg, #0891b2, #0e7490);
+            border-color: #06b6d4;
+            color: #fff;
+        }
+        .btn-info:hover {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+        }
+        .btn-sm {
+            padding: 5px 14px;
+            font-size: 13px;
+        }
+        .btn-xs {
+            padding: 3px 10px;
+            font-size: 12px;
+        }
+        .btn-outline {
+            background: transparent;
+            border-color: #334155;
+        }
+        .btn-outline:hover {
+            background: #1e293b;
+        }
+
+        /* ===== ВКЛАДКИ ===== */
         .tabs {
             display: flex;
-            gap: 8px;
+            gap: 4px;
             margin-bottom: 24px;
-            border-bottom: 2px solid #1f2937;
+            border-bottom: 2px solid rgba(30, 42, 58, 0.4);
             padding-bottom: 4px;
             flex-wrap: wrap;
         }
         .tab-btn {
             background: transparent;
             border: none;
-            color: #8a9bb0;
+            color: #64748b;
             padding: 12px 24px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             border-radius: 12px 12px 0 0;
-            transition: 0.2s;
+            transition: all 0.2s ease;
             position: relative;
         }
         .tab-btn:hover {
             color: #e8edf2;
-            background: #1a212b;
+            background: rgba(30, 42, 58, 0.4);
         }
         .tab-btn.active {
             color: #60a5fa;
-            background: #1a212b;
+            background: rgba(59, 130, 246, 0.08);
         }
         .tab-btn.active::after {
             content: '';
             position: absolute;
             bottom: -2px;
-            left: 0;
-            right: 0;
+            left: 20%;
+            right: 20%;
             height: 3px;
-            background: #3b82f6;
+            background: linear-gradient(90deg, #2563eb, #60a5fa);
             border-radius: 4px;
         }
         .tab-content {
@@ -188,7 +304,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ----- СЕТКА ----- */
+        /* ===== СЕТКА ===== */
         .grid-3 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -197,7 +313,7 @@
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 28px;
+            gap: 24px;
         }
 
         @media (max-width: 1200px) {
@@ -214,212 +330,167 @@
             }
         }
 
-        /* ----- КАРТОЧКИ ----- */
+        /* ===== КАРТОЧКИ ===== */
         .card {
-            background: #1a212b;
-            border-radius: 24px;
+            background: linear-gradient(145deg, #111927, #0d1520);
+            border-radius: 20px;
             padding: 22px 24px;
-            border: 1px solid #2a3543;
-            transition: 0.15s;
+            border: 1px solid #1a2636;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         .card:hover {
-            border-color: #3e4d5f;
+            border-color: #2a3a4a;
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
         }
 
         .card-title {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 17px;
+            font-weight: 700;
             margin-bottom: 18px;
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #b9c7db;
+            color: #e2e8f0;
+            letter-spacing: 0.3px;
+        }
+        .card-title .count-badge {
+            background: #1a2636;
+            padding: 0 14px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-left: auto;
         }
 
-        /* ----- ВЫЗОВЫ ----- */
+        /* ===== ВЫЗОВЫ ===== */
         .call-list {
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            max-height: 400px;
+            gap: 12px;
+            max-height: 420px;
             overflow-y: auto;
             padding-right: 6px;
         }
         .call-list::-webkit-scrollbar {
-            width: 5px;
+            width: 4px;
         }
         .call-list::-webkit-scrollbar-track {
-            background: #0f161e;
+            background: #0a0f17;
             border-radius: 12px;
         }
         .call-list::-webkit-scrollbar-thumb {
-            background: #3b4a5c;
+            background: #2a3a4a;
             border-radius: 12px;
         }
 
         .call-item {
-            background: #0f171f;
-            padding: 16px 18px;
-            border-radius: 18px;
-            border-left: 6px solid #f59e0b;
+            background: #0f172a;
+            padding: 14px 18px;
+            border-radius: 16px;
+            border-left: 5px solid #475569;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.15s ease;
+            border: 1px solid #1a2636;
+        }
+        .call-item:hover {
+            border-color: #2a3a4a;
+        }
+        .call-item.priority-high {
+            border-left-color: #dc2626;
+            background: rgba(220, 38, 38, 0.06);
+        }
+        .call-item.priority-medium {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.04);
+        }
+        .call-item.priority-low {
+            border-left-color: #22c55e;
+            background: rgba(34, 197, 94, 0.04);
+        }
+        .call-item.status-assigned {
+            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.06);
+        }
+        .call-item.status-completed {
+            border-left-color: #22c55e;
+            opacity: 0.6;
+        }
+        .call-item .call-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
-            transition: 0.1s;
-        }
-        .call-item.priority-high {
-            border-left-color: #ef4444;
-            background: #1e1418;
-        }
-        .call-item.priority-low {
-            border-left-color: #22c55e;
-        }
-        .call-item.assigned {
-            border-left-color: #3b82f6;
-            background: #141e30;
-        }
-        .call-item.completed {
-            border-left-color: #22c55e;
-            background: #0f1f1a;
-            opacity: 0.7;
-        }
-        .call-item .call-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-            min-width: 150px;
+            gap: 8px;
         }
         .call-item .call-street {
             font-weight: 600;
-            font-size: 17px;
+            font-size: 16px;
+            color: #f1f5f9;
         }
-        .call-item .call-desc {
-            font-size: 14px;
-            color: #9aaec9;
-        }
-        .call-item .call-time {
-            font-size: 13px;
-            color: #6a7f99;
-        }
-        .call-item .call-assigned {
+        .call-item .call-priority {
             font-size: 12px;
-            color: #60a5fa;
-            background: #1a1f3a;
+            font-weight: 600;
             padding: 2px 12px;
             border-radius: 40px;
-            display: inline-block;
+            background: #1a2636;
+        }
+        .call-item .call-priority.high { color: #f87171; background: rgba(220, 38, 38, 0.15); }
+        .call-item .call-priority.medium { color: #fbbf24; background: rgba(245, 158, 11, 0.15); }
+        .call-item .call-priority.low { color: #4ade80; background: rgba(34, 197, 94, 0.15); }
+        .call-item .call-desc {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+        .call-item .call-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #64748b;
         }
         .call-item .call-status {
             font-size: 12px;
-            padding: 2px 12px;
+            font-weight: 600;
+            padding: 2px 14px;
             border-radius: 40px;
-            display: inline-block;
         }
         .call-item .call-status.pending {
-            background: #1a1a2a;
-            color: #facc15;
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.15);
         }
         .call-item .call-status.assigned {
-            background: #1a1f3a;
             color: #60a5fa;
+            background: rgba(59, 130, 246, 0.15);
         }
         .call-item .call-status.completed {
-            background: #064e3b;
             color: #4ade80;
+            background: rgba(34, 197, 94, 0.15);
         }
-
-        .btn {
-            border: none;
-            background: #2a3a4e;
-            color: white;
-            font-weight: 600;
-            padding: 8px 18px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.15s;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #3f5167;
-        }
-        .btn:hover {
-            background: #3a4e66;
-            transform: scale(1.02);
-        }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-primary {
-            background: #2563eb;
-            border-color: #3b82f6;
-        }
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-        .btn-success {
-            background: #16a34a;
-            border-color: #22c55e;
-        }
-        .btn-success:hover {
-            background: #15803d;
-        }
-        .btn-danger {
-            background: #b91c1c;
-            border-color: #dc2626;
-        }
-        .btn-danger:hover {
-            background: #991b1b;
-        }
-        .btn-warning {
-            background: #d97706;
-            border-color: #f59e0b;
-        }
-        .btn-warning:hover {
-            background: #b45309;
-        }
-        .btn-sm {
-            padding: 5px 14px;
-            font-size: 13px;
-        }
-        .btn-xs {
-            padding: 3px 10px;
-            font-size: 12px;
-        }
-
-        /* ----- ФОРМЫ ----- */
-        .form-row {
+        .call-item .call-actions {
             display: flex;
+            gap: 6px;
             flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 10px;
+            margin-top: 4px;
         }
-        .form-row input, .form-row select {
-            flex: 1 1 140px;
-            background: #0f171f;
-            border: 1px solid #2b3a4b;
-            border-radius: 40px;
-            padding: 12px 18px;
-            color: #e8edf2;
-            font-size: 14px;
-            outline: none;
-            transition: 0.1s;
-        }
-        .form-row input:focus, .form-row select:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px #1e3a5f;
+        .call-item .call-comment {
+            font-size: 13px;
+            color: #94a3b8;
+            background: #0a0f17;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border-left: 3px solid #3b82f6;
+            margin-top: 4px;
         }
 
-        /* ----- ЮНИТЫ ----- */
+        /* ===== ЮНИТЫ ===== */
         .unit-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             max-height: 350px;
             overflow-y: auto;
             padding-right: 4px;
@@ -428,57 +499,138 @@
             width: 4px;
         }
         .unit-list::-webkit-scrollbar-thumb {
-            background: #3b4a5c;
+            background: #2a3a4a;
             border-radius: 12px;
         }
+
         .unit-item {
-            background: #0f171f;
-            padding: 12px 18px;
-            border-radius: 16px;
+            background: #0f172a;
+            padding: 12px 16px;
+            border-radius: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid #25303e;
+            border: 1px solid #1a2636;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
-        .unit-item.available {
-            border-left: 4px solid #22c55e;
-        }
-        .unit-item.busy {
-            border-left: 4px solid #facc15;
-        }
-        .unit-item.offline {
-            border-left: 4px solid #6b7280;
-            opacity: 0.5;
+        .unit-item:hover {
+            border-color: #2a3a4a;
         }
         .unit-item .unit-name {
             font-weight: 600;
             color: #60a5fa;
+            font-size: 15px;
         }
         .unit-item .unit-status {
-            font-size: 13px;
+            font-size: 12px;
+            font-weight: 600;
             padding: 2px 14px;
             border-radius: 40px;
         }
         .unit-item .unit-status.available {
-            background: #064e3b;
             color: #4ade80;
+            background: rgba(34, 197, 94, 0.15);
         }
         .unit-item .unit-status.busy {
-            background: #1a1a2a;
-            color: #facc15;
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.15);
+        }
+        .unit-item .unit-status.en-route {
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.15);
+        }
+        .unit-item .unit-status.briefing {
+            color: #a78bfa;
+            background: rgba(139, 92, 246, 0.15);
+        }
+        .unit-item .unit-status.waiting {
+            color: #f472b6;
+            background: rgba(236, 72, 153, 0.15);
+        }
+        .unit-item .unit-status.helping {
+            color: #34d399;
+            background: rgba(52, 211, 153, 0.15);
         }
         .unit-item .unit-status.offline {
-            background: #1f2937;
-            color: #9ca3af;
+            color: #94a3b8;
+            background: rgba(71, 85, 105, 0.15);
         }
         .unit-item .unit-call {
             font-size: 13px;
-            color: #9aaec9;
+            color: #94a3b8;
+        }
+        .unit-item .unit-status-select {
+            background: #0a0f17;
+            border: 1px solid #1a2636;
+            border-radius: 40px;
+            padding: 4px 12px;
+            color: #e8edf2;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+        .unit-item .unit-status-select:focus {
+            border-color: #3b82f6;
         }
 
-        /* ----- АРХИВ ----- */
+        /* ===== ФОРМЫ ===== */
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .form-row input, .form-row select, .form-row textarea {
+            flex: 1 1 140px;
+            background: #0a0f17;
+            border: 1px solid #1a2636;
+            border-radius: 40px;
+            padding: 10px 16px;
+            color: #e8edf2;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.15s ease;
+        }
+        .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .form-row textarea {
+            border-radius: 16px;
+            resize: vertical;
+            min-height: 60px;
+            flex: 1 1 100%;
+        }
+        .form-row input::placeholder, .form-row textarea::placeholder {
+            color: #475569;
+        }
+
+        /* ===== СТАТИСТИКА ===== */
+        .stats {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #1a2636;
+        }
+        .stat-item {
+            background: #0a0f17;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 13px;
+            border: 1px solid #1a2636;
+        }
+        .stat-item strong {
+            color: #facc15;
+            font-size: 17px;
+        }
+        .stat-item .stat-value {
+            color: #60a5fa;
+        }
+
+        /* ===== АРХИВ ===== */
         .archive-controls {
             display: flex;
             gap: 12px;
@@ -489,8 +641,8 @@
         .archive-controls input {
             flex: 1;
             min-width: 180px;
-            background: #0f171f;
-            border: 1px solid #2b3a4b;
+            background: #0a0f17;
+            border: 1px solid #1a2636;
             border-radius: 40px;
             padding: 10px 18px;
             color: #e8edf2;
@@ -501,8 +653,8 @@
             border-color: #3b82f6;
         }
         .archive-controls select {
-            background: #0f171f;
-            border: 1px solid #2b3a4b;
+            background: #0a0f17;
+            border: 1px solid #1a2636;
             border-radius: 40px;
             padding: 10px 18px;
             color: #e8edf2;
@@ -520,36 +672,32 @@
             padding-right: 6px;
         }
         .archive-list::-webkit-scrollbar {
-            width: 5px;
-        }
-        .archive-list::-webkit-scrollbar-track {
-            background: #0f161e;
-            border-radius: 12px;
+            width: 4px;
         }
         .archive-list::-webkit-scrollbar-thumb {
-            background: #3b4a5c;
+            background: #2a3a4a;
             border-radius: 12px;
         }
 
         .archive-item {
-            background: #0f171f;
+            background: #0f172a;
             padding: 14px 18px;
-            border-radius: 16px;
+            border-radius: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            border-left: 4px solid #4a5a6e;
-            transition: 0.1s;
+            border-left: 4px solid #475569;
+            border: 1px solid #1a2636;
         }
         .archive-item:hover {
-            background: #15202b;
+            border-color: #2a3a4a;
         }
-        .archive-item.resolved {
+        .archive-item.status-resolved {
             border-left-color: #22c55e;
         }
-        .archive-item.cancelled {
+        .archive-item.status-cancelled {
             border-left-color: #6b7280;
         }
         .archive-item .archive-info {
@@ -559,117 +707,39 @@
         }
         .archive-item .archive-street {
             font-weight: 600;
+            color: #f1f5f9;
         }
         .archive-item .archive-meta {
             font-size: 13px;
-            color: #8a9bb0;
+            color: #94a3b8;
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
         }
         .archive-item .archive-status {
-            font-size: 13px;
+            font-size: 12px;
+            font-weight: 600;
             padding: 2px 14px;
             border-radius: 40px;
-            background: #1f2937;
         }
         .archive-item .archive-status.resolved {
-            background: #064e3b;
             color: #4ade80;
+            background: rgba(34, 197, 94, 0.15);
         }
         .archive-item .archive-status.cancelled {
-            background: #1f2937;
-            color: #9ca3af;
+            color: #94a3b8;
+            background: rgba(71, 85, 105, 0.15);
         }
 
         .empty-state {
-            color: #5e738b;
+            color: #475569;
             text-align: center;
-            padding: 28px 0;
+            padding: 32px 0;
             font-style: italic;
-        }
-
-        /* ----- СТАТИСТИКА ----- */
-        .stats {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 24px;
-            padding-top: 18px;
-            border-top: 1px solid #1f2937;
-        }
-        .stat-item {
-            background: #0f171f;
-            padding: 6px 20px;
-            border-radius: 40px;
-            font-size: 14px;
-            border: 1px solid #25303e;
-        }
-        .stat-item strong {
-            color: #facc15;
-            font-size: 18px;
-        }
-        .stat-item .archive-count {
-            color: #60a5fa;
-        }
-
-        .badge {
-            background: #1f2937;
-            padding: 0 14px;
-            border-radius: 40px;
             font-size: 15px;
-            margin-left: auto;
         }
 
-        /* ----- АДМИН ПАНЕЛЬ ----- */
-        .admin-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        @media (max-width: 700px) {
-            .admin-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .admin-field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .admin-field label {
-            font-size: 14px;
-            color: #9aaec9;
-            font-weight: 500;
-        }
-        .admin-field input, .admin-field select {
-            background: #0f171f;
-            border: 1px solid #2b3a4b;
-            border-radius: 12px;
-            padding: 10px 16px;
-            color: #e8edf2;
-            font-size: 14px;
-            outline: none;
-            transition: 0.1s;
-        }
-        .admin-field input:focus, .admin-field select:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px #1e3a5f;
-        }
-        .admin-field .hint {
-            font-size: 12px;
-            color: #6a7f99;
-        }
-
-        .admin-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
-
-        /* ----- МОДАЛЬНОЕ ОКНО ----- */
+        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -677,8 +747,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -687,36 +757,53 @@
             display: flex;
         }
         .modal {
-            background: #1a212b;
-            border-radius: 32px;
-            padding: 40px;
-            max-width: 440px;
-            width: 90%;
-            border: 1px solid #2a3543;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            background: linear-gradient(145deg, #111927, #0d1520);
+            border-radius: 28px;
+            padding: 36px 40px;
+            max-width: 500px;
+            width: 92%;
+            border: 1px solid #1a2636;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal::-webkit-scrollbar {
+            width: 4px;
+        }
+        .modal::-webkit-scrollbar-thumb {
+            background: #2a3a4a;
+            border-radius: 12px;
         }
         .modal h2 {
-            margin-bottom: 8px;
-            color: #e8edf2;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #f1f5f9;
         }
         .modal p {
-            color: #8a9bb0;
+            color: #94a3b8;
             margin-bottom: 20px;
             font-size: 14px;
         }
-        .modal input, .modal select {
+        .modal input, .modal select, .modal textarea {
             width: 100%;
-            background: #0f171f;
-            border: 1px solid #2b3a4b;
-            border-radius: 16px;
-            padding: 14px 18px;
+            background: #0a0f17;
+            border: 1px solid #1a2636;
+            border-radius: 14px;
+            padding: 12px 16px;
             color: #e8edf2;
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
             margin-bottom: 12px;
+            transition: all 0.15s ease;
         }
-        .modal input:focus, .modal select:focus {
+        .modal input:focus, .modal select:focus, .modal textarea:focus {
             border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .modal textarea {
+            resize: vertical;
+            min-height: 80px;
         }
         .modal .modal-actions {
             display: flex;
@@ -746,11 +833,115 @@
             display: block;
         }
 
+        .badge-count {
+            background: #1a2636;
+            padding: 0 14px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        /* ===== АДМИН ПАНЕЛЬ ===== */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 700px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .admin-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .admin-field label {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        .admin-field input, .admin-field select {
+            background: #0a0f17;
+            border: 1px solid #1a2636;
+            border-radius: 12px;
+            padding: 10px 16px;
+            color: #e8edf2;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.15s ease;
+        }
+        .admin-field input:focus, .admin-field select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .admin-field .hint {
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .user-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .user-list::-webkit-scrollbar-thumb {
+            background: #2a3a4a;
+            border-radius: 12px;
+        }
+        .user-item {
+            background: #0a0f17;
+            padding: 10px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #1a2636;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .user-item .user-name {
+            font-weight: 600;
+            color: #f1f5f9;
+            font-size: 14px;
+        }
+        .user-item .user-role {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 14px;
+            border-radius: 40px;
+        }
+        .user-item .user-role.admin {
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.15);
+        }
+        .user-item .user-role.dispatcher {
+            color: #4ade80;
+            background: rgba(34, 197, 94, 0.15);
+        }
+        .user-item .user-role.civilian {
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.15);
+        }
+        .user-item .user-role.user {
+            color: #94a3b8;
+            background: rgba(71, 85, 105, 0.15);
+        }
+
         .settings-group {
-            background: #0f171f;
-            border-radius: 16px;
+            background: #0a0f17;
+            border-radius: 14px;
             padding: 16px 20px;
-            border: 1px solid #25303e;
+            border: 1px solid #1a2636;
             margin-bottom: 16px;
         }
         .settings-group .setting-row {
@@ -762,15 +953,16 @@
         }
         .settings-group .setting-row label {
             min-width: 140px;
-            color: #9aaec9;
+            color: #94a3b8;
             font-size: 14px;
+            font-weight: 500;
         }
         .settings-group .setting-row input, 
         .settings-group .setting-row select {
             flex: 1;
             min-width: 200px;
-            background: #0a0f15;
-            border: 1px solid #2b3a4b;
+            background: #0f172a;
+            border: 1px solid #1a2636;
             border-radius: 12px;
             padding: 8px 14px;
             color: #e8edf2;
@@ -781,269 +973,267 @@
         .settings-group .setting-row select:focus {
             border-color: #3b82f6;
         }
+        .settings-group .setting-row .hint {
+            color: #475569;
+            font-size: 12px;
+        }
 
-        /* ----- ПОЛЬЗОВАТЕЛИ ----- */
-        .user-list {
+        .admin-actions {
             display: flex;
-            flex-direction: column;
             gap: 10px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 4px;
+            flex-wrap: wrap;
+            margin-top: 12px;
         }
-        .user-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .user-list::-webkit-scrollbar-thumb {
-            background: #3b4a5c;
-            border-radius: 12px;
-        }
-        .user-item {
-            background: #0f171f;
-            padding: 12px 18px;
-            border-radius: 16px;
+
+        /* ===== СТАТУС БАР ВНИЗУ ===== */
+        .footer-bar {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #1a2636;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid #25303e;
             flex-wrap: wrap;
-            gap: 10px;
-        }
-        .user-item .user-name {
-            font-weight: 600;
-            color: #e8edf2;
-        }
-        .user-item .user-role {
+            gap: 12px;
             font-size: 13px;
-            padding: 2px 14px;
-            border-radius: 40px;
-            background: #1f2937;
+            color: #475569;
         }
-        .user-item .user-role.admin {
-            background: #1e2a4a;
-            color: #60a5fa;
-        }
-        .user-item .user-role.dispatcher {
-            background: #1a2a1a;
-            color: #4ade80;
-        }
-        .user-item .user-role.user {
-            background: #1f2937;
-            color: #9ca3af;
+        .footer-bar .footer-right {
+            display: flex;
+            gap: 20px;
         }
 
-        /* Анимация для новых элементов */
-        .fade-in {
-            animation: fadeIn 0.3s ease;
+        /* Стили для статусов юнитов в списке */
+        .unit-status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .call-item, .unit-item, .archive-item {
-            animation: slideIn 0.25s ease;
-        }
+        .unit-status-dot.available { background: #22c55e; }
+        .unit-status-dot.busy { background: #f59e0b; }
+        .unit-status-dot.en-route { background: #3b82f6; }
+        .unit-status-dot.briefing { background: #8b5cf6; }
+        .unit-status-dot.waiting { background: #ec4899; }
+        .unit-status-dot.helping { background: #34d399; }
+        .unit-status-dot.offline { background: #6b7280; }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="dashboard" id="app">
+    <div class="dashboard">
 
-        <!-- ШАПКА -->
+        <!-- ===== ШАПКА ===== -->
         <div class="header">
             <div class="logo">
-                <h1 id="systemTitle">🚨 911 ДИСПЕТЧЕР <span>RP</span></h1>
+                <span class="shield">🛡️</span>
+                <h1 id="systemTitle">911 Диспетчерский Центр</h1>
+                <span class="badge">ДС</span>
+                <span class="version">v2.1</span>
             </div>
             <div class="header-controls">
                 <div class="status-badge">
                     <span class="live-dot"></span>
-                    <span>Онлайн</span>
+                    <span>Система активна</span>
                 </div>
                 <div class="user-info" id="userInfo" style="display:none;">
                     <div class="user-avatar" id="userAvatar">U</div>
-                    <span id="userNameDisplay">Пользователь</span>
+                    <span class="user-name" id="userNameDisplay">Пользователь</span>
                 </div>
-                <div class="role-badge" id="roleBadge">👤 Гость</div>
-                <button class="btn btn-sm" id="authToggleBtn">🔑 Войти</button>
+                <div class="role-badge guest" id="roleBadge">👤 Гость</div>
+                <button class="btn btn-sm btn-outline" id="authToggleBtn">🔑 Войти</button>
             </div>
         </div>
 
-        <!-- ВКЛАДКИ -->
+        <!-- ===== ВКЛАДКИ ===== -->
         <div class="tabs">
             <button class="tab-btn active" data-tab="main">📋 Основная панель</button>
-            <button class="tab-btn" data-tab="archive">📦 Архив вызовов <span id="archiveBadge" style="background:#1f2937; padding:0 10px; border-radius:30px; font-size:13px; margin-left:6px;">0</span></button>
-            <button class="tab-btn" data-tab="admin" id="adminTabBtn" style="display:none;">⚙️ Админ панель</button>
+            <button class="tab-btn" data-tab="archive">📦 Архив</button>
+            <button class="tab-btn" data-tab="admin" id="adminTabBtn" style="display:none;">⚙️ Администрирование</button>
         </div>
 
-        <!-- ВКЛАДКА 1: ОСНОВНАЯ -->
+        <!-- ===== ВКЛАДКА 1: ОСНОВНАЯ ===== -->
         <div class="tab-content active" id="tab-main">
             <div class="grid-3">
-                <!-- ЛЕВАЯ КОЛОНКА: ВЫЗОВЫ -->
+                <!-- ВЫЗОВЫ -->
                 <div class="card" style="grid-column: span 2;">
                     <div class="card-title">
-                        <span>📞</span> Входящие вызовы
-                        <span class="badge" id="callCounter">0</span>
+                        <span>📞</span> Активные вызовы
+                        <span class="count-badge" id="callCounter">0</span>
                     </div>
                     <div class="call-list" id="callList"></div>
-                    <div style="margin-top: 20px;">
+                    <div style="margin-top: 16px;">
                         <div class="form-row">
-                            <input type="text" id="streetInput" placeholder="Улица / место">
-                            <input type="text" id="descInput" placeholder="Описание">
+                            <input type="text" id="streetInput" placeholder="Адрес / Местоположение">
+                            <input type="text" id="descInput" placeholder="Описание происшествия">
                             <select id="prioritySelect">
-                                <option value="medium">Средний</option>
-                                <option value="high">🔥 Высокий</option>
-                                <option value="low">Низкий</option>
+                                <option value="medium">🟡 Средний</option>
+                                <option value="high">🔴 Высокий</option>
+                                <option value="low">🟢 Низкий</option>
                             </select>
                             <button class="btn btn-primary" id="addCallBtn">➕ Добавить</button>
                         </div>
                     </div>
-                    <div style="margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap;">
-                        <button class="btn btn-sm" id="resetCallsBtn" style="background: #2d3748;">🔄 Сбросить тестовые</button>
+                    <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-sm btn-outline" id="resetCallsBtn">🔄 Тестовые вызовы</button>
                         <button class="btn btn-sm btn-danger" id="clearAllCallsBtn">🗑 Очистить все</button>
                     </div>
                 </div>
 
-                <!-- ПРАВАЯ КОЛОНКА: ЮНИТЫ -->
+                <!-- ЮНИТЫ -->
                 <div class="card">
                     <div class="card-title">
-                        <span>🚔</span> Юниты
-                        <span class="badge" id="unitCounter">0</span>
+                        <span>🚔</span> Активные юниты
+                        <span class="count-badge" id="unitCounter">0</span>
                     </div>
                     <div class="unit-list" id="unitList"></div>
-                    <div style="margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap;">
-                        <input type="text" id="unitNameInput" placeholder="Название юнита (напр. Unit-7)" style="flex:2; background:#0f171f; border:1px solid #2b3a4b; border-radius:40px; padding:10px 18px; color:white;">
-                        <button class="btn btn-success" id="addUnitBtn">➕ Создать юнит</button>
+                    <div style="margin-top: 14px;">
+                        <div class="form-row">
+                            <input type="text" id="unitNameInput" placeholder="Название юнита (например, Unit-7)" style="flex:2;">
+                            <button class="btn btn-success" id="addUnitBtn">➕ Создать</button>
+                        </div>
                     </div>
                     <div class="stats">
-                        <div class="stat-item">📌 Активных вызовов: <strong id="statActiveCalls">0</strong></div>
-                        <div class="stat-item">🚓 Юнитов в работе: <strong id="statBusyUnits">0</strong></div>
-                        <div class="stat-item">📦 В архиве: <strong id="statArchive" class="archive-count">0</strong></div>
+                        <div class="stat-item">📌 Активных: <strong id="statActiveCalls">0</strong></div>
+                        <div class="stat-item">🚓 Занято: <strong id="statBusyUnits">0</strong></div>
+                        <div class="stat-item">📦 В архиве: <strong id="statArchive" class="stat-value">0</strong></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ВКЛАДКА 2: АРХИВ -->
+        <!-- ===== ВКЛАДКА 2: АРХИВ ===== -->
         <div class="tab-content" id="tab-archive">
             <div class="card">
                 <div class="card-title">
                     <span>📦</span> Архив вызовов
-                    <span class="badge" id="archiveCounter">0</span>
+                    <span class="count-badge" id="archiveCounter">0</span>
                 </div>
                 <div class="archive-controls">
-                    <input type="text" id="archiveSearch" placeholder="🔍 Поиск по улице или описанию...">
+                    <input type="text" id="archiveSearch" placeholder="🔍 Поиск...">
                     <select id="archiveFilter">
                         <option value="all">Все статусы</option>
                         <option value="resolved">✅ Завершены</option>
                         <option value="cancelled">❌ Отменены</option>
                     </select>
-                    <button class="btn btn-danger btn-sm" id="clearArchiveBtn">🗑 Очистить архив</button>
+                    <button class="btn btn-sm btn-danger" id="clearArchiveBtn">🗑 Очистить</button>
+                    <button class="btn btn-sm btn-outline" id="exportArchiveBtn">📥 Экспорт TXT</button>
                 </div>
                 <div class="archive-list" id="archiveList"></div>
-                <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                    <span style="color: #8a9bb0; font-size: 14px;">Всего записей: <strong id="archiveTotal">0</strong></span>
-                    <button class="btn btn-sm" id="exportArchiveBtn" style="background: #2d3748;">📥 Экспорт (TXT)</button>
+                <div style="margin-top: 12px; color: #475569; font-size: 13px;">
+                    Всего записей: <strong id="archiveTotal" style="color: #94a3b8;">0</strong>
                 </div>
             </div>
         </div>
 
-        <!-- ВКЛАДКА 3: АДМИН ПАНЕЛЬ -->
+        <!-- ===== ВКЛАДКА 3: АДМИН ===== -->
         <div class="tab-content" id="tab-admin">
             <div class="card">
                 <div class="card-title">
-                    <span>⚙️</span> Административная панель
-                    <span class="badge" id="adminRoleBadge">🔐 Админ</span>
+                    <span>⚙️</span> Администрирование системы
+                    <span class="count-badge" id="adminRoleBadge">🔐 Админ</span>
                 </div>
 
                 <!-- УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ -->
                 <div style="margin-bottom: 24px;">
-                    <h3 style="color: #60a5fa; margin-bottom: 12px;">👥 Управление пользователями</h3>
+                    <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">👥 Управление пользователями</h3>
                     <div class="admin-grid" style="margin-bottom: 16px;">
                         <div class="admin-field">
                             <label>Добавить пользователя</label>
                             <input type="text" id="newUserLogin" placeholder="Логин">
                             <input type="text" id="newUserPassword" placeholder="Пароль">
                             <select id="newUserRole">
+                                <option value="civilian">👤 Гражданский</option>
                                 <option value="user">👤 Пользователь</option>
                                 <option value="dispatcher">📡 Диспетчер</option>
                                 <option value="admin">👑 Администратор</option>
                             </select>
-                            <button class="btn btn-success btn-sm" id="addUserBtn" style="margin-top: 8px;">➕ Добавить пользователя</button>
+                            <button class="btn btn-success btn-sm" id="addUserBtn" style="margin-top: 8px;">➕ Добавить</button>
                         </div>
                         <div class="admin-field">
                             <label>Список пользователей</label>
                             <div class="user-list" id="userList"></div>
-                            <span class="hint">Всего пользователей: <strong id="totalUsersCount">0</strong></span>
+                            <span class="hint">Всего: <strong id="totalUsersCount">0</strong></span>
                         </div>
                     </div>
                 </div>
 
-                <hr style="border-color: #1f2937; margin: 20px 0;">
+                <hr style="border-color: #1a2636; margin: 20px 0;">
 
-                <!-- НАСТРОЙКИ СИСТЕМЫ -->
+                <!-- НАСТРОЙКИ -->
                 <div style="margin-bottom: 24px;">
-                    <h3 style="color: #60a5fa; margin-bottom: 12px;">⚙️ Настройки системы</h3>
+                    <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">⚙️ Настройки</h3>
                     <div class="settings-group">
                         <div class="setting-row">
                             <label>Название системы</label>
                             <input type="text" id="systemNameSetting" placeholder="Название">
-                            <button class="btn btn-primary btn-sm" id="changeSystemNameBtn">Изменить</button>
+                            <button class="btn btn-sm btn-primary" id="changeSystemNameBtn">Изменить</button>
                         </div>
                         <div class="setting-row">
                             <label>Цветовая схема</label>
                             <select id="themeSelector">
-                                <option value="dark">Тёмная (по умолчанию)</option>
+                                <option value="dark">Тёмная (официальная)</option>
                                 <option value="light">Светлая</option>
                                 <option value="blue">Синяя</option>
                                 <option value="red">Красная</option>
                             </select>
-                            <button class="btn btn-primary btn-sm" id="applyThemeBtn">Применить</button>
+                            <button class="btn btn-sm btn-primary" id="applyThemeBtn">Применить</button>
                         </div>
                     </div>
                 </div>
 
-                <hr style="border-color: #1f2937; margin: 20px 0;">
+                <hr style="border-color: #1a2636; margin: 20px 0;">
 
-                <!-- Управление данными -->
-                <h3 style="color: #60a5fa; margin-bottom: 16px;">📊 Управление данными</h3>
+                <!-- УПРАВЛЕНИЕ ДАННЫМИ -->
+                <h3 style="color: #f1f5f9; margin-bottom: 12px; font-size: 17px;">📊 Управление данными</h3>
                 <div class="admin-grid">
                     <div class="admin-field">
                         <label>Редактировать вызов (ID)</label>
-                        <input type="number" id="editCallId" placeholder="Номер вызова" min="0">
-                        <input type="text" id="editCallStreet" placeholder="Новая улица" style="margin-top: 6px;">
+                        <input type="number" id="editCallId" placeholder="Номер" min="0">
+                        <input type="text" id="editCallStreet" placeholder="Новый адрес" style="margin-top: 6px;">
                         <input type="text" id="editCallDesc" placeholder="Новое описание" style="margin-top: 6px;">
                         <select id="editCallPriority" style="margin-top: 6px;">
-                            <option value="medium">Средний</option>
-                            <option value="high">🔥 Высокий</option>
-                            <option value="low">Низкий</option>
+                            <option value="medium">🟡 Средний</option>
+                            <option value="high">🔴 Высокий</option>
+                            <option value="low">🟢 Низкий</option>
                         </select>
-                        <button class="btn btn-primary btn-sm" id="applyEditBtn" style="margin-top: 8px;">✏️ Применить изменения</button>
+                        <button class="btn btn-primary btn-sm" id="applyEditBtn" style="margin-top: 8px;">✏️ Применить</button>
                     </div>
                     <div class="admin-field">
                         <label>Экспорт / Импорт</label>
-                        <button class="btn btn-sm" id="exportAllBtn" style="background: #2d3748; width:100%; margin-top:6px;">📥 Экспорт всех данных (JSON)</button>
+                        <button class="btn btn-sm btn-outline" id="exportAllBtn" style="width:100%; margin-top:6px;">📥 Экспорт JSON</button>
                         <div style="display: flex; gap: 8px; margin-top: 6px;">
-                            <input type="file" id="importFileInput" accept=".json" style="flex:1; background:#0f171f; border:1px solid #2b3a4b; border-radius:12px; padding:8px; color:#e8edf2;">
+                            <input type="file" id="importFileInput" accept=".json" style="flex:1; background:#0a0f17; border:1px solid #1a2636; border-radius:12px; padding:8px; color:#e8edf2;">
                             <button class="btn btn-sm btn-success" id="importBtn">📤 Импорт</button>
                         </div>
                         <span class="hint">Импорт заменит все текущие данные</span>
                     </div>
                 </div>
 
-                <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button class="btn btn-danger" id="resetAllDataBtn">⚠️ Сбросить все данные</button>
-                    <button class="btn btn-sm" id="refreshAdminBtn" style="background: #2d3748;">🔄 Обновить</button>
+                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-danger" id="resetAllDataBtn">⚠️ Сбросить всё</button>
+                    <button class="btn btn-sm btn-outline" id="refreshAdminBtn">🔄 Обновить</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- ===== ФУТЕР ===== -->
+        <div class="footer-bar">
+            <span>© 2024 911 Диспетчерский Центр</span>
+            <div class="footer-right">
+                <span id="onlineUsersDisplay">👥 Онлайн: 0</span>
+                <span>🕐 <span id="clockDisplay"></span></span>
             </div>
         </div>
     </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ВХОДА/РЕГИСТРАЦИИ -->
+<!-- ===== МОДАЛЬНОЕ ОКНО: АВТОРИЗАЦИЯ ===== -->
 <div class="modal-overlay" id="authModal">
     <div class="modal">
         <h2 id="authModalTitle">🔐 Вход в систему</h2>
-        <p id="authModalDesc">Войдите или зарегистрируйтесь для доступа к диспетчерской</p>
+        <p id="authModalDesc">Войдите для доступа к диспетчерскому центру</p>
         <div class="error-msg" id="authError">❌ Ошибка</div>
         <div class="success-msg" id="authSuccess">✅ Успешно!</div>
         <input type="text" id="authLoginInput" placeholder="Логин">
@@ -1053,25 +1243,77 @@
             <button class="btn btn-success" id="authRegisterBtn" style="flex:1;">Зарегистрироваться</button>
         </div>
         <div class="modal-actions">
-            <button class="btn" id="authCancelBtn" style="flex:1;">Отмена</button>
+            <button class="btn btn-outline" id="authCancelBtn" style="flex:1;">Отмена</button>
         </div>
-        <div style="margin-top: 12px; text-align: center; color: #6a7f99; font-size: 13px;">
+        <div style="margin-top: 12px; text-align: center; color: #475569; font-size: 13px;">
             <span id="authSwitchText">Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрируйтесь</a></span>
         </div>
     </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО ДЛЯ НАЗНАЧЕНИЯ ЮНИТА -->
+<!-- ===== МОДАЛЬНОЕ ОКНО: НАЗНАЧЕНИЕ ЮНИТА ===== -->
 <div class="modal-overlay" id="assignModal">
     <div class="modal">
-        <h2>🚔 Назначить юнит на вызов</h2>
+        <h2>🚔 Назначить юнит</h2>
         <p id="assignCallInfo">Вызов: ...</p>
-        <select id="assignUnitSelect" style="width:100%; background:#0f171f; border:1px solid #2b3a4b; border-radius:16px; padding:14px 18px; color:#e8edf2; font-size:16px; outline:none; margin-bottom:12px;">
+        <select id="assignUnitSelect" style="width:100%;">
             <option value="">Выберите юнит...</option>
         </select>
         <div class="modal-actions">
             <button class="btn btn-success" id="assignConfirmBtn">✅ Назначить</button>
-            <button class="btn" id="assignCancelBtn">Отмена</button>
+            <button class="btn btn-outline" id="assignCancelBtn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== МОДАЛЬНОЕ ОКНО: КОММЕНТАРИЙ ===== -->
+<div class="modal-overlay" id="commentModal">
+    <div class="modal">
+        <h2>💬 Добавить комментарий</h2>
+        <p id="commentCallInfo">Вызов: ...</p>
+        <textarea id="commentInput" placeholder="Введите комментарий..."></textarea>
+        <div class="modal-actions">
+            <button class="btn btn-primary" id="commentConfirmBtn">💬 Добавить</button>
+            <button class="btn btn-outline" id="commentCancelBtn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== МОДАЛЬНОЕ ОКНО: ИЗМЕНЕНИЕ СТАТУСА ВЫЗОВА ===== -->
+<div class="modal-overlay" id="statusModal">
+    <div class="modal">
+        <h2>🔄 Изменить статус вызова</h2>
+        <p id="statusTargetInfo">Вызов: ...</p>
+        <select id="statusSelect" style="width:100%;">
+            <option value="pending">⏳ Ожидает</option>
+            <option value="assigned">🚔 Назначен</option>
+            <option value="completed">✅ Выполнен</option>
+            <option value="cancelled">❌ Отменён</option>
+        </select>
+        <div class="modal-actions">
+            <button class="btn btn-primary" id="statusConfirmBtn">🔄 Применить</button>
+            <button class="btn btn-outline" id="statusCancelBtn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== МОДАЛЬНОЕ ОКНО: ИЗМЕНЕНИЕ СТАТУСА ЮНИТА ===== -->
+<div class="modal-overlay" id="unitStatusModal">
+    <div class="modal">
+        <h2>🔄 Изменить статус юнита</h2>
+        <p id="unitStatusTargetInfo">Юнит: ...</p>
+        <select id="unitStatusSelect" style="width:100%;">
+            <option value="available">🟢 Доступен</option>
+            <option value="busy">🟡 Занят</option>
+            <option value="en-route">🔵 В пути</option>
+            <option value="briefing">🟣 На брифинге</option>
+            <option value="waiting">🩷 Ожидание</option>
+            <option value="helping">💚 Помощь</option>
+            <option value="offline">⚫ Офлайн</option>
+        </select>
+        <div class="modal-actions">
+            <button class="btn btn-primary" id="unitStatusConfirmBtn">🔄 Применить</button>
+            <button class="btn btn-outline" id="unitStatusCancelBtn">Отмена</button>
         </div>
     </div>
 </div>
@@ -1084,7 +1326,7 @@
         // 1. НАСТРОЙКИ
         // ============================================
         let CONFIG = {
-            SYSTEM_NAME: '🚨 911 ДИСПЕТЧЕР RP',
+            SYSTEM_NAME: '911 Диспетчерский Центр',
             THEME: 'dark',
         };
 
@@ -1102,96 +1344,9 @@
         let calls = [];
         let units = [];
         let archive = [];
-        let callIdCounter = 0;
 
         // ============================================
-        // 4. DOM
-        // ============================================
-        const callListEl = document.getElementById('callList');
-        const unitListEl = document.getElementById('unitList');
-        const archiveListEl = document.getElementById('archiveList');
-        const userListEl = document.getElementById('userList');
-        const callCounter = document.getElementById('callCounter');
-        const unitCounter = document.getElementById('unitCounter');
-        const archiveCounter = document.getElementById('archiveCounter');
-        const archiveBadge = document.getElementById('archiveBadge');
-        const statActiveCalls = document.getElementById('statActiveCalls');
-        const statBusyUnits = document.getElementById('statBusyUnits');
-        const statArchive = document.getElementById('statArchive');
-        const archiveTotal = document.getElementById('archiveTotal');
-        const totalUsersCount = document.getElementById('totalUsersCount');
-        const roleBadge = document.getElementById('roleBadge');
-        const adminTabBtn = document.getElementById('adminTabBtn');
-        const adminRoleBadge = document.getElementById('adminRoleBadge');
-        const userInfo = document.getElementById('userInfo');
-        const userAvatar = document.getElementById('userAvatar');
-        const userNameDisplay = document.getElementById('userNameDisplay');
-        const authToggleBtn = document.getElementById('authToggleBtn');
-        const systemTitle = document.getElementById('systemTitle');
-
-        const streetInput = document.getElementById('streetInput');
-        const descInput = document.getElementById('descInput');
-        const prioritySelect = document.getElementById('prioritySelect');
-        const addCallBtn = document.getElementById('addCallBtn');
-
-        const unitNameInput = document.getElementById('unitNameInput');
-        const addUnitBtn = document.getElementById('addUnitBtn');
-
-        const resetCallsBtn = document.getElementById('resetCallsBtn');
-        const clearAllCallsBtn = document.getElementById('clearAllCallsBtn');
-
-        const archiveSearch = document.getElementById('archiveSearch');
-        const archiveFilter = document.getElementById('archiveFilter');
-        const clearArchiveBtn = document.getElementById('clearArchiveBtn');
-        const exportArchiveBtn = document.getElementById('exportArchiveBtn');
-
-        // Модальное окно авторизации
-        const authModal = document.getElementById('authModal');
-        const authModalTitle = document.getElementById('authModalTitle');
-        const authModalDesc = document.getElementById('authModalDesc');
-        const authLoginInput = document.getElementById('authLoginInput');
-        const authPasswordInput = document.getElementById('authPasswordInput');
-        const authLoginBtn = document.getElementById('authLoginBtn');
-        const authRegisterBtn = document.getElementById('authRegisterBtn');
-        const authCancelBtn = document.getElementById('authCancelBtn');
-        const authError = document.getElementById('authError');
-        const authSuccess = document.getElementById('authSuccess');
-        const authSwitchText = document.getElementById('authSwitchText');
-        const authSwitchLink = document.getElementById('authSwitchLink');
-
-        // Модальное окно назначения
-        const assignModal = document.getElementById('assignModal');
-        const assignCallInfo = document.getElementById('assignCallInfo');
-        const assignUnitSelect = document.getElementById('assignUnitSelect');
-        const assignConfirmBtn = document.getElementById('assignConfirmBtn');
-        const assignCancelBtn = document.getElementById('assignCancelBtn');
-        let assignTargetCallId = null;
-
-        // Admin
-        const editCallId = document.getElementById('editCallId');
-        const editCallStreet = document.getElementById('editCallStreet');
-        const editCallDesc = document.getElementById('editCallDesc');
-        const editCallPriority = document.getElementById('editCallPriority');
-        const applyEditBtn = document.getElementById('applyEditBtn');
-        const exportAllBtn = document.getElementById('exportAllBtn');
-        const importFileInput = document.getElementById('importFileInput');
-        const importBtn = document.getElementById('importBtn');
-        const resetAllDataBtn = document.getElementById('resetAllDataBtn');
-        const refreshAdminBtn = document.getElementById('refreshAdminBtn');
-
-        const systemNameSetting = document.getElementById('systemNameSetting');
-        const changeSystemNameBtn = document.getElementById('changeSystemNameBtn');
-        const themeSelector = document.getElementById('themeSelector');
-        const applyThemeBtn = document.getElementById('applyThemeBtn');
-
-        // Users
-        const newUserLogin = document.getElementById('newUserLogin');
-        const newUserPassword = document.getElementById('newUserPassword');
-        const newUserRole = document.getElementById('newUserRole');
-        const addUserBtn = document.getElementById('addUserBtn');
-
-        // ============================================
-        // 5. ВСПОМОГАТЕЛЬНЫЕ
+        // 4. ВСПОМОГАТЕЛЬНЫЕ
         // ============================================
         function getTime() {
             const d = new Date();
@@ -1203,20 +1358,23 @@
             return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
         }
 
-        function getTimestamp() {
-            return new Date().toLocaleTimeString();
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         }
 
         function getAvatar(login) {
             return login.charAt(0).toUpperCase();
         }
 
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        function updateClock() {
+            const d = new Date();
+            document.getElementById('clockDisplay').textContent = d.toLocaleTimeString('ru-RU');
         }
+        setInterval(updateClock, 1000);
+        updateClock();
 
         // ============================================
-        // 6. УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ
+        // 5. ПОЛЬЗОВАТЕЛИ
         // ============================================
         function loadUsers() {
             const saved = localStorage.getItem('911_users');
@@ -1230,6 +1388,7 @@
                 { login: 'admin', password: 'admin123', role: 'admin' },
                 { login: 'dispatcher', password: '123456', role: 'dispatcher' },
                 { login: 'user', password: '123456', role: 'user' },
+                { login: 'civilian', password: '123456', role: 'civilian' },
             ];
             saveUsers();
             return false;
@@ -1255,12 +1414,12 @@
             return { success: true, user };
         }
 
-        function registerUser(login, password, role = 'user') {
+        function registerUser(login, password, role = 'civilian') {
             if (findUser(login)) {
-                return { success: false, message: 'Пользователь с таким логином уже существует' };
+                return { success: false, message: 'Пользователь уже существует' };
             }
             if (login.length < 3 || password.length < 3) {
-                return { success: false, message: 'Логин и пароль должны быть не менее 3 символов' };
+                return { success: false, message: 'Минимум 3 символа' };
             }
             const newUser = { login, password, role };
             users.push(newUser);
@@ -1281,7 +1440,7 @@
                 return false;
             }
             if (currentUser && currentUser.login === login) {
-                alert('Нельзя удалить самого себя');
+                alert('Нельзя удалить себя');
                 return false;
             }
             users = users.filter(u => u.login !== login);
@@ -1304,48 +1463,54 @@
         }
 
         function renderUsersList() {
-            if (userListEl) {
-                let html = '';
-                users.forEach(user => {
-                    const roleClass = user.role === 'admin' ? 'admin' : user.role === 'dispatcher' ? 'dispatcher' : 'user';
-                    const isCurrent = currentUser && currentUser.login === user.login;
-                    html += `
-                        <div class="user-item">
-                            <div>
-                                <span class="user-name">${user.login}</span>
-                                <span class="user-role ${roleClass}">${user.role.toUpperCase()}</span>
-                                ${isCurrent ? ' <span style="color:#60a5fa;font-size:12px;">(Вы)</span>' : ''}
-                            </div>
-                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                                ${user.role !== 'admin' ? `
-                                    <select onchange="window.changeUserRole('${user.login}', this.value)" style="background:#0f171f; border:1px solid #2b3a4b; border-radius:40px; padding:4px 12px; color:#e8edf2; font-size:12px;">
-                                        <option value="user" ${user.role === 'user' ? 'selected' : ''}>👤 Пользователь</option>
-                                        <option value="dispatcher" ${user.role === 'dispatcher' ? 'selected' : ''}>📡 Диспетчер</option>
-                                        <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Админ</option>
-                                    </select>
-                                ` : ''}
-                                ${user.login !== 'admin' ? `<button class="btn btn-danger btn-xs" onclick="window.deleteUser('${user.login}')">✖</button>` : ''}
-                            </div>
+            if (!userListEl) return;
+            let html = '';
+            users.forEach(user => {
+                const roleClass = user.role === 'admin' ? 'admin' : 
+                                 user.role === 'dispatcher' ? 'dispatcher' : 
+                                 user.role === 'civilian' ? 'civilian' : 'user';
+                const roleLabel = user.role === 'admin' ? '👑 Админ' :
+                                 user.role === 'dispatcher' ? '📡 Диспетчер' :
+                                 user.role === 'civilian' ? '👤 Гражданский' : '👤 Пользователь';
+                const isCurrent = currentUser && currentUser.login === user.login;
+                html += `
+                    <div class="user-item">
+                        <div>
+                            <span class="user-name">${user.login}</span>
+                            <span class="user-role ${roleClass}">${roleLabel}</span>
+                            ${isCurrent ? ' <span style="color:#60a5fa;font-size:12px;">(Вы)</span>' : ''}
                         </div>
-                    `;
-                });
-                userListEl.innerHTML = html || '<div class="empty-state">👤 Нет пользователей</div>';
-                totalUsersCount.textContent = users.length;
-            }
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            ${user.role !== 'admin' ? `
+                                <select onchange="window.changeUserRole('${user.login}', this.value)" style="background:#0a0f17; border:1px solid #1a2636; border-radius:40px; padding:4px 12px; color:#e8edf2; font-size:12px;">
+                                    <option value="civilian" ${user.role === 'civilian' ? 'selected' : ''}>👤 Гражданский</option>
+                                    <option value="user" ${user.role === 'user' ? 'selected' : ''}>👤 Пользователь</option>
+                                    <option value="dispatcher" ${user.role === 'dispatcher' ? 'selected' : ''}>📡 Диспетчер</option>
+                                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Админ</option>
+                                </select>
+                            ` : ''}
+                            ${user.login !== 'admin' ? `<button class="btn btn-danger btn-xs" onclick="window.deleteUser('${user.login}')">✖</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            userListEl.innerHTML = html || '<div class="empty-state">Нет пользователей</div>';
+            totalUsersCount.textContent = users.length;
+            updateOnlineUsers();
         }
 
         window.deleteUser = deleteUser;
         window.changeUserRole = changeUserRole;
 
         // ============================================
-        // 7. ОСНОВНЫЕ ФУНКЦИИ
+        // 6. ОСНОВНЫЕ ФУНКЦИИ
         // ============================================
         function addCall(street, desc, priority) {
             if (!isDispatcher && !isAdmin) {
-                alert('⛔ Только диспетчеры и администраторы могут добавлять вызовы');
+                alert('⛔ Только диспетчеры могут добавлять вызовы');
                 return false;
             }
-            if (!street.trim()) { alert('Введите улицу или место'); return false; }
+            if (!street.trim()) { alert('Введите адрес'); return false; }
             if (!desc.trim()) { alert('Введите описание'); return false; }
             
             const call = {
@@ -1354,10 +1519,13 @@
                 desc: desc.trim(),
                 priority: priority || 'medium',
                 time: getTime(),
-                status: 'pending', // pending, assigned, completed
+                status: 'pending',
                 assignedTo: null,
                 assignedByName: null,
-                createdBy: currentUser ? currentUser.login : 'system'
+                createdBy: currentUser ? currentUser.login : 'system',
+                comment: null,
+                commentBy: null,
+                commentTime: null
             };
             calls.push(call);
             renderCalls();
@@ -1371,39 +1539,40 @@
             } else {
                 let html = '';
                 calls.forEach((call, index) => {
-                    const priorityClass = call.priority === 'high' ? 'priority-high' : call.priority === 'low' ? 'priority-low' : '';
-                    const priorityLabel = call.priority === 'high' ? '🔥' : call.priority === 'low' ? '🟢' : '🟡';
+                    const priorityClass = call.priority;
+                    const priorityLabel = call.priority === 'high' ? '🔴 Высокий' : 
+                                         call.priority === 'low' ? '🟢 Низкий' : '🟡 Средний';
                     
-                    let statusClass = 'pending';
-                    let statusLabel = '⏳ Ожидает';
-                    if (call.status === 'assigned') {
-                        statusClass = 'assigned';
-                        statusLabel = '🚔 Назначен';
-                    } else if (call.status === 'completed') {
-                        statusClass = 'completed';
-                        statusLabel = '✅ Выполнен';
-                    }
+                    const statusClass = call.status;
+                    const statusLabel = call.status === 'pending' ? '⏳ Ожидает' :
+                                       call.status === 'assigned' ? '🚔 Назначен' : '✅ Выполнен';
                     
-                    const assignedInfo = call.assignedTo ? 
-                        `<span class="call-assigned">🚔 ${call.assignedTo} ${call.assignedByName ? '(назначил: ' + call.assignedByName + ')' : ''}</span>` : '';
+                    const assignedInfo = call.assignedTo ? `🚔 ${call.assignedTo}` : '';
+                    const commentHtml = call.comment ? 
+                        `<div class="call-comment">💬 ${call.comment} <span style="color:#64748b;font-size:12px;">(${call.commentBy || 'система'}, ${call.commentTime || ''})</span></div>` : '';
                     
                     html += `
-                        <div class="call-item ${priorityClass} ${call.status === 'assigned' ? 'assigned' : ''} ${call.status === 'completed' ? 'completed' : ''}">
-                            <div class="call-info">
-                                <div class="call-street">${priorityLabel} ${call.street}</div>
-                                <div class="call-desc">${call.desc}</div>
-                                <div class="call-time">⏱ ${call.time} ${assignedInfo}</div>
+                        <div class="call-item priority-${priorityClass} status-${statusClass}">
+                            <div class="call-header">
+                                <span class="call-street">📍 ${call.street}</span>
+                                <span class="call-priority ${priorityClass}">${priorityLabel}</span>
                             </div>
-                            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                            <div class="call-desc">${call.desc}</div>
+                            <div class="call-meta">
+                                <span>⏱ ${call.time}</span>
+                                ${assignedInfo ? `<span>${assignedInfo}</span>` : ''}
                                 <span class="call-status ${statusClass}">${statusLabel}</span>
-                                ${call.status === 'pending' && isDispatcher ? `
-                                    <button class="btn btn-primary btn-sm" onclick="window.openAssignModal('${call.id}')">🎯 Назначить</button>
-                                ` : ''}
-                                ${call.status === 'assigned' && isDispatcher ? `
-                                    <button class="btn btn-success btn-sm" onclick="window.completeCall('${call.id}')">✅ Завершить</button>
+                            </div>
+                            ${commentHtml}
+                            <div class="call-actions">
+                                ${isDispatcher ? `
+                                    ${call.status === 'pending' ? `<button class="btn btn-primary btn-xs" onclick="window.openAssignModal('${call.id}')">🎯 Назначить</button>` : ''}
+                                    ${call.status === 'assigned' ? `<button class="btn btn-success btn-xs" onclick="window.completeCall('${call.id}')">✅ Завершить</button>` : ''}
+                                    <button class="btn btn-info btn-xs" onclick="window.openCommentModal('${call.id}')">💬 Коммент</button>
+                                    <button class="btn btn-warning btn-xs" onclick="window.openCallStatusModal('${call.id}')">🔄 Статус</button>
                                 ` : ''}
                                 ${isAdmin ? `
-                                    <button class="btn btn-danger btn-sm" onclick="window.deleteCall('${call.id}')">✖</button>
+                                    <button class="btn btn-danger btn-xs" onclick="window.deleteCall('${call.id}')">✖</button>
                                 ` : ''}
                             </div>
                         </div>
@@ -1414,6 +1583,93 @@
             updateCounters();
         }
 
+        // ============================================
+        // 7. ЮНИТЫ С РАСШИРЕННЫМИ СТАТУСАМИ
+        // ============================================
+        function addUnit(name) {
+            if (!isDispatcher && !isAdmin) {
+                alert('⛔ Только диспетчеры могут создавать юниты');
+                return false;
+            }
+            if (!name.trim()) { alert('Введите название юнита'); return false; }
+            if (units.find(u => u.name.toLowerCase() === name.trim().toLowerCase())) {
+                alert('Юнит уже существует');
+                return false;
+            }
+            
+            units.push({
+                id: generateId(),
+                name: name.trim(),
+                status: 'available',
+                currentCall: null,
+                createdBy: currentUser ? currentUser.login : 'system'
+            });
+            renderUnits();
+            saveData();
+            return true;
+        }
+
+        function renderUnits() {
+            if (units.length === 0) {
+                unitListEl.innerHTML = `<div class="empty-state">🚫 Нет созданных юнитов</div>`;
+            } else {
+                let html = '';
+                units.forEach(unit => {
+                    const statusLabels = {
+                        'available': '🟢 Доступен',
+                        'busy': '🟡 Занят',
+                        'en-route': '🔵 В пути',
+                        'briefing': '🟣 На брифинге',
+                        'waiting': '🩷 Ожидание',
+                        'helping': '💚 Помощь',
+                        'offline': '⚫ Офлайн'
+                    };
+                    const statusLabel = statusLabels[unit.status] || unit.status;
+                    
+                    let callInfo = '';
+                    if (unit.currentCall) {
+                        const call = calls.find(c => c.id === unit.currentCall);
+                        if (call) {
+                            callInfo = `<span class="unit-call">📞 ${call.street}</span>`;
+                        }
+                    }
+                    
+                    html += `
+                        <div class="unit-item">
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <span class="unit-name">${unit.name}</span>
+                                <span class="unit-status ${unit.status}">${statusLabel}</span>
+                                ${callInfo}
+                            </div>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                                ${isDispatcher ? `
+                                    <select class="unit-status-select" onchange="window.changeUnitStatus('${unit.id}', this.value)">
+                                        <option value="available" ${unit.status === 'available' ? 'selected' : ''}>🟢 Доступен</option>
+                                        <option value="busy" ${unit.status === 'busy' ? 'selected' : ''}>🟡 Занят</option>
+                                        <option value="en-route" ${unit.status === 'en-route' ? 'selected' : ''}>🔵 В пути</option>
+                                        <option value="briefing" ${unit.status === 'briefing' ? 'selected' : ''}>🟣 На брифинге</option>
+                                        <option value="waiting" ${unit.status === 'waiting' ? 'selected' : ''}>🩷 Ожидание</option>
+                                        <option value="helping" ${unit.status === 'helping' ? 'selected' : ''}>💚 Помощь</option>
+                                        <option value="offline" ${unit.status === 'offline' ? 'selected' : ''}>⚫ Офлайн</option>
+                                    </select>
+                                    ${unit.status === 'available' ? `<button class="btn btn-primary btn-xs" onclick="window.setUnitBusy('${unit.id}')">📋 Занять</button>` : ''}
+                                    ${unit.status === 'busy' || unit.status === 'en-route' || unit.status === 'helping' ? `<button class="btn btn-success btn-xs" onclick="window.setUnitAvailable('${unit.id}')">🟢 Освободить</button>` : ''}
+                                ` : ''}
+                                ${isAdmin ? `
+                                    <button class="btn btn-danger btn-xs" onclick="window.deleteUnit('${unit.id}')">✖</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                unitListEl.innerHTML = html;
+            }
+            updateCounters();
+        }
+
+        // ============================================
+        // 8. ДЕЙСТВИЯ С ВЫЗОВАМИ
+        // ============================================
         window.openAssignModal = function(callId) {
             if (!isDispatcher && !isAdmin) {
                 alert('⛔ Только диспетчеры могут назначать юниты');
@@ -1427,13 +1683,12 @@
             }
             
             assignTargetCallId = callId;
-            assignCallInfo.textContent = `Вызов: ${call.street} - ${call.desc}`;
+            assignCallInfo.textContent = `📍 ${call.street} - ${call.desc}`;
             
-            // Заполняем список доступных юнитов
             const availableUnits = units.filter(u => u.status === 'available');
             assignUnitSelect.innerHTML = '<option value="">Выберите юнит...</option>';
             availableUnits.forEach(u => {
-                assignUnitSelect.innerHTML += `<option value="${u.id}">${u.name} (${u.status})</option>`;
+                assignUnitSelect.innerHTML += `<option value="${u.id}">${u.name} (Доступен)</option>`;
             });
             if (availableUnits.length === 0) {
                 assignUnitSelect.innerHTML += '<option value="" disabled>Нет доступных юнитов</option>';
@@ -1450,10 +1705,9 @@
             const call = calls.find(c => c.id === callId);
             if (!call) return;
             
-            if (confirm(`Завершить вызов "${call.street}" и отправить в архив?`)) {
-                // Освобождаем юнит
+            if (confirm(`Завершить вызов "${call.street}"?`)) {
                 if (call.assignedTo) {
-                    const unit = units.find(u => u.id === call.assignedTo);
+                    const unit = units.find(u => u.name === call.assignedTo);
                     if (unit) {
                         unit.status = 'available';
                         unit.currentCall = null;
@@ -1476,98 +1730,57 @@
             }
             const call = calls.find(c => c.id === callId);
             if (!call) return;
-            if (confirm(`Удалить вызов "${call.street}" без архивации?`)) {
+            if (confirm(`Удалить вызов "${call.street}"?`)) {
                 calls = calls.filter(c => c.id !== callId);
                 renderCalls();
                 saveData();
             }
         };
 
+        window.openCallStatusModal = function(callId) {
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            statusTargetType = 'call';
+            statusTargetId = callId;
+            statusTargetInfo.textContent = `📍 ${call.street} - ${call.desc}`;
+            statusSelect.value = call.status;
+            statusModal.classList.add('active');
+        };
+
         // ============================================
-        // 8. ЮНИТЫ
+        // 9. ДЕЙСТВИЯ С ЮНИТАМИ
         // ============================================
-        function addUnit(name) {
+        window.changeUnitStatus = function(unitId, newStatus) {
+            const unit = units.find(u => u.id === unitId);
+            if (!unit) return;
             if (!isDispatcher && !isAdmin) {
-                alert('⛔ Только диспетчеры и администраторы могут создавать юниты');
-                return false;
+                alert('⛔ Только диспетчеры могут изменять статус юнитов');
+                return;
             }
-            if (!name.trim()) { alert('Введите название юнита'); return false; }
-            if (units.find(u => u.name.toLowerCase() === name.trim().toLowerCase())) {
-                alert('Юнит с таким названием уже существует');
-                return false;
+            unit.status = newStatus;
+            if (newStatus === 'available') {
+                unit.currentCall = null;
             }
-            
-            units.push({
-                id: generateId(),
-                name: name.trim(),
-                status: 'available', // available, busy, offline
-                currentCall: null,
-                createdBy: currentUser ? currentUser.login : 'system'
-            });
             renderUnits();
             saveData();
-            return true;
-        }
-
-        function renderUnits() {
-            if (units.length === 0) {
-                unitListEl.innerHTML = `<div class="empty-state">🚫 Нет созданных юнитов</div>`;
-            } else {
-                let html = '';
-                units.forEach(unit => {
-                    const statusClass = unit.status;
-                    const statusLabel = unit.status === 'available' ? '🟢 Доступен' : 
-                                      unit.status === 'busy' ? '🟡 Занят' : '⚫ Офлайн';
-                    
-                    let callInfo = '';
-                    if (unit.currentCall) {
-                        const call = calls.find(c => c.id === unit.currentCall);
-                        if (call) {
-                            callInfo = `<span class="unit-call">📞 ${call.street}</span>`;
-                        }
-                    }
-                    
-                    html += `
-                        <div class="unit-item ${statusClass}">
-                            <div>
-                                <span class="unit-name">${unit.name}</span>
-                                <span class="unit-status ${statusClass}">${statusLabel}</span>
-                                ${callInfo}
-                            </div>
-                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                ${isDispatcher && unit.status === 'available' ? `
-                                    <button class="btn btn-warning btn-xs" onclick="window.setUnitBusy('${unit.id}')">📋 Занять</button>
-                                ` : ''}
-                                ${isDispatcher && unit.status === 'busy' ? `
-                                    <button class="btn btn-success btn-xs" onclick="window.setUnitAvailable('${unit.id}')">🟢 Освободить</button>
-                                ` : ''}
-                                ${isAdmin ? `
-                                    <button class="btn btn-danger btn-xs" onclick="window.deleteUnit('${unit.id}')">✖</button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-                unitListEl.innerHTML = html;
-            }
-            updateCounters();
-        }
+        };
 
         window.setUnitBusy = function(unitId) {
             const unit = units.find(u => u.id === unitId);
             if (!unit) return;
-            if (unit.status === 'busy') return;
+            if (unit.status === 'busy' || unit.status === 'en-route' || unit.status === 'helping') {
+                alert('Юнит уже занят');
+                return;
+            }
             
-            // Находим активные вызовы без назначения
             const pendingCalls = calls.filter(c => c.status === 'pending');
             if (pendingCalls.length === 0) {
                 alert('Нет активных вызовов для назначения');
                 return;
             }
             
-            // Предлагаем выбрать вызов
             const callOptions = pendingCalls.map((c, i) => `${i+1}. ${c.street} - ${c.desc}`).join('\n');
-            const choice = prompt(`Выберите вызов для юнита ${unit.name}:\n${callOptions}\n\nВведите номер:`);
+            const choice = prompt(`Выберите вызов для ${unit.name}:\n${callOptions}\n\nВведите номер:`);
             if (!choice) return;
             
             const idx = parseInt(choice) - 1;
@@ -1580,7 +1793,7 @@
             unit.status = 'busy';
             unit.currentCall = call.id;
             call.status = 'assigned';
-            call.assignedTo = unit.id;
+            call.assignedTo = unit.name;
             call.assignedByName = currentUser ? currentUser.login : 'system';
             
             renderUnits();
@@ -1591,12 +1804,15 @@
         window.setUnitAvailable = function(unitId) {
             const unit = units.find(u => u.id === unitId);
             if (!unit) return;
-            if (unit.status !== 'busy') return;
+            if (unit.status === 'available') {
+                alert('Юнит уже доступен');
+                return;
+            }
             
             if (unit.currentCall) {
                 const call = calls.find(c => c.id === unit.currentCall);
-                if (call && call.status === 'assigned') {
-                    if (confirm(`Освободить юнит ${unit.name}? Вызов "${call.street}" будет отменён и отправлен в архив.`)) {
+                if (call && (call.status === 'assigned' || call.status === 'pending')) {
+                    if (confirm(`Освободить ${unit.name}? Вызов "${call.street}" будет отменён.`)) {
                         addToArchive(call, 'cancelled');
                         calls = calls.filter(c => c.id !== call.id);
                         unit.status = 'available';
@@ -1631,7 +1847,34 @@
         };
 
         // ============================================
-        // 9. АРХИВ
+        // 10. КОММЕНТАРИИ
+        // ============================================
+        window.openCommentModal = function(callId) {
+            if (!isDispatcher && !isAdmin) {
+                alert('⛔ Только диспетчеры могут оставлять комментарии');
+                return;
+            }
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            
+            commentTargetCallId = callId;
+            commentCallInfo.textContent = `📍 ${call.street} - ${call.desc}`;
+            commentInput.value = call.comment || '';
+            commentModal.classList.add('active');
+        };
+
+        function addComment(callId, text) {
+            const call = calls.find(c => c.id === callId);
+            if (!call) return;
+            call.comment = text;
+            call.commentBy = currentUser ? currentUser.login : 'system';
+            call.commentTime = getFullTime();
+            renderCalls();
+            saveData();
+        }
+
+        // ============================================
+        // 11. АРХИВ
         // ============================================
         function addToArchive(call, status) {
             archive.push({
@@ -1640,11 +1883,12 @@
                 desc: call.desc,
                 priority: call.priority,
                 time: call.time,
-                status: status || 'resolved',
+                status: status,
                 resolvedTime: getFullTime(),
                 assignedTo: call.assignedTo || null,
                 assignedByName: call.assignedByName || null,
-                createdBy: call.createdBy || 'system'
+                createdBy: call.createdBy || 'system',
+                comment: call.comment || null
             });
             updateArchiveCounters();
             saveData();
@@ -1666,16 +1910,18 @@
             }
 
             if (filtered.length === 0) {
-                archiveListEl.innerHTML = `<div class="empty-state">📭 В архиве нет записей</div>`;
+                archiveListEl.innerHTML = `<div class="empty-state">📭 Архив пуст</div>`;
             } else {
                 let html = '';
                 filtered.forEach((item, idx) => {
                     const statusClass = item.status;
                     const statusLabel = item.status === 'resolved' ? '✅ Завершён' : '❌ Отменён';
-                    const priorityIcon = item.priority === 'high' ? '🔥' : item.priority === 'low' ? '🟢' : '🟡';
+                    const priorityIcon = item.priority === 'high' ? '🔴' : 
+                                        item.priority === 'low' ? '🟢' : '🟡';
                     const unitInfo = item.assignedTo ? `🚔 ${item.assignedTo}` : '';
+                    const commentInfo = item.comment ? `💬 ${item.comment}` : '';
                     html += `
-                        <div class="archive-item ${statusClass}">
+                        <div class="archive-item status-${statusClass}">
                             <div class="archive-info">
                                 <div class="archive-street">${priorityIcon} ${item.street}</div>
                                 <div class="archive-meta">
@@ -1683,6 +1929,7 @@
                                     <span>⏱ ${item.time}</span>
                                     <span>📌 ${item.resolvedTime}</span>
                                     ${unitInfo ? `<span>${unitInfo}</span>` : ''}
+                                    ${commentInfo ? `<span>${commentInfo}</span>` : ''}
                                     <span class="archive-status ${statusClass}">${statusLabel}</span>
                                 </div>
                             </div>
@@ -1697,10 +1944,10 @@
 
         window.deleteArchiveItem = function(id) {
             if (!isAdmin) {
-                alert('⛔ Только администраторы могут удалять записи из архива');
+                alert('⛔ Только администраторы могут удалять записи');
                 return;
             }
-            if (confirm('Удалить эту запись из архива?')) {
+            if (confirm('Удалить запись из архива?')) {
                 archive = archive.filter(item => item.id !== id);
                 renderArchive();
                 updateArchiveCounters();
@@ -1711,32 +1958,29 @@
         function updateArchiveCounters() {
             const count = archive.length;
             archiveCounter.textContent = count;
-            archiveBadge.textContent = count;
             statArchive.textContent = count;
             archiveTotal.textContent = count;
         }
 
         // ============================================
-        // 10. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
+        // 12. ОБНОВЛЕНИЕ СЧЁТЧИКОВ
         // ============================================
         function updateCounters() {
             callCounter.textContent = calls.length;
             unitCounter.textContent = units.length;
             statActiveCalls.textContent = calls.length;
-            const busyUnits = units.filter(u => u.status === 'busy').length;
+            const busyUnits = units.filter(u => u.status === 'busy' || u.status === 'en-route' || u.status === 'helping').length;
             statBusyUnits.textContent = busyUnits;
             updateArchiveCounters();
             updateOnlineUsers();
         }
 
         function updateOnlineUsers() {
-            // В локальной версии считаем всех пользователей
-            const onlineCount = document.getElementById('onlineUsersCount');
-            if (onlineCount) onlineCount.textContent = users.length;
+            onlineUsersDisplay.textContent = `👥 Онлайн: ${users.length}`;
         }
 
         // ============================================
-        // 11. СОХРАНЕНИЕ ДАННЫХ
+        // 13. СОХРАНЕНИЕ
         // ============================================
         function saveData() {
             const data = { calls, units, archive, timestamp: new Date().toISOString() };
@@ -1761,23 +2005,25 @@
         }
 
         // ============================================
-        // 12. ТЕСТОВЫЕ ДАННЫЕ
+        // 14. ТЕСТОВЫЕ ДАННЫЕ
         // ============================================
         function loadTestData() {
             if (loadData()) return;
             
             calls = [
-                { id: generateId(), street: 'Бродвей, 12', desc: 'Перестрелка, нужна помощь', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system' },
-                { id: generateId(), street: 'Парк им. Ленина', desc: 'Пьяный дебош', priority: 'medium', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system' },
+                { id: generateId(), street: 'Бродвей, 12', desc: 'Перестрелка, требуется помощь', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system', comment: null, commentBy: null, commentTime: null },
+                { id: generateId(), street: 'Парк им. Ленина', desc: 'Группа лиц в состоянии алкогольного опьянения', priority: 'medium', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system', comment: null, commentBy: null, commentTime: null },
+                { id: generateId(), street: 'ТЦ "Галактика"', desc: 'Сработала сигнализация', priority: 'low', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: 'system', comment: null, commentBy: null, commentTime: null },
             ];
             units = [
                 { id: generateId(), name: 'Unit-3', status: 'available', currentCall: null, createdBy: 'system' },
-                { id: generateId(), name: 'Unit-7', status: 'available', currentCall: null, createdBy: 'system' },
+                { id: generateId(), name: 'Unit-7', status: 'en-route', currentCall: null, createdBy: 'system' },
                 { id: generateId(), name: 'Unit-12', status: 'busy', currentCall: null, createdBy: 'system' },
+                { id: generateId(), name: 'Unit-5', status: 'briefing', currentCall: null, createdBy: 'system' },
             ];
             archive = [
-                { id: generateId(), street: 'Центральная, 15', desc: 'Ограбление банка', priority: 'high', time: '14:23', status: 'resolved', resolvedTime: '15:10:22', assignedTo: 'Unit-3', assignedByName: 'admin', createdBy: 'system' },
-                { id: generateId(), street: 'Лесная, 7', desc: 'Пожар в подвале', priority: 'high', time: '13:45', status: 'resolved', resolvedTime: '14:30:15', assignedTo: 'Unit-7', assignedByName: 'admin', createdBy: 'system' },
+                { id: generateId(), street: 'Центральная, 15', desc: 'Ограбление банка', priority: 'high', time: '14:23', status: 'resolved', resolvedTime: '15:10:22', assignedTo: 'Unit-3', assignedByName: 'admin', createdBy: 'system', comment: 'Задержан грабитель' },
+                { id: generateId(), street: 'Лесная, 7', desc: 'Пожар в подвале', priority: 'high', time: '13:45', status: 'resolved', resolvedTime: '14:30:15', assignedTo: 'Unit-7', assignedByName: 'admin', createdBy: 'system', comment: null },
             ];
             renderCalls();
             renderUnits();
@@ -1787,14 +2033,14 @@
 
         function resetCallsToTest() {
             if (!isDispatcher && !isAdmin) {
-                alert('⛔ Только диспетчеры и администраторы могут сбрасывать вызовы');
+                alert('⛔ Только диспетчеры могут сбрасывать вызовы');
                 return;
             }
-            if (calls.length > 0 && !confirm('Заменить текущие вызовы на тестовые? (архив и юниты останутся)')) return;
+            if (calls.length > 0 && !confirm('Заменить вызовы на тестовые?')) return;
             calls = [
-                { id: generateId(), street: 'Океанская, 7', desc: 'Неизвестный предмет', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system' },
-                { id: generateId(), street: 'Центр, пл. Победы', desc: 'Массовая драка', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system' },
-                { id: generateId(), street: 'Западное шоссе', desc: 'Поломка светофора', priority: 'low', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system' },
+                { id: generateId(), street: 'Океанская, 7', desc: 'Неизвестный предмет', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system', comment: null, commentBy: null, commentTime: null },
+                { id: generateId(), street: 'Центр, пл. Победы', desc: 'Массовая драка', priority: 'high', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system', comment: null, commentBy: null, commentTime: null },
+                { id: generateId(), street: 'Западное шоссе', desc: 'Поломка светофора', priority: 'low', time: getTime(), status: 'pending', assignedTo: null, assignedByName: null, createdBy: currentUser ? currentUser.login : 'system', comment: null, commentBy: null, commentTime: null },
             ];
             renderCalls();
             saveData();
@@ -1806,7 +2052,7 @@
                 return;
             }
             if (calls.length === 0) return;
-            if (confirm('Удалить ВСЕ активные вызовы без архивации?')) {
+            if (confirm('Удалить ВСЕ активные вызовы?')) {
                 calls = [];
                 renderCalls();
                 saveData();
@@ -1829,24 +2075,25 @@
 
         function exportArchive() {
             if (archive.length === 0) {
-                alert('Архив пуст!');
+                alert('Архив пуст');
                 return;
             }
             let text = '=== АРХИВ ВЫЗОВОВ 911 ===\n';
-            text += `Дата экспорта: ${new Date().toLocaleString()}\n`;
+            text += `Дата: ${new Date().toLocaleString()}\n`;
             text += '='.repeat(50) + '\n\n';
             archive.forEach((item, idx) => {
                 const statusLabel = item.status === 'resolved' ? 'ЗАВЕРШЁН' : 'ОТМЕНЁН';
                 text += `#${idx+1} | ${item.street}\n`;
                 text += `  Описание: ${item.desc}\n`;
                 text += `  Приоритет: ${item.priority.toUpperCase()}\n`;
-                text += `  Время вызова: ${item.time}\n`;
+                text += `  Время: ${item.time}\n`;
                 text += `  Завершён: ${item.resolvedTime}\n`;
                 text += `  Назначен: ${item.assignedTo || 'не назначен'}\n`;
+                text += `  Комментарий: ${item.comment || 'нет'}\n`;
                 text += `  Статус: ${statusLabel}\n`;
                 text += '-'.repeat(40) + '\n';
             });
-            text += '\nВсего записей: ' + archive.length;
+            text += '\nВсего: ' + archive.length;
 
             const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
@@ -1860,61 +2107,11 @@
         }
 
         // ============================================
-        // 13. НАЗНАЧЕНИЕ ЮНИТА (обработчик)
-        // ============================================
-        assignConfirmBtn.addEventListener('click', function() {
-            const unitId = assignUnitSelect.value;
-            if (!unitId) {
-                alert('Выберите юнит');
-                return;
-            }
-            
-            const call = calls.find(c => c.id === assignTargetCallId);
-            if (!call) {
-                alert('Вызов не найден');
-                assignModal.classList.remove('active');
-                return;
-            }
-            
-            const unit = units.find(u => u.id === unitId);
-            if (!unit) {
-                alert('Юнит не найден');
-                return;
-            }
-            
-            if (unit.status !== 'available') {
-                alert('Юнит недоступен');
-                return;
-            }
-            
-            unit.status = 'busy';
-            unit.currentCall = call.id;
-            call.status = 'assigned';
-            call.assignedTo = unit.name;
-            call.assignedByName = currentUser ? currentUser.login : 'system';
-            
-            assignModal.classList.remove('active');
-            renderCalls();
-            renderUnits();
-            saveData();
-        });
-
-        assignCancelBtn.addEventListener('click', function() {
-            assignModal.classList.remove('active');
-        });
-
-        assignModal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('active');
-            }
-        });
-
-        // ============================================
-        // 14. АДМИН ФУНКЦИИ
+        // 15. АДМИН
         // ============================================
         function applyEditCall() {
             if (!isAdmin) {
-                alert('Требуются права администратора!');
+                alert('Требуются права администратора');
                 return;
             }
             const id = parseInt(editCallId.value);
@@ -1958,7 +2155,7 @@
 
         function importData(file) {
             if (!isAdmin) {
-                alert('Требуются права администратора!');
+                alert('Требуются права администратора');
                 return;
             }
             if (!file) return;
@@ -1967,7 +2164,7 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     if (data.calls && data.units && data.archive) {
-                        if (confirm('Импорт заменит все текущие данные. Продолжить?')) {
+                        if (confirm('Импорт заменит все данные. Продолжить?')) {
                             calls = data.calls;
                             units = data.units;
                             archive = data.archive;
@@ -1992,7 +2189,7 @@
                         alert('❌ Неверный формат файла');
                     }
                 } catch (err) {
-                    alert('❌ Ошибка чтения файла: ' + err.message);
+                    alert('❌ Ошибка: ' + err.message);
                 }
             };
             reader.readAsText(file);
@@ -2000,10 +2197,10 @@
 
         function resetAllData() {
             if (!isAdmin) {
-                alert('Требуются права администратора!');
+                alert('Требуются права администратора');
                 return;
             }
-            if (confirm('⚠️ ВСЕ ДАННЫЕ будут удалены безвозвратно! Продолжить?')) {
+            if (confirm('⚠️ ВСЕ ДАННЫЕ будут удалены! Продолжить?')) {
                 calls = [];
                 units = [];
                 archive = [];
@@ -2016,7 +2213,7 @@
         }
 
         // ============================================
-        // 15. НАСТРОЙКИ СИСТЕМЫ
+        // 16. НАСТРОЙКИ
         // ============================================
         function applySystemSettings() {
             systemTitle.innerHTML = CONFIG.SYSTEM_NAME;
@@ -2047,12 +2244,12 @@
                     el.style.borderColor = '#4a1a1a';
                 });
             } else {
-                document.body.style.background = '#0b0e14';
-                document.querySelector('.dashboard').style.background = '#141a22';
-                document.querySelector('.dashboard').style.borderColor = '#2c3540';
+                document.body.style.background = '#0a0e17';
+                document.querySelector('.dashboard').style.background = 'linear-gradient(145deg, #111927, #0d1520)';
+                document.querySelector('.dashboard').style.borderColor = '#1e2a3a';
                 document.querySelectorAll('.card').forEach(el => {
-                    el.style.background = '#1a212b';
-                    el.style.borderColor = '#2a3543';
+                    el.style.background = 'linear-gradient(145deg, #111927, #0d1520)';
+                    el.style.borderColor = '#1a2636';
                 });
             }
             saveConfig();
@@ -2073,7 +2270,104 @@
         }
 
         // ============================================
-        // 16. UI ОБНОВЛЕНИЕ
+        // 17. DOM ЭЛЕМЕНТЫ
+        // ============================================
+        const callListEl = document.getElementById('callList');
+        const unitListEl = document.getElementById('unitList');
+        const archiveListEl = document.getElementById('archiveList');
+        const userListEl = document.getElementById('userList');
+        const callCounter = document.getElementById('callCounter');
+        const unitCounter = document.getElementById('unitCounter');
+        const archiveCounter = document.getElementById('archiveCounter');
+        const statActiveCalls = document.getElementById('statActiveCalls');
+        const statBusyUnits = document.getElementById('statBusyUnits');
+        const statArchive = document.getElementById('statArchive');
+        const archiveTotal = document.getElementById('archiveTotal');
+        const totalUsersCount = document.getElementById('totalUsersCount');
+        const roleBadge = document.getElementById('roleBadge');
+        const adminTabBtn = document.getElementById('adminTabBtn');
+        const adminRoleBadge = document.getElementById('adminRoleBadge');
+        const userInfo = document.getElementById('userInfo');
+        const userAvatar = document.getElementById('userAvatar');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const authToggleBtn = document.getElementById('authToggleBtn');
+        const systemTitle = document.getElementById('systemTitle');
+        const onlineUsersDisplay = document.getElementById('onlineUsersDisplay');
+
+        const streetInput = document.getElementById('streetInput');
+        const descInput = document.getElementById('descInput');
+        const prioritySelect = document.getElementById('prioritySelect');
+        const addCallBtn = document.getElementById('addCallBtn');
+
+        const unitNameInput = document.getElementById('unitNameInput');
+        const addUnitBtn = document.getElementById('addUnitBtn');
+
+        const resetCallsBtn = document.getElementById('resetCallsBtn');
+        const clearAllCallsBtn = document.getElementById('clearAllCallsBtn');
+
+        const archiveSearch = document.getElementById('archiveSearch');
+        const archiveFilter = document.getElementById('archiveFilter');
+        const clearArchiveBtn = document.getElementById('clearArchiveBtn');
+        const exportArchiveBtn = document.getElementById('exportArchiveBtn');
+
+        const editCallId = document.getElementById('editCallId');
+        const editCallStreet = document.getElementById('editCallStreet');
+        const editCallDesc = document.getElementById('editCallDesc');
+        const editCallPriority = document.getElementById('editCallPriority');
+        const applyEditBtn = document.getElementById('applyEditBtn');
+        const exportAllBtn = document.getElementById('exportAllBtn');
+        const importFileInput = document.getElementById('importFileInput');
+        const importBtn = document.getElementById('importBtn');
+        const resetAllDataBtn = document.getElementById('resetAllDataBtn');
+        const refreshAdminBtn = document.getElementById('refreshAdminBtn');
+
+        const systemNameSetting = document.getElementById('systemNameSetting');
+        const changeSystemNameBtn = document.getElementById('changeSystemNameBtn');
+        const themeSelector = document.getElementById('themeSelector');
+        const applyThemeBtn = document.getElementById('applyThemeBtn');
+
+        const newUserLogin = document.getElementById('newUserLogin');
+        const newUserPassword = document.getElementById('newUserPassword');
+        const newUserRole = document.getElementById('newUserRole');
+        const addUserBtn = document.getElementById('addUserBtn');
+
+        // Модальные окна
+        const authModal = document.getElementById('authModal');
+        const authModalTitle = document.getElementById('authModalTitle');
+        const authModalDesc = document.getElementById('authModalDesc');
+        const authLoginInput = document.getElementById('authLoginInput');
+        const authPasswordInput = document.getElementById('authPasswordInput');
+        const authLoginBtn = document.getElementById('authLoginBtn');
+        const authRegisterBtn = document.getElementById('authRegisterBtn');
+        const authCancelBtn = document.getElementById('authCancelBtn');
+        const authError = document.getElementById('authError');
+        const authSuccess = document.getElementById('authSuccess');
+        const authSwitchText = document.getElementById('authSwitchText');
+
+        const assignModal = document.getElementById('assignModal');
+        const assignCallInfo = document.getElementById('assignCallInfo');
+        const assignUnitSelect = document.getElementById('assignUnitSelect');
+        const assignConfirmBtn = document.getElementById('assignConfirmBtn');
+        const assignCancelBtn = document.getElementById('assignCancelBtn');
+        let assignTargetCallId = null;
+
+        const commentModal = document.getElementById('commentModal');
+        const commentCallInfo = document.getElementById('commentCallInfo');
+        const commentInput = document.getElementById('commentInput');
+        const commentConfirmBtn = document.getElementById('commentConfirmBtn');
+        const commentCancelBtn = document.getElementById('commentCancelBtn');
+        let commentTargetCallId = null;
+
+        const statusModal = document.getElementById('statusModal');
+        const statusTargetInfo = document.getElementById('statusTargetInfo');
+        const statusSelect = document.getElementById('statusSelect');
+        const statusConfirmBtn = document.getElementById('statusConfirmBtn');
+        const statusCancelBtn = document.getElementById('statusCancelBtn');
+        let statusTargetType = null;
+        let statusTargetId = null;
+
+        // ============================================
+        // 18. UI ОБНОВЛЕНИЕ
         // ============================================
         function updateUI() {
             if (currentUser) {
@@ -2082,25 +2376,22 @@
                 userNameDisplay.textContent = currentUser.login;
                 authToggleBtn.textContent = '🚪 Выйти';
                 
-                const roleNames = {
+                const roleLabels = {
                     'admin': '👑 Администратор',
                     'dispatcher': '📡 Диспетчер',
+                    'civilian': '👤 Гражданский',
                     'user': '👤 Пользователь'
                 };
-                roleBadge.textContent = roleNames[currentUser.role] || '👤 Пользователь';
+                roleBadge.textContent = roleLabels[currentUser.role] || '👤 Пользователь';
                 roleBadge.className = 'role-badge ' + currentUser.role;
 
-                if (isAdmin) {
-                    adminTabBtn.style.display = 'inline-block';
-                    adminRoleBadge.textContent = '🔐 Админ';
-                } else {
-                    adminTabBtn.style.display = 'none';
-                }
+                adminTabBtn.style.display = isAdmin ? 'inline-block' : 'none';
+                if (isAdmin) adminRoleBadge.textContent = '🔐 Админ';
             } else {
                 userInfo.style.display = 'none';
                 authToggleBtn.textContent = '🔑 Войти';
                 roleBadge.textContent = '👤 Гость';
-                roleBadge.className = 'role-badge';
+                roleBadge.className = 'role-badge guest';
                 adminTabBtn.style.display = 'none';
             }
             renderUsersList();
@@ -2108,7 +2399,7 @@
         }
 
         // ============================================
-        // 17. АВТОРИЗАЦИЯ
+        // 19. АВТОРИЗАЦИЯ
         // ============================================
         let isLoginMode = true;
 
@@ -2122,13 +2413,13 @@
             
             if (isLoginMode) {
                 authModalTitle.textContent = '🔐 Вход в систему';
-                authModalDesc.textContent = 'Войдите для доступа к диспетчерской';
+                authModalDesc.textContent = 'Войдите для доступа к диспетчерскому центру';
                 authLoginBtn.style.display = 'block';
                 authRegisterBtn.style.display = 'none';
                 authSwitchText.innerHTML = 'Нет аккаунта? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Зарегистрируйтесь</a>';
             } else {
                 authModalTitle.textContent = '📝 Регистрация';
-                authModalDesc.textContent = 'Создайте аккаунт для доступа к диспетчерской';
+                authModalDesc.textContent = 'Создайте аккаунт для доступа к диспетчерскому центру';
                 authLoginBtn.style.display = 'none';
                 authRegisterBtn.style.display = 'block';
                 authSwitchText.innerHTML = 'Уже есть аккаунт? <a href="#" id="authSwitchLink" style="color: #60a5fa;">Войдите</a>';
@@ -2165,9 +2456,7 @@
             if (result.success) {
                 authSuccess.textContent = '✅ Вход выполнен!';
                 authSuccess.classList.add('show');
-                setTimeout(() => {
-                    closeAuthModal();
-                }, 500);
+                setTimeout(closeAuthModal, 500);
             } else {
                 authError.textContent = '❌ ' + result.message;
                 authError.classList.add('show');
@@ -2184,13 +2473,11 @@
                 return;
             }
             
-            const result = registerUser(login, password, 'user');
+            const result = registerUser(login, password, 'civilian');
             if (result.success) {
                 authSuccess.textContent = '✅ Регистрация выполнена! Теперь войдите.';
                 authSuccess.classList.add('show');
-                setTimeout(() => {
-                    showAuthModal('login');
-                }, 800);
+                setTimeout(() => showAuthModal('login'), 800);
             } else {
                 authError.textContent = '❌ ' + result.message;
                 authError.classList.add('show');
@@ -2198,7 +2485,7 @@
         }
 
         // ============================================
-        // 18. СОБЫТИЯ
+        // 20. ОБРАБОТЧИКИ СОБЫТИЙ
         // ============================================
 
         // Вкладки
@@ -2236,27 +2523,17 @@
 
         authLoginInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                if (isLoginMode) {
-                    handleAuthLogin();
-                } else {
-                    handleAuthRegister();
-                }
+                isLoginMode ? handleAuthLogin() : handleAuthRegister();
             }
         });
         authPasswordInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                if (isLoginMode) {
-                    handleAuthLogin();
-                } else {
-                    handleAuthRegister();
-                }
+                isLoginMode ? handleAuthLogin() : handleAuthRegister();
             }
         });
 
         authModal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeAuthModal();
-            }
+            if (e.target === this) closeAuthModal();
         });
 
         // Добавление вызова
@@ -2305,7 +2582,7 @@
         // Настройки системы
         changeSystemNameBtn.addEventListener('click', function() {
             if (!isAdmin) {
-                alert('Требуются права администратора!');
+                alert('Требуются права администратора');
                 return;
             }
             const name = systemNameSetting.value.trim();
@@ -2322,7 +2599,7 @@
 
         applyThemeBtn.addEventListener('click', function() {
             if (!isAdmin) {
-                alert('Требуются права администратора!');
+                alert('Требуются права администратора');
                 return;
             }
             CONFIG.THEME = themeSelector.value;
@@ -2334,7 +2611,7 @@
         // Управление пользователями
         addUserBtn.addEventListener('click', function() {
             if (!isAdmin) {
-                alert('Требуются права администратора!');
+                alert('Требуются права администратора');
                 return;
             }
             const login = newUserLogin.value.trim();
@@ -2358,13 +2635,105 @@
             }
         });
 
+        // Модальные окна: Назначение
+        assignConfirmBtn.addEventListener('click', function() {
+            const unitId = assignUnitSelect.value;
+            if (!unitId) {
+                alert('Выберите юнит');
+                return;
+            }
+            
+            const call = calls.find(c => c.id === assignTargetCallId);
+            if (!call) {
+                alert('Вызов не найден');
+                assignModal.classList.remove('active');
+                return;
+            }
+            
+            const unit = units.find(u => u.id === unitId);
+            if (!unit) {
+                alert('Юнит не найден');
+                return;
+            }
+            
+            if (unit.status !== 'available') {
+                alert('Юнит недоступен');
+                return;
+            }
+            
+            unit.status = 'busy';
+            unit.currentCall = call.id;
+            call.status = 'assigned';
+            call.assignedTo = unit.name;
+            call.assignedByName = currentUser ? currentUser.login : 'system';
+            
+            assignModal.classList.remove('active');
+            renderCalls();
+            renderUnits();
+            saveData();
+        });
+
+        assignCancelBtn.addEventListener('click', function() {
+            assignModal.classList.remove('active');
+        });
+
+        assignModal.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+
+        // Модальные окна: Комментарий
+        commentConfirmBtn.addEventListener('click', function() {
+            const text = commentInput.value.trim();
+            if (!text) {
+                alert('Введите комментарий');
+                return;
+            }
+            addComment(commentTargetCallId, text);
+            commentModal.classList.remove('active');
+        });
+
+        commentCancelBtn.addEventListener('click', function() {
+            commentModal.classList.remove('active');
+        });
+
+        commentModal.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+
+        // Модальные окна: Статус вызова
+        statusConfirmBtn.addEventListener('click', function() {
+            const newStatus = statusSelect.value;
+            if (statusTargetType === 'call') {
+                const call = calls.find(c => c.id === statusTargetId);
+                if (!call) return;
+                call.status = newStatus;
+                if (newStatus === 'completed' || newStatus === 'cancelled') {
+                    const status = newStatus === 'completed' ? 'resolved' : 'cancelled';
+                    addToArchive(call, status);
+                    calls = calls.filter(c => c.id !== statusTargetId);
+                }
+                renderCalls();
+                renderArchive();
+                saveData();
+            }
+            statusModal.classList.remove('active');
+        });
+
+        statusCancelBtn.addEventListener('click', function() {
+            statusModal.classList.remove('active');
+        });
+
+        statusModal.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+
         // Enter в полях
         streetInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallBtn.click(); });
         descInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallBtn.click(); });
         unitNameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addUnitBtn.click(); });
 
         // ============================================
-        // 19. ЗАПУСК
+        // 21. ЗАПУСК
         // ============================================
         
         loadConfig();
@@ -2378,9 +2747,10 @@
         updateUI();
         renderUsersList();
 
-        console.log('🚀 Система 911 запущена');
-        console.log('👥 Доступны пользователи: admin / dispatcher / user');
+        console.log('🚀 911 Диспетчерский Центр запущен');
+        console.log('👥 Пользователи: admin / dispatcher / user / civilian');
         console.log('🔑 Пароль для admin: admin123, для остальных: 123456');
+        console.log('📋 Доступные статусы юнитов: Доступен, Занят, В пути, На брифинге, Ожидание, Помощь, Офлайн');
 
     })();
 </script>
